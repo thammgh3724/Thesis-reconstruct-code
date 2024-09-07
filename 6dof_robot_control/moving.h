@@ -23,6 +23,9 @@ public:
   void autoMove(float* Xnext, float vel0, float acc0, float velini, float velfin);
   void listen();
   void move();
+
+  void printCurJoint();
+  void printCurPos();
 };
 
 #endif
