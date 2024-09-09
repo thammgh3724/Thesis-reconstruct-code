@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import time
 import serial
+import threading
 
 serialPort = '/dev/ttyACM0'
 serialBaudrate = 115200
@@ -14,26 +15,31 @@ serialObject = serial.Serial(
     timeout=0.01
 ) 
 
-time.sleep(10)
-initalstring = "!Initon#"
-serialObject.write(bytes(str(initalstring), encoding='utf-8'))
+def read_from_serial():
+    while True:
+        if serialObject.in_waiting > 0:
+            line = serialObject.readline().decode('utf-8').strip()
+            if line:
+                if line.startswith('!'):
+                    print(f"\nRead from Serial: {line}")
 
-autostring = "goauto"
-serialObject.write(bytes(str(autostring), encoding='utf-8'))
+def write_to_serial():
+    while True:
+        user_input = input("Input (or 'exit' to exit): ")
+        if user_input.lower() == 'exit':
+            break
+        serialObject.write(bytes(str(user_input), encoding='utf-8'))
+        print(f"Send Serial: {user_input}")
+# !1:1:1:1:1:1A#
+# !init# , !gohome#
+read_thread = threading.Thread(target=read_from_serial, daemon=True)
+write_thread = threading.Thread(target=write_to_serial, daemon=True)
 
-while True:
-    # pygame.event.pump()
-    data = serialObject.readline().decode(encoding='utf-8')
-    if data == "ACK\r\n": 
-        print("acknowledage")
-        ack = True
-    elif data == "KCA\r\n": 
-        print("stopped")
-        ack = True
-    # Input : !pos1:pos2:pos3:pos4:pos5:pos6#
-    # Example : 0:0:0:0:90:0
-    # manual, gohome, gofold
-    string = input("Nhập một chuỗi: ")
-    print('send: ', string)
-    serialObject.write(bytes(str(string), encoding='utf-8'))
+read_thread.start()
+write_thread.start()
+
+write_thread.join()
+
+serialObject.close()
+print("Done.")
 
