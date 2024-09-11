@@ -56,9 +56,11 @@ void ArmMoving::printCurJoint(){
 }
 
 void ArmMoving::printCurPos(){
+  float currPos[6];
+  ForwardK(this->currJoint, currPos);
   String result = "!Curr pos : ";
   for (int i = 0; i < 6; ++i){
-    result += String(getCurPos(i));  
+    result += String(currPos[i]);  
     if (i < 5) {
         result += ":"; 
     }
@@ -77,12 +79,12 @@ void ArmMoving::wakeUp(){
   // joint #3
   singleJointMove(DIR3_PIN, LOW, PUL3_PIN, 6569);
   // joint #5
-  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(180 / dl5));
+  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(45 / dl5));
   //Serial.println("Arm go home");
 
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
-  this->currJoint[4] = 90;
-  setCurPos(0, 0, 0, 0, 90, 0);
+  this->currJoint[4] = 40;
+  setCurPos(0, 0, 0, 0, 40, 0);
   memcpy(this->buffer, this->currJoint, NUM_BYTES_BUFFER);
 }
 
@@ -140,6 +142,7 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
   String data_print = "!JNEXT: ";
   for (int i = 0; i < 6; ++i){
     data_print += Jnext[i];
+    data_print += ":";
     if (!isfinite(Jnext[i])) {
         Serial.println("!Danger! The number is not finite");
         return;
@@ -206,7 +209,7 @@ void ArmMoving::move(){
   if(position == "init") {
     Serial.println(position); 
     position = "";
-    // Serial.println("!INIT START");
+    Serial.println("!INIT START");
     this->wakeUp();
     this->printCurJoint();
     this->printCurPos();
@@ -227,15 +230,17 @@ void ArmMoving::move(){
     float output[6];
     if(getAxis(output)){
       this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+      this->printCurJoint();
+      this->printCurPos();
       Serial.println("!AUTO DONE");
     }
     position = "";
   } 
   else {
-    float output[6]; 
-    if (getAxis(output)) {
-        Serial.println("!TEST DONE");
-    }
-    position = "";
+    // float output[6]; 
+    // if (getAxis(output)) {
+    //     Serial.println("!TEST DONE");
+    // }
+    // position = "";
   }
 }
