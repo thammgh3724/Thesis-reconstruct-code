@@ -64,7 +64,8 @@ void loop() {
   arm.listen();
   if(move_flag == 1){
     move_flag = 0;
-    Serial.println(position);
+    // Print out position
+    // Serial.println(position);
     arm.move();
   }
 }

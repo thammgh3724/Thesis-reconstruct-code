@@ -7,9 +7,10 @@
 
 const float velG = 0.25e-4;
 float start_vel = 1 * velG;
-float end_vel = 1 * velG;
+float end_vel = 1 * velG; 
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(float))
+
 
 int validateJoint(float* input){
   for (int i = 0; i < 6; ++i){
@@ -161,32 +162,40 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
 }
 
 void ArmMoving::listen(){
-  read();
+    read();
 }
 
 bool getAxis(float* output){
+    // INIT AXIS ARRAY;
+    for (int i = 0; i < 6; i++) 
+    {
+        output[i] = 0.0; 
+    }
+    int posLen = position.length(); 
     String token = "";
     int i = 0;
-    for (char c : position) {
+    for (int idx = 0; idx < posLen + 1; idx++) {
         if (i == 6) break;
-        if (c != ':' && c != '\0' && c != 'A') {
-            token += c;
+        if (position[idx] != ':' && position[idx] != '\0' && position[idx] != 'A') {
+            token += position[idx];
         } 
         else {
             // Convert String to char array
             char charArray[token.length() + 1]; // +1 for null terminator
             token.toCharArray(charArray, token.length() + 1);
             //Convert to float
-            float floatValue = atof(charArray);
+            float floatValue = atof(charArray); 
             output[i++] = floatValue;
             token = "";
         }
     }
+
     String data_print = "!GET SUCCESS POSITION  ";
-    for (int i = 0; i < 6; i++)
+    for (int j = 0; j < 6; j++)
     {
-      data_print += output[i];
+      data_print += output[j];
       data_print += ":";
+      // data_print += i; 
     }
     Serial.println(data_print);
     return true;
@@ -194,9 +203,10 @@ bool getAxis(float* output){
 
 
 void ArmMoving::move(){
-  if(position == "init"){
+  if(position == "init") {
+    Serial.println(position); 
     position = "";
-    Serial.println("!INIT START");
+    // Serial.println("!INIT START");
     this->wakeUp();
     this->printCurJoint();
     this->printCurPos();
@@ -208,10 +218,10 @@ void ArmMoving::move(){
     this->goHomeFromManual();
     this->printCurJoint();
     this->printCurPos();
+
     Serial.println("!GOHOME DONE");
   }
   else if(position.endsWith("A")){
-    position = "";
     // set position
     Serial.println("!AUTO START");
     float output[6];
@@ -219,11 +229,13 @@ void ArmMoving::move(){
       this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
       Serial.println("!AUTO DONE");
     }
-  }
-  else if(position == ""){
-
-  }
-  else{
-
+    position = "";
+  } 
+  else {
+    float output[6]; 
+    if (getAxis(output)) {
+        Serial.println("!TEST DONE");
+    }
+    position = "";
   }
 }
