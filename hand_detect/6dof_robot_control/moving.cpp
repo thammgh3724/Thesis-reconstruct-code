@@ -25,7 +25,7 @@ int validateJoint(float* input){
         if (input[i] > 60 || input[i] < -60) return 3;
         break;
       case 3:
-        if (input[i] > 90 || input[i] < -90) return 4;
+        if (input[i] > 180 || input[i] < -180) return 4;
         break;
       case 4:
         if (input[i] > 120 || input[i] < -90) return 5;
@@ -42,6 +42,10 @@ int validateJoint(float* input){
 ArmMoving::ArmMoving(){
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
   memset(this->buffer, 0, NUM_BYTES_BUFFER);
+  memset(this->currX, 0, NUM_BYTES_BUFFER);
+  this->isFirstmove = true;
+  this->isHorizontalMove = false;
+  this->isLengthwiseMove = false;
 }
 
 void ArmMoving::printCurJoint(){
@@ -56,11 +60,9 @@ void ArmMoving::printCurJoint(){
 }
 
 void ArmMoving::printCurPos(){
-  float currPos[6];
-  ForwardK(this->currJoint, currPos);
   String result = "!Curr pos : ";
   for (int i = 0; i < 6; ++i){
-    result += String(currPos[i]);  
+    result += String(this->currX[i]);  
     if (i < 5) {
         result += ":"; 
     }
@@ -79,13 +81,21 @@ void ArmMoving::wakeUp(){
   // joint #3
   singleJointMove(DIR3_PIN, LOW, PUL3_PIN, 6569);
   // joint #5
-  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)(45 / dl5));
+  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
+  // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
 
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
-  this->currJoint[4] = 40;
-  setCurPos(0, 0, 0, 0, 40, 0);
+
+  this->currJoint[4] = 90;
+  setCurPos(0, 0, 0, 0, 90, 0);
   memcpy(this->buffer, this->currJoint, NUM_BYTES_BUFFER);
+  // First move
+  float output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
+  this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+  setCurPos(0.0, -2.15, 6.47, 180.0, 4.32, -180.0);
+  ForwardK(this->currJoint, this->currX); // calculate Xcurr by FK
+  this->isFirstmove = false;
 }
 
 void ArmMoving::goHomeFromManual(){
@@ -138,6 +148,33 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
   memcpy(Jcurr, this->currJoint, NUM_BYTES_BUFFER);
   ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
   InverseK(Xnext, Jnext); // calculate Jnext by IK
+  // just move joint 4 in initial move
+  if(this->isFirstmove == false) {
+    Jnext[3] = Jcurr[3];
+    Serial.println("!Dont rotate joint 4");
+    if (isHorizontalMove) {
+      Jnext[1] = Jcurr[1];
+      Jnext[2] = Jcurr[2];
+      Jnext[3] = Jcurr[3];
+      Jnext[4] = Jcurr[4];
+      Jnext[5] = Jcurr[5];
+      Serial.println("!Move only joint 1 in horizontal");
+    }
+    if (isLengthwiseMove) {
+      // joint 5 alway move up when robot go down
+      // need rework
+      // if ( temp_Jnext4 - Jcurr[3] < -1.0 ) {
+      //   if ((Xnext[2] < Xcurr[2]) && (Jnext[4] - Jcurr[4] <= 1) ) {
+      //     Jnext[4] = Jcurr[4] + (Jcurr[4] - Jnext[4]); // parse joint5 move down -> move up
+      //     Serial.println("!joint5 should move up");
+      //   }
+      //   else if ( (Xnext[2] > Xcurr[2]) && (Jnext[4] - Jcurr[4] >= 1)) {
+      //     Jnext[4] = Jcurr[4] - (Jnext[4] - Jcurr[4]); // parse joint5 move up -> move down
+      //     Serial.println("!joint5 should move down");
+      //   }
+      // }
+    }
+  }
   memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
   String data_print = "!JNEXT: ";
   for (int i = 0; i < 6; ++i){
@@ -154,7 +191,8 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
   if (canMove == 0){
     Serial.println("!MOVING...");
     goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
-    memcpy(this->currJoint, Jcurr, NUM_BYTES_BUFFER); //Update currJoint
+    memcpy(this->currJoint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
+    ForwardK(this->currJoint, this->currX); //Update currX
     Serial.println("!MOVE DONE");
   }
   else{
@@ -229,11 +267,34 @@ void ArmMoving::move(){
     Serial.println("!AUTO START");
     float output[6];
     if(getAxis(output)){
-      this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
-      this->printCurJoint();
-      this->printCurPos();
-      Serial.println("!AUTO DONE");
+      // Move lengthwise and horizontal seperately
+      float lengthwise = output[2];
+      float horizontal = output[1];
+      // horizontal move
+      if( (horizontal - this->currX[1] >= 1.0) || (horizontal - this->currX[1] < -1.0) ){
+        output[1] = horizontal;
+        output[2] = currX[2]; // keep lengthwise unchanged
+        this->isHorizontalMove = true;
+        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+        this->printCurJoint();
+        this->printCurPos();
+        this->isHorizontalMove = false;
+        Serial.println("!HORIZONTAL DONE");
+      }
+      // lengthwise move
+      if( (lengthwise - this->currX[2] >= 1.0) || (lengthwise - this->currX[2] < -1.0) ){
+        // update new position after horizontal move
+        memcpy(output, this->currX, NUM_BYTES_BUFFER);
+        output[2] = lengthwise;
+        this->isLengthwiseMove = true;
+        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+        this->printCurJoint();
+        this->printCurPos();
+        this->isLengthwiseMove = false;
+        Serial.println("!LENGHTWISE DONE");
+      }
     }
+    Serial.println("!AUTO DONE");
     position = "";
   } 
   else {

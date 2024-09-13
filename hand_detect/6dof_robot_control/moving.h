@@ -8,7 +8,11 @@
 class ArmMoving {
 private:
   float currJoint[6]; // current joints angle
+  float currX[6]; // current {x, y, z, ZYZ Euler angles}
   float buffer[6];
+  bool isFirstmove; 
+  bool isHorizontalMove;
+  bool isLengthwiseMove;
 
 public:
   ArmMoving();
