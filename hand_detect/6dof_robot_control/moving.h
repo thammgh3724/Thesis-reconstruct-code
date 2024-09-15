@@ -27,6 +27,8 @@ public:
 
   void printCurJoint();
   void printCurPos();
+
+  bool getDataModel(float* output);
 };
 
 #endif
