@@ -274,8 +274,8 @@ bool ArmMoving::getDataModel(float* output){
         output[i] = this->currX[i]; 
     }
     // caculate new position
-    output[1] = output[1] + ( -40/177*(data[0]-320) );
-    output[2] = output[2] + ( -75/73*(data[1]-240) );
+    output[1] = output[1] + ( (-40.0/177.0)*(data[0]-320.0) );
+    output[2] = output[2] + ( (-75.0/73.0)*(data[1]-240.0) );
     String data_print = "!GET SUCCESS POSITION  ";
     for (int j = 0; j < 6; j++)
     {
