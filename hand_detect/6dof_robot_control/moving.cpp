@@ -84,7 +84,7 @@ void ArmMoving::wakeUp(){
   singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
-
+  
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
 
   this->currJoint[4] = 90;
@@ -103,7 +103,7 @@ void ArmMoving::goHomeFromManual(){
   memcpy(tmp, this->currJoint, NUM_BYTES_BUFFER);  //Store current joints
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
   //Rotate Joint5 90 degree
-  currJoint[4] = 90;  
+  currJoint[4] = 90;
   //Moving using kinematics
   goStrightLine(tmp, this->currJoint, 0.25e-4, 0.75e-10, 0.0, 0.0);
   setCurPos(0, 0, 0, 0, 90, 0);
@@ -173,6 +173,12 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
       //     Serial.println("!joint5 should move down");
       //   }
       // }
+      Jnext[0] = Jcurr[0];
+      Jnext[2] = Jcurr[2];
+      Jnext[3] = Jcurr[3];
+      Jnext[4] = Jcurr[4];
+      Jnext[5] = Jcurr[5];
+      Serial.println("!Move only joint 2 in lengthwise");
     }
   }
   memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
@@ -230,7 +236,6 @@ bool getAxis(float* output){
             token = "";
         }
     }
-
     String data_print = "!GET SUCCESS POSITION  ";
     for (int j = 0; j < 6; j++)
     {
