@@ -20,15 +20,19 @@ public:
   void goHomeFromManual();
   void goFoldFromManual();
   void singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530);
-  void manualControl(char *DATA, double vel0, double acc0, double velini, double velfin);
+  void manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin);
   void autoMove(double* Xnext, double vel0, double acc0, double velini, double velfin);
+  void autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin);
   void listen();
   void move();
+  int validateJoint(double* input);
 
   void printCurJoint();
   void printCurPos();
 
   bool getDataModel(double* output);
+  bool getAxis(double* output);
+  bool getDataManual(double* output);
 };
 
 #endif
