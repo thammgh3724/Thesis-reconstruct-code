@@ -4,23 +4,23 @@
 
 #include "Arduino.h"
 
-void goStrightLine(float* xfi, float* xff, float vel0, float acc0, float velini, float velfin);
-void goTrajectory(float* Jf);
-void InverseK(float* Xik, float* Jik);
-void ForwardK(float* Jfk, float* Xfk);
-void invtran(float* Titi, float* Titf);
-void tran2pos(float* Ttp, float* Xtp);
-void pos2tran(float* Xpt, float* Tpt);
-void DH1line(float thetadh, float alfadh, float rdh, float ddh, float* Tdh);
-void MatrixPrint(float* A, int m, int n, String label);
-void MatrixCopy(float* A, int n, int m, float* B);
-void MatrixMultiply(float* A, float* B, int m, int p, int n, float* C);
-void MatrixAdd(float* A, float* B, int m, int n, float* C);
-void MatrixSubtract(float* A, float* B, int m, int n, float* C);
-void MatrixTranspose(float* A, int m, int n, float* C);
-void MatrixScale(float* A, int m, int n, float k);
-void setCurPos(double pos1, double pos2, double pos3, double pos4, double pos5, double pos6);
-float getCurPos(uint8_t i);
-void printCurPos();
+void goStrightLine(double* xfi, double* xff, double vel0, double acc0, double velini, double velfin);
+void goTrajectory(double* Jf);
+void InverseK(double* Xik, double* Jik);
+void ForwardK(double* Jfk, double* Xfk);
+void invtran(double* Titi, double* Titf);
+void tran2pos(double* Ttp, double* Xtp);
+void pos2tran(double* Xpt, double* Tpt);
+void DH1line(double thetadh, double alfadh, double rdh, double ddh, double* Tdh);
+void MatrixPrint(double* A, int m, int n, String label);
+void MatrixCopy(double* A, int n, int m, double* B);
+void MatrixMultiply(double* A, double* B, int m, int p, int n, double* C);
+void MatrixAdd(double* A, double* B, int m, int n, double* C);
+void MatrixSubtract(double* A, double* B, int m, int n, double* C);
+void MatrixTranspose(double* A, int m, int n, double* C);
+void MatrixScale(double* A, int m, int n, double k);
+void setcurJoint(double pos1, double pos2, double pos3, double pos4, double pos5, double pos6);
+double getcurJoint(uint8_t i);
+void printcurJoint();
 
 #endif

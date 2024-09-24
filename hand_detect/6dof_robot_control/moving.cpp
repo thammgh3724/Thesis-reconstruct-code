@@ -5,39 +5,11 @@
 #define NEGATIVE_DIRECTION '2'
 #define ANGLE_PER_COMMAND   2
 
-const float velG = 0.25e-4;
-float start_vel = 1 * velG;
-float end_vel = 1 * velG; 
+const double velG = 0.25e-4;
+double start_vel = 1 * velG;
+double end_vel = 1 * velG; 
 
-#define NUM_BYTES_BUFFER    (6 * sizeof(float))
-
-
-int validateJoint(float* input){
-  for (int i = 0; i < 6; ++i){
-    switch (i){
-      case 0:
-        if (input[i] > 90 || input[i] < -90) return 1;
-        break; 
-      case 1:
-        if (input[i] > 87 || input[i] < -60) return 2;
-        break; 
-      case 2:
-        if (input[i] > 80 || input[i] < -80) return 3;
-        break;
-      case 3:
-        if (input[i] > 180 || input[i] < -180) return 4;
-        break;
-      case 4:
-        if (input[i] > 120 || input[i] < -90) return 5;
-        break;
-      case 5:
-        break;
-      default:
-        break;
-    }
-  }
-  return 0;
-}
+#define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
 ArmMoving::ArmMoving(){
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
@@ -48,26 +20,96 @@ ArmMoving::ArmMoving(){
   this->isLengthwiseMove = false;
 }
 
-void ArmMoving::printCurJoint(){
-  String result = "!Curr joint : ";
-  for (int i = 0; i < 6; ++i){
-    result += String(this->currJoint[i]);  
-    if (i < 5) {
-        result += ":"; 
-    }
-  }
-  Serial.println(result);
+void ArmMoving::listen(){
+    read();
 }
 
-void ArmMoving::printCurPos(){
-  String result = "!Curr pos : ";
-  for (int i = 0; i < 6; ++i){
-    result += String(this->currX[i]);  
-    if (i < 5) {
-        result += ":"; 
-    }
+void ArmMoving::move(){
+  // !init#
+  if(position == "init") {
+    Serial.println(position);
+    position = "";
+    Serial.println("!INIT START");
+    this->wakeUp();
+    this->printCurJoint();
+    this->printCurPos();
+    Serial.println("!INIT DONE");
   }
-  Serial.println(result);
+  // !gohome#
+  // not working
+  else if(position == "gohome"){
+    position = "";
+    Serial.println("!GOHOME START");
+    this->goHomeFromManual();
+    this->printCurJoint();
+    this->printCurPos();
+    Serial.println("!GOHOME DONE");
+  }
+  // !0:0:0:0:0:0A#
+  else if(position.endsWith("A")){
+    // set position
+    Serial.println("!AUTO START");
+    double output[6];
+    if(getAxis(output)){
+      this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+    }
+    Serial.println("!AUTO DONE");
+    position = "";
+  }
+  // !0:0H#
+  else if(position.endsWith("H")){
+    // set position
+    Serial.println("!GO HAND START");
+    double output[6];
+    if(getDataModel(output)){
+      // Move lengthwise and horizontal seperately
+      double lengthwise = output[2];
+      double horizontal = output[1];
+      // horizontal move
+      if( (horizontal - this->currX[1] >= 1.0) || (horizontal - this->currX[1] < -1.0) ){
+        output[1] = horizontal;
+        output[2] = currX[2]; // keep lengthwise unchanged
+        this->isHorizontalMove = true;
+        this->autoMove_detectHand(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+        this->printCurJoint();
+        this->printCurPos();
+        this->isHorizontalMove = false;
+        Serial.println("!HORIZONTAL DONE");
+      }
+      // lengthwise move
+      if( (lengthwise - this->currX[2] >= 1.0) || (lengthwise - this->currX[2] < -1.0) ){
+        // update new position after horizontal move
+        memcpy(output, this->currX, NUM_BYTES_BUFFER);
+        output[2] = lengthwise;
+        this->isLengthwiseMove = true;
+        this->autoMove_detectHand(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+        this->printCurJoint();
+        this->printCurPos();
+        this->isLengthwiseMove = false;
+        Serial.println("!LENGHTWISE DONE");
+      }
+    }
+    Serial.println("!GO HAND DONE");
+    position = "";
+  }
+  // !0:0:0:0:0:0M#
+  else if(position.endsWith("M")){
+    // set position
+    Serial.println("!GO MANUAL START");
+    double output[6];
+    if(getDataManual(output)){
+      this->manualMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+    }
+    Serial.println("!GO MANUAL DONE");
+    position = "";
+  }
+  else {
+    // double output[6]; 
+    // if (getAxis(output)) {
+    //     Serial.println("!TEST DONE");
+    // }
+    // position = "";
+  }
 }
 
 void ArmMoving::wakeUp(){
@@ -88,26 +130,29 @@ void ArmMoving::wakeUp(){
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
 
   this->currJoint[4] = 90;
-  setCurPos(0, 0, 0, 0, 90, 0);
+  setcurJoint(0, 0, 0, 0, 90, 0);
   memcpy(this->buffer, this->currJoint, NUM_BYTES_BUFFER);
   // First move
-  float output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
+  double output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
   this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
-  setCurPos(0.0, -2.15, 6.47, 180.0, 4.32, -180.0);
+  setcurJoint(0.0, -2.15, 6.47, 180.0, 4.32, -180.0);
   ForwardK(this->currJoint, this->currX); // calculate Xcurr by FK
   this->isFirstmove = false;
 }
 
 void ArmMoving::goHomeFromManual(){
-  float tmp[6];
+  double tmp[6];
   memcpy(tmp, this->currJoint, NUM_BYTES_BUFFER);  //Store current joints
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
   //Rotate Joint5 90 degree
-  currJoint[4] = 90;
+  this->currJoint[1] = -2.15;
+  this->currJoint[2] = 6.47;
+  this->currJoint[3] = 180.0;
+  this->currJoint[4] = 4.32;
+  this->currJoint[5] = -180.0;  
   //Moving using kinematics
   goStrightLine(tmp, this->currJoint, 0.25e-4, 0.75e-10, 0.0, 0.0);
-  setCurPos(0, 0, 0, 0, 90, 0);
-  memcpy(this->buffer, this->currJoint, NUM_BYTES_BUFFER);
+  setcurJoint(0.0, -2.15, 6.47, 180.0, 4.32, -180.0);
 }
 
 void ArmMoving::singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530)
@@ -140,11 +185,45 @@ void ArmMoving::singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, i
   }
 }
 
-void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, float velfin){
+void ArmMoving::autoMove(double* Xnext, double vel0, double acc0, double velini, double velfin){
   Serial.println("!Start Calculate new Position");
-  float Jcurr[6]; // tmp for this->currJoint;
-  float Xcurr[6]; // current //{x, y, z, ZYZ Euler angles}
-  float Jnext[6]; // target joints
+  double Jcurr[6]; // tmp for this->currJoint;
+  double Xcurr[6]; // current //{x, y, z, ZYZ Euler angles}
+  double Jnext[6]; // target joints
+  memcpy(Jcurr, this->currJoint, NUM_BYTES_BUFFER);
+  ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
+  InverseK(Xnext, Jnext); // calculate Jnext by IK
+  String data_print = "!JNEXT: ";
+  for (int i = 0; i < 6; ++i){
+    if (!isfinite(Jnext[i])) {
+        Serial.println("!Danger! The number is not finite");
+        return;
+    }
+    data_print += Jnext[i];
+    data_print += ":";
+  }
+  Serial.println(data_print);
+  //Move
+  int canMove = validateJoint(Jnext);
+  if (canMove == 0){
+    Serial.println("!MOVING...");
+    goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
+    memcpy(this->currJoint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
+    ForwardK(this->currJoint, this->currX); //Update currX
+    Serial.println("!MOVE DONE");
+  }
+  else{
+    data_print = "!Joint out of range : Joint ";
+    data_print += canMove;
+    Serial.println(data_print);
+  }
+}
+
+void ArmMoving::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin){
+  Serial.println("!Start Calculate new Position");
+  double Jcurr[6]; // tmp for this->currJoint;
+  double Xcurr[6]; // current //{x, y, z, ZYZ Euler angles}
+  double Jnext[6]; // target joints
   memcpy(Jcurr, this->currJoint, NUM_BYTES_BUFFER);
   ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
   InverseK(Xnext, Jnext); // calculate Jnext by IK
@@ -171,12 +250,12 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
   memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
   String data_print = "!JNEXT: ";
   for (int i = 0; i < 6; ++i){
-    data_print += Jnext[i];
-    data_print += ":";
     if (!isfinite(Jnext[i])) {
         Serial.println("!Danger! The number is not finite");
         return;
     }
+    data_print += Jnext[i];
+    data_print += ":";
   }
   Serial.println(data_print);
   //Move
@@ -195,11 +274,24 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
   }
 }
 
-void ArmMoving::listen(){
-    read();
+void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin){
+  //Move
+  int canMove = validateJoint(Jnext);
+  if (canMove == 0){
+    Serial.println("MOVING...");
+    goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
+    memcpy(this->currJoint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
+    ForwardK(this->currJoint, this->currX); //Update currX
+    Serial.println("!MOVE DONE");
+  }
+  else{
+    String data_print = "!Joint out of range : Joint ";
+    data_print += canMove;
+    Serial.println(data_print);
+  }
 }
 
-bool getAxis(float* output){
+bool ArmMoving::getAxis(double* output){
     // INIT AXIS ARRAY;
     for (int i = 0; i < 6; i++) 
     {
@@ -217,9 +309,9 @@ bool getAxis(float* output){
             // Convert String to char array
             char charArray[token.length() + 1]; // +1 for null terminator
             token.toCharArray(charArray, token.length() + 1);
-            //Convert to float
-            float floatValue = atof(charArray); 
-            output[i++] = floatValue;
+            //Convert to double
+            double doubleValue = atof(charArray); 
+            output[i++] = doubleValue;
             token = "";
         }
     }
@@ -234,9 +326,9 @@ bool getAxis(float* output){
     return true;
 }
 
-bool ArmMoving::getDataModel(float* output){
+bool ArmMoving::getDataModel(double* output){
   // get data from model
-    float data[2];
+    double data[2];
     for (int i = 0; i < 2; i++) 
     {
         data[i] = 0.0; 
@@ -253,9 +345,9 @@ bool ArmMoving::getDataModel(float* output){
             // Convert String to char array
             char charArray[token.length() + 1]; // +1 for null terminator
             token.toCharArray(charArray, token.length() + 1);
-            //Convert to float
-            float floatValue = atof(charArray); 
-            data[i++] = floatValue;
+            //Convert to double
+            double doubleValue = atof(charArray); 
+            data[i++] = doubleValue;
             token = "";
         }
     }
@@ -264,7 +356,6 @@ bool ArmMoving::getDataModel(float* output){
     {
       data_print1 += data[j];
       data_print1 += ":";
-      // data_print += i; 
     }
     Serial.println(data_print1);
     // INIT AXIS ARRAY;
@@ -286,100 +377,111 @@ bool ArmMoving::getDataModel(float* output){
     return true;
 }
 
-void ArmMoving::move(){
-  if(position == "init") {
-    Serial.println(position); 
-    position = "";
-    Serial.println("!INIT START");
-    this->wakeUp();
-    this->printCurJoint();
-    this->printCurPos();
-    Serial.println("!INIT DONE");
-  }
-  else if(position == "gohome"){
-    position = "";
-    Serial.println("!GOHOME START");
-    this->goHomeFromManual();
-    this->printCurJoint();
-    this->printCurPos();
+bool ArmMoving::getDataManual(double* output){
+  // get data from gamepad
+    double data[6];
+    for (int i = 0; i < 6; i++) 
+    {
+        data[i] = 0.0; 
+    }
+    int posLen = position.length(); 
+    String token = "";
+    int i = 0;
+    for (int idx = 0; idx < posLen + 1; idx++) {
+        if (i == 6) break;
+        if (position[idx] != ':' && position[idx] != '\0' && position[idx] != 'M') {
+            token += position[idx];
+        } 
+        else {
+            // Convert String to char array
+            char charArray[token.length() + 1]; // +1 for null terminator
+            token.toCharArray(charArray, token.length() + 1);
+            //Convert to double
+            double doubleValue = atof(charArray); 
+            data[i++] = doubleValue;
+            token = "";
+        }
+    }
+    String data_print1 = "!GET SUCCESS DATA  ";
+    for (int j = 0; j < 6; j++)
+    {
+      data_print1 += data[j];
+      data_print1 += ":";
+    }
+    Serial.println(data_print1);
+    // INIT NEW JOINT ARRAY;
+    for (int i = 0; i < 6; i++) 
+    {
+        output[i] = this->currJoint[i]; 
+    }
+    // caculate new joint
+    for (int i = 0; i < 6; ++i) {
+      if (data[i] == POSITIVE_DIRECTION) {
+        //Rotate positive direction
+       output[i] += ANGLE_PER_COMMAND;
+      } 
+      else if (data[i] == NEGATIVE_DIRECTION) {
+        //Rotate negative direction
+        output[i] -= ANGLE_PER_COMMAND;
+      }
+    }
+    String data_print = "!GET SUCCESS JOINT  ";
+    for (int j = 0; j < 6; j++)
+    {
+      data_print += output[j];
+      data_print += ":";
+      // data_print += i; 
+    }
+    Serial.println(data_print);
+    return true;
+}
 
-    Serial.println("!GOHOME DONE");
-  }
-  else if(position.endsWith("A")){
-    // set position
-    Serial.println("!AUTO START");
-    float output[6];
-    if(getAxis(output)){
-      // Move lengthwise and horizontal seperately
-      float lengthwise = output[2];
-      float horizontal = output[1];
-      // horizontal move
-      if( (horizontal - this->currX[1] >= 1.0) || (horizontal - this->currX[1] < -1.0) ){
-        output[1] = horizontal;
-        output[2] = currX[2]; // keep lengthwise unchanged
-        this->isHorizontalMove = true;
-        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
-        this->printCurJoint();
-        this->printCurPos();
-        this->isHorizontalMove = false;
-        Serial.println("!HORIZONTAL DONE");
-      }
-      // lengthwise move
-      if( (lengthwise - this->currX[2] >= 1.0) || (lengthwise - this->currX[2] < -1.0) ){
-        // update new position after horizontal move
-        memcpy(output, this->currX, NUM_BYTES_BUFFER);
-        output[2] = lengthwise;
-        this->isLengthwiseMove = true;
-        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
-        this->printCurJoint();
-        this->printCurPos();
-        this->isLengthwiseMove = false;
-        Serial.println("!LENGHTWISE DONE");
-      }
+int ArmMoving::validateJoint(double* input){
+  for (int i = 0; i < 6; ++i){
+    switch (i){
+      case 0:
+        if (input[i] > MAX_JOINT_ANGLE[0] || input[i] < MIN_JOINT_ANGLE[0]) return 1;
+        break; 
+      case 1:
+        if (input[i] > MAX_JOINT_ANGLE[1] || input[i] < MIN_JOINT_ANGLE[1]) return 2;
+        break; 
+      case 2:
+        if (input[i] > MAX_JOINT_ANGLE[2] || input[i] < MIN_JOINT_ANGLE[2]) return 3;
+        break;
+      case 3:
+        if (input[i] > MAX_JOINT_ANGLE[3] || input[i] < MIN_JOINT_ANGLE[3]) return 4;
+        break;
+      case 4:
+        if (input[i] > MAX_JOINT_ANGLE[4] || input[i] < MIN_JOINT_ANGLE[4]) return 5;
+        break;
+      case 5:
+        if (input[i] > MAX_JOINT_ANGLE[5] || input[i] < MIN_JOINT_ANGLE[5]) return 6;
+        break;
+      default:
+        break;
     }
-    Serial.println("!AUTO DONE");
-    position = "";
   }
-  else if(position.endsWith("H")){
-    // set position
-    Serial.println("!GO HAND START");
-    float output[6];
-    if(getDataModel(output)){
-      // Move lengthwise and horizontal seperately
-      float lengthwise = output[2];
-      float horizontal = output[1];
-      // horizontal move
-      if( (horizontal - this->currX[1] >= 1.0) || (horizontal - this->currX[1] < -1.0) ){
-        output[1] = horizontal;
-        output[2] = currX[2]; // keep lengthwise unchanged
-        this->isHorizontalMove = true;
-        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
-        this->printCurJoint();
-        this->printCurPos();
-        this->isHorizontalMove = false;
-        Serial.println("!HORIZONTAL DONE");
-      }
-      // lengthwise move
-      if( (lengthwise - this->currX[2] >= 1.0) || (lengthwise - this->currX[2] < -1.0) ){
-        // update new position after horizontal move
-        memcpy(output, this->currX, NUM_BYTES_BUFFER);
-        output[2] = lengthwise;
-        this->isLengthwiseMove = true;
-        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
-        this->printCurJoint();
-        this->printCurPos();
-        this->isLengthwiseMove = false;
-        Serial.println("!LENGHTWISE DONE");
-      }
+  return 0;
+}
+
+void ArmMoving::printCurJoint(){
+  String result = "!Curr joint : ";
+  for (int i = 0; i < 6; ++i){
+    result += String(this->currJoint[i]);  
+    if (i < 5) {
+        result += ":"; 
     }
-    Serial.println("!GO HAND DONE");
-    position = "";
   }
-  else {
-    // float output[6]; 
-    // if (getAxis(output)) {
-    //     Serial.println("!TEST DONE");
-    // }
-    // position = "";
+  Serial.println(result);
+}
+
+void ArmMoving::printCurPos(){
+  String result = "!Curr pos : ";
+  for (int i = 0; i < 6; ++i){
+    result += String(this->currX[i]);  
+    if (i < 5) {
+        result += ":"; 
+    }
   }
+  Serial.println(result);
 }

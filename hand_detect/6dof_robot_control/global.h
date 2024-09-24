@@ -44,8 +44,8 @@ const double dl6 = 360.0/200.0/16.0/1.0;
 
 const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};
 
-const float MAX_JOINT_ANGLE[5] = {80, 80, 60, 140, 90};
-const float MIN_JOINT_ANGLE[5] = {-80, -80, -80, -180, -90};
+const double MAX_JOINT_ANGLE[6] = {90, 87, 80, 180, 120, 180};
+const double MIN_JOINT_ANGLE[6] = {-90, -60, -80, -180, -90, -180};
 
 extern int cmd;
 extern String position;
