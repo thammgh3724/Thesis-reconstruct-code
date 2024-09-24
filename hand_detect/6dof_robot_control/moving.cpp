@@ -22,7 +22,7 @@ int validateJoint(float* input){
         if (input[i] > 87 || input[i] < -60) return 2;
         break; 
       case 2:
-        if (input[i] > 60 || input[i] < -60) return 3;
+        if (input[i] > 80 || input[i] < -80) return 3;
         break;
       case 3:
         if (input[i] > 180 || input[i] < -180) return 4;
@@ -163,24 +163,11 @@ void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, flo
     if (isLengthwiseMove) {
       // joint 5 alway move up when robot go down
       // need rework
-      // if ( temp_Jnext4 - Jcurr[3] < -1.0 ) {
-      //   if ((Xnext[2] < Xcurr[2]) && (Jnext[4] - Jcurr[4] <= 1) ) {
-      //     Jnext[4] = Jcurr[4] + (Jcurr[4] - Jnext[4]); // parse joint5 move down -> move up
-      //     Serial.println("!joint5 should move up");
-      //   }
-      //   else if ( (Xnext[2] > Xcurr[2]) && (Jnext[4] - Jcurr[4] >= 1)) {
-      //     Jnext[4] = Jcurr[4] - (Jnext[4] - Jcurr[4]); // parse joint5 move up -> move down
-      //     Serial.println("!joint5 should move down");
-      //   }
-      // }
-      Jnext[0] = Jcurr[0];
-      Jnext[2] = Jcurr[2];
-      Jnext[3] = Jcurr[3];
-      Jnext[4] = Jcurr[4];
-      Jnext[5] = Jcurr[5];
-      Serial.println("!Move only joint 2 in lengthwise");
+      int angleJ2Move = Jnext[1] - Jcurr[1];
+      int angleJ3Move = Jnext[2] - Jcurr[2];
+      Jnext[4] = Jcurr[4] + angleJ2Move + angleJ3Move;
     }
-  }
+  } 
   memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
   String data_print = "!JNEXT: ";
   for (int i = 0; i < 6; ++i){
@@ -247,6 +234,57 @@ bool getAxis(float* output){
     return true;
 }
 
+bool ArmMoving::getDataModel(float* output){
+  // get data from model
+    float data[2];
+    for (int i = 0; i < 2; i++) 
+    {
+        data[i] = 0.0; 
+    }
+    int posLen = position.length(); 
+    String token = "";
+    int i = 0;
+    for (int idx = 0; idx < posLen + 1; idx++) {
+        if (i == 2) break;
+        if (position[idx] != ':' && position[idx] != '\0' && position[idx] != 'H') {
+            token += position[idx];
+        } 
+        else {
+            // Convert String to char array
+            char charArray[token.length() + 1]; // +1 for null terminator
+            token.toCharArray(charArray, token.length() + 1);
+            //Convert to float
+            float floatValue = atof(charArray); 
+            data[i++] = floatValue;
+            token = "";
+        }
+    }
+    String data_print1 = "!GET SUCCESS DATA  ";
+    for (int j = 0; j < 2; j++)
+    {
+      data_print1 += data[j];
+      data_print1 += ":";
+      // data_print += i; 
+    }
+    Serial.println(data_print1);
+    // INIT AXIS ARRAY;
+    for (int i = 0; i < 6; i++) 
+    {
+        output[i] = this->currX[i]; 
+    }
+    // caculate new position
+    output[1] = output[1] + ( (-40.0/177.0)*(data[0]-320.0) );
+    output[2] = output[2] + ( (-75.0/73.0)*(data[1]-240.0) );
+    String data_print = "!GET SUCCESS POSITION  ";
+    for (int j = 0; j < 6; j++)
+    {
+      data_print += output[j];
+      data_print += ":";
+      // data_print += i; 
+    }
+    Serial.println(data_print);
+    return true;
+}
 
 void ArmMoving::move(){
   if(position == "init") {
@@ -301,7 +339,42 @@ void ArmMoving::move(){
     }
     Serial.println("!AUTO DONE");
     position = "";
-  } 
+  }
+  else if(position.endsWith("H")){
+    // set position
+    Serial.println("!GO HAND START");
+    float output[6];
+    if(getDataModel(output)){
+      // Move lengthwise and horizontal seperately
+      float lengthwise = output[2];
+      float horizontal = output[1];
+      // horizontal move
+      if( (horizontal - this->currX[1] >= 1.0) || (horizontal - this->currX[1] < -1.0) ){
+        output[1] = horizontal;
+        output[2] = currX[2]; // keep lengthwise unchanged
+        this->isHorizontalMove = true;
+        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+        this->printCurJoint();
+        this->printCurPos();
+        this->isHorizontalMove = false;
+        Serial.println("!HORIZONTAL DONE");
+      }
+      // lengthwise move
+      if( (lengthwise - this->currX[2] >= 1.0) || (lengthwise - this->currX[2] < -1.0) ){
+        // update new position after horizontal move
+        memcpy(output, this->currX, NUM_BYTES_BUFFER);
+        output[2] = lengthwise;
+        this->isLengthwiseMove = true;
+        this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+        this->printCurJoint();
+        this->printCurPos();
+        this->isLengthwiseMove = false;
+        Serial.println("!LENGHTWISE DONE");
+      }
+    }
+    Serial.println("!GO HAND DONE");
+    position = "";
+  }
   else {
     // float output[6]; 
     // if (getAxis(output)) {
