@@ -103,6 +103,14 @@ void ArmMoving::move(){
     Serial.println("!GO MANUAL DONE");
     position = "";
   }
+  // !0# !1# !2#  1/2-> go left/right
+  else if(position.endsWith("S")){
+    // set position
+    Serial.println("!GO SLIDE START");
+    //TODO : get data and move slide here
+    Serial.println("!GO SLIDE DONE");
+    position = "";
+  }
   else {
     // double output[6]; 
     // if (getAxis(output)) {
