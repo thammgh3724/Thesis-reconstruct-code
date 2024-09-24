@@ -134,7 +134,7 @@ void ArmMoving::wakeUp(){
   singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
-
+  
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
 
   this->currJoint[4] = 90;
@@ -254,7 +254,7 @@ void ArmMoving::autoMove_detectHand(double* Xnext, double vel0, double acc0, dou
       int angleJ3Move = Jnext[2] - Jcurr[2];
       Jnext[4] = Jcurr[4] + angleJ2Move + angleJ3Move;
     }
-  }
+  } 
   memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
   String data_print = "!JNEXT: ";
   for (int i = 0; i < 6; ++i){
@@ -323,7 +323,6 @@ bool ArmMoving::getAxis(double* output){
             token = "";
         }
     }
-
     String data_print = "!GET SUCCESS POSITION  ";
     for (int j = 0; j < 6; j++)
     {

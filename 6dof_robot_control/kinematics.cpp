@@ -70,8 +70,8 @@ void goStrightLine(float* xfi, float* xff, float vel0, float acc0, float velini,
   vel0 = min(vel0,sqrt(lmax*acc0+0.5*velini*velini+0.5*velfin*velfin));
   unsigned long curMil = micros();
   unsigned long t = 0;
-  double tap = vel0/acc0-velini/acc0;
-  double lap = velini*tap+acc0*tap*tap/2.0;
+  double tap = vel0/acc0-velini/acc0;// thoi gian chuyen dong trong phase nhanh dan
+  double lap = velini*tap+acc0*tap*tap/2.0;// khoang cach nhanh dan
   double lcsp = lmax-(vel0*vel0/2.0/acc0-velfin*velfin/2.0/acc0);
   double tcsp = (lcsp-lap)/vel0+tap;
   double tfin = vel0/acc0-velfin/acc0+tcsp;
@@ -98,7 +98,7 @@ void goStrightLine(float* xfi, float* xff, float vel0, float acc0, float velini,
     Xx[3]=xfi[3]+(xff[3]-xfi[3])/lmax*l;
     Xx[4]=xfi[4]+(xff[4]-xfi[4])/lmax*l;
     Xx[5]=xfi[5]+(xff[5]-xfi[5])/lmax*l;
-    
+    // cong thuc  nay la cai gi
     goTrajectory(Xx);
     curMil = micros();
   }
