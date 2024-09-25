@@ -4,6 +4,14 @@
 #include "Arduino.h"
 #define PI 3.1415926535897932384626433832795
 
+// inductive sensor for sliders
+#define INDUCTIVE_SR    33
+
+// Driver for slider control
+#define SLIDER_PUL      31
+#define SLIDER_DIR      29
+#define SLIDER_NEG_DIR  27
+
 //driver for the axis 1
 #define PUL1_PIN 39
 #define DIR1_PIN 37

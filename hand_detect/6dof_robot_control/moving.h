@@ -5,6 +5,8 @@
 #include "communication.h"
 #include "kinematics.h"
 
+int inductiveSrDetect();
+
 class ArmMoving {
 private:
   double currJoint[6]; // current joints angle

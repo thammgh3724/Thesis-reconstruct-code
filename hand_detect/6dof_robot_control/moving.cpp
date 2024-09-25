@@ -11,6 +11,13 @@ double end_vel = 1 * velG;
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
+/* read inductive sensor for sliders
+ */
+int inductiveSrDetect() {
+  int inductive = digitalRead(INDUCTIVE_SR);
+  return inductive;
+}
+
 ArmMoving::ArmMoving(){
   memset(this->currJoint, 0, NUM_BYTES_BUFFER);
   memset(this->buffer, 0, NUM_BYTES_BUFFER);
@@ -102,6 +109,60 @@ void ArmMoving::move(){
     }
     Serial.println("!GO MANUAL DONE");
     position = "";
+  }
+  // Sliders Control
+  else if (position.endsWith("S")) {
+    int direct = digitalRead(SLIDER_DIR);
+    if (position == "LEFTS"){
+      if (inductiveSrDetect() == LOW && direct == HIGH){
+        Serial.println("!LIMIT MOVE DETECT");
+        return;
+      }
+      digitalWrite(SLIDER_DIR,HIGH);
+      for (int i = 0 ; i < 100 ; i++){
+        digitalWrite(SLIDER_PUL,HIGH); 
+        delayMicroseconds(250); 
+        digitalWrite(SLIDER_PUL,LOW); 
+        delayMicroseconds(250); 
+      }
+      Serial.println("!GO LEFT");
+    }
+    else if (position == "RIGHTS"){
+      if (inductiveSrDetect() == LOW && direct == LOW){
+        Serial.println("!LIMIT MOVE DETECT");
+        return;
+      }
+      digitalWrite(SLIDER_DIR,LOW);
+      for (int i = 0 ; i < 100; i++){
+        digitalWrite(SLIDER_PUL,HIGH); 
+        delayMicroseconds(250); 
+        digitalWrite(SLIDER_PUL,LOW); 
+        delayMicroseconds(250); 
+      }
+      Serial.println("!GO RIGHT");
+    }
+    else if (position == "AUTOS"){ 
+      while(true){
+        if (inductiveSrDetect() == 0){
+          digitalWrite(SLIDER_DIR, !digitalRead(SLIDER_DIR));
+          for (int i = 0 ;i <100 ;i++){
+            digitalWrite(SLIDER_PUL, HIGH);
+            delayMicroseconds(250);
+            digitalWrite(SLIDER_PUL,LOW);
+            delayMicroseconds(250);
+          }
+          continue;
+        }
+        digitalWrite(SLIDER_PUL, HIGH);
+        delayMicroseconds(250);
+        digitalWrite(SLIDER_PUL,LOW);
+        delayMicroseconds(250);
+        read();
+        if (position == "STOPS"){
+          break;
+        }
+      }
+    }
   }
   else {
     // double output[6]; 
@@ -463,6 +524,9 @@ int ArmMoving::validateJoint(double* input){
   }
   return 0;
 }
+
+
+
 
 void ArmMoving::printCurJoint(){
   String result = "!Curr joint : ";

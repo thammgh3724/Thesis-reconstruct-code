@@ -50,8 +50,15 @@ void setup() {
   // digitalWrite(EN4_PIN, HIGH);
   // digitalWrite(EN5_PIN, HIGH);
   // digitalWrite(EN6_PIN, HIGH);
-
   digitalWrite(PUMP_PIN, LOW);  //PUMP OFF
+
+  // SET UP FOR SLIDERS
+  pinMode(SLIDER_DIR, OUTPUT); 
+  pinMode(SLIDER_PUL, OUTPUT);
+  pinMode(INDUCTIVE_SR, INPUT); 
+
+  pinMode(SLIDER_NEG_DIR, OUTPUT); 
+  digitalWrite(SLIDER_NEG_DIR, LOW);
 
   Serial.begin(115200);
 }

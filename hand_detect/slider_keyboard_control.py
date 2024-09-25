@@ -2,8 +2,8 @@ from pynput.keyboard import Key, Listener
 import serial
 import threading
 
-serialPort = 'COM6'
-serialBaudrate = 9600
+serialPort = 'COM4'
+serialBaudrate = 115200
 
 serialObject = serial.Serial(
     port=serialPort, 
@@ -25,13 +25,13 @@ def read_from_serial():
 def show(key): 
     print('\nYou Entered {0}'.format(key))
     if (key == Key.left):
-        serialObject.write(bytes(str("!LEFT#"), encoding='utf-8'))
+        serialObject.write(bytes(str("!LEFTS#"), encoding='utf-8'))
     if (key == Key.right):
-        serialObject.write(bytes(str("!RIGHT#"), encoding='utf-8'))
+        serialObject.write(bytes(str("!RIGHTS#"), encoding='utf-8'))
     if (key == Key.up):
-        serialObject.write(bytes(str("!AUTO#"), encoding='utf-8'))
+        serialObject.write(bytes(str("!AUTOS#"), encoding='utf-8'))
     if (key == Key.down):
-        serialObject.write(bytes(str("!STOP#"), encoding='utf-8'))
+        serialObject.write(bytes(str("!STOPS#"), encoding='utf-8'))
     if key == Key.delete:
         # Stp listener
         return False
