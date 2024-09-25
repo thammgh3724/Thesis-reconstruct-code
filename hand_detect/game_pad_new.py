@@ -6,7 +6,8 @@ import threading
 # Initialize pygame
 pygame.init()
 
-serialPort = '/dev/ttyACM0'
+# serialPort = '/dev/ttyACM0'
+serialPort = 'COM4'
 serialBaudrate = 115200
 ack = False
 debounce = 0
@@ -19,18 +20,18 @@ serialObject = serial.Serial(
     port=serialPort, 
     baudrate=serialBaudrate,
     bytesize=serial.EIGHTBITS,
-    parity=serial.PARITY_NONE,
+    parity=serial.PARITY_NONE,  
     stopbits=serial.STOPBITS_ONE, 
     timeout=0.01
 ) 
 
 time.sleep(10)
-initalstring = "!Initon#"
+initalstring = "!init#"
 serialObject.write(bytes(str(initalstring), encoding='utf-8'))
 
 # INitialize input values
 buffer = [0, 0, 0, 0, 0, 0]
-slide_signal = 0
+slide_signal = [0,0]
 newValue = False
 
 def handle_button_release(button, buffer):
@@ -143,21 +144,46 @@ def handle_button_press(button, buffer):
 def handle_dpad_x(value):
     global debounce
     if value == 1.0:
+        slide_signal[0] = 1
         print("D-pad right pressed")
     elif value == -1.0:
+        slide_signal[0] = 2
         print("D-pad left pressed")
     else:
+        slide_signal[0] = 0
         print("D-pad X-axis released")
-        debounce = 0
+        # debounce = 0
 
 def handle_dpad_y(value):
     if value == 1.0:
+        slide_signal[1] = 1
         print("D-pad down pressed")
     elif value == -1.0:
+        slide_signal[1] = 2
         print("D-pad up pressed")
     else:
+        slide_signal[1] = 0
         print("D-pad Y-axis released")
 
+def handle_dpad_new():
+    # The hat returns a tuple (x, y) where x is horizontal and y is vertical
+    hat_position = joystick.get_hat()
+    
+    if hat_position == (0, 1):
+        print("D-pad Up")
+        slide_signal = 1
+    elif hat_position == (0, -1):
+        slide_signal = 2
+        print("D-pad Down")
+    elif hat_position == (-1, 0):
+        slide_signal = 3
+        print("D-pad Left")
+    elif hat_position == (1, 0):
+        print("D-pad Right")
+        slide_signal = 4
+    elif hat_position == (0, 0):
+        slide_signal = 0
+        print("D-pad Released (Center)")
 
 
 
@@ -184,20 +210,34 @@ if joystick_count > 0:
                 handle_button_release(event.button, buffer)
             if event.type == pygame.JOYAXISMOTION:
                 handle_axis_motion(event.axis, event.value, buffer)
+            if event.type == pygame.JOYHATMOTION:
+                x_value, y_value = event.value
+                handle_dpad_x(x_value)
+                handle_dpad_y(y_value)
         newValue = False
         if idleFlag == False:
+            if slide_signal[1] != 0 or slide_signal[0] !=0:
+                newValue = True
+                stopFlag = False
             for b in buffer:
-                if (b != 0 or slide_signal != 0):
+                if (b != 0):
                     newValue = True
                     stopFlag = False
                     break
-        if newValue == True and ack == True:  
-            if slide_signal != 0: # need rework logic here
-                string = '!' + str(slide_signal) + 'S#'
+        if newValue == True:  
+            if slide_signal[1] != 0 or slide_signal[0] != 0: # need rework logic here
+                if slide_signal[1] == 1:
+                    string = '!AUTOS#'
+                elif slide_signal[1] == 2:
+                    string = '!STOPS#'
+                elif slide_signal[0] == 1:
+                    string = '!LEFTS#'
+                elif slide_signal[0] == 2:
+                    string = '!RIGHTS#'
                 print('send: ', string)
                 serialObject.write(bytes(str(string), encoding='utf-8'))
             else:       
-                string = ''.join(str(x) for x in buffer)
+                string = ':'.join(str(x) for x in buffer)
                 string = '!' + string + 'M#'
                 print('send: ', string)
                 serialObject.write(bytes(str(string), encoding='utf-8'))

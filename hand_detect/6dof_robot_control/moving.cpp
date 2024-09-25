@@ -471,19 +471,19 @@ bool ArmMoving::getDataManual(double* output){
     }
     Serial.println(data_print1);
     // INIT NEW JOINT ARRAY;
-    for (int i = 0; i < 6; i++) 
+    for (int j = 0; j < 6; j++) 
     {
-        output[i] = this->currJoint[i]; 
+        output[j] = this->currJoint[j]; 
     }
     // caculate new joint
-    for (int i = 0; i < 6; ++i) {
-      if (data[i] == POSITIVE_DIRECTION) {
+    for (int j = 0; j < 6; ++j) {
+      if (data[j] == POSITIVE_DIRECTION) {
         //Rotate positive direction
-       output[i] += ANGLE_PER_COMMAND;
+       output[j] += ANGLE_PER_COMMAND;
       } 
-      else if (data[i] == NEGATIVE_DIRECTION) {
+      else if (data[j] == NEGATIVE_DIRECTION) {
         //Rotate negative direction
-        output[i] -= ANGLE_PER_COMMAND;
+        output[j] -= ANGLE_PER_COMMAND;
       }
     }
     String data_print = "!GET SUCCESS JOINT  ";
