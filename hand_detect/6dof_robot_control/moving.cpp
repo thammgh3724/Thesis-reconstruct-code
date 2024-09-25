@@ -102,7 +102,9 @@ void ArmMoving::move(){
   // !0:0:0:0:0:0M#
   else if(position.endsWith("M")){
     // set position
+    #ifdef DEBUG
     Serial.println("!GO MANUAL START");
+    #endif
     double output[6];
     if(getDataManual(output)){
       this->manualMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
@@ -339,11 +341,15 @@ void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velin
   //Move
   int canMove = validateJoint(Jnext);
   if (canMove == 0){
+    #ifdef DEBUG
     Serial.println("MOVING...");
+    #endif
     goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
     memcpy(this->currJoint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
     ForwardK(this->currJoint, this->currX); //Update currX
+    #ifdef DEBUG
     Serial.println("!MOVE DONE");
+    #endif
   }
   else{
     String data_print = "!Joint out of range : Joint ";
@@ -463,6 +469,7 @@ bool ArmMoving::getDataManual(double* output){
             token = "";
         }
     }
+    #ifdef DEBUG
     String data_print1 = "!GET SUCCESS DATA  ";
     for (int j = 0; j < 6; j++)
     {
@@ -470,6 +477,7 @@ bool ArmMoving::getDataManual(double* output){
       data_print1 += ":";
     }
     Serial.println(data_print1);
+    #endif
     // INIT NEW JOINT ARRAY;
     for (int j = 0; j < 6; j++) 
     {
@@ -477,15 +485,16 @@ bool ArmMoving::getDataManual(double* output){
     }
     // caculate new joint
     for (int j = 0; j < 6; ++j) {
-      if (data[j] == POSITIVE_DIRECTION) {
+      if ( (data[j] >= 0.9) && (data[j] <= 1.1)) {
         //Rotate positive direction
        output[j] += ANGLE_PER_COMMAND;
       } 
-      else if (data[j] == NEGATIVE_DIRECTION) {
+      else if ( (data[j] >= 1.9) && (data[j] <= 2.1) ) {
         //Rotate negative direction
         output[j] -= ANGLE_PER_COMMAND;
       }
     }
+    #ifdef DEBUG
     String data_print = "!GET SUCCESS JOINT  ";
     for (int j = 0; j < 6; j++)
     {
@@ -494,6 +503,7 @@ bool ArmMoving::getDataManual(double* output){
       // data_print += i; 
     }
     Serial.println(data_print);
+    #endif
     return true;
 }
 

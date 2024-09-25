@@ -58,6 +58,7 @@ const double MIN_JOINT_ANGLE[6] = {-90, -60, -80, -180, -90, -180};
 extern int cmd;
 extern String position;
 extern int move_flag;
+
 //Debug flag
 #define DEBUG
 

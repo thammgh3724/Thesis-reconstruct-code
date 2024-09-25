@@ -6,10 +6,10 @@ import threading
 # Initialize pygame
 pygame.init()
 
-# serialPort = '/dev/ttyACM0'
-serialPort = 'COM4'
+serialPort = '/dev/ttyACM0'
+#serialPort = 'COM4'
 serialBaudrate = 115200
-ack = False
+ack = True
 debounce = 0
 stopFlag = True
 idleFlag = False
@@ -165,84 +165,85 @@ def handle_dpad_y(value):
         slide_signal[1] = 0
         print("D-pad Y-axis released")
 
-def handle_dpad_new():
-    # The hat returns a tuple (x, y) where x is horizontal and y is vertical
-    hat_position = joystick.get_hat()
-    
-    if hat_position == (0, 1):
-        print("D-pad Up")
-        slide_signal = 1
-    elif hat_position == (0, -1):
-        slide_signal = 2
-        print("D-pad Down")
-    elif hat_position == (-1, 0):
-        slide_signal = 3
-        print("D-pad Left")
-    elif hat_position == (1, 0):
-        print("D-pad Right")
-        slide_signal = 4
-    elif hat_position == (0, 0):
-        slide_signal = 0
-        print("D-pad Released (Center)")
-
-
-
-if joystick_count > 0:
-    joystick = pygame.joystick.Joystick(0)
-    joystick.init()
-
-    print(f"Joystick found: {joystick.get_name()}")
-    debounce = 0
+def read_from_serial():
+    global ack
     while True:
-        # pygame.event.pump()
-        data = serialObject.readline().decode(encoding='utf-8')
-        if (data == "!GO MANUAL DONE\r\n" or data == "!GO SLIDE DONE\r\n"):  # Maybe bug
-            print("acknowledage")
-            ack = True
-        elif data == "KCA\r\n": 
-            print("stopped")
-            ack = True
-        # choose 1 button to control slide then config "slide_signal" in the handle button funtion
-        for event in pygame.event.get():
-            if event.type == pygame.JOYBUTTONDOWN:
-                handle_button_press(event.button, buffer)
-            if event.type == pygame.JOYBUTTONUP:
-                handle_button_release(event.button, buffer)
-            if event.type == pygame.JOYAXISMOTION:
-                handle_axis_motion(event.axis, event.value, buffer)
-            if event.type == pygame.JOYHATMOTION:
-                x_value, y_value = event.value
-                handle_dpad_x(x_value)
-                handle_dpad_y(y_value)
-        newValue = False
-        if idleFlag == False:
-            if slide_signal[1] != 0 or slide_signal[0] !=0:
-                newValue = True
-                stopFlag = False
-            for b in buffer:
-                if (b != 0):
+        if serialObject.in_waiting > 0:
+            line = serialObject.readline().decode('utf-8').strip()
+            if line:
+                if line.startswith('!'):
+                    print(f"\nRead from Serial: {line}")
+            if (line == "!GO MANUAL DONE" or line == "!GO SLIDE DONE"):  # Maybe bug
+                print("acknowledage")
+                ack = True
+            elif line == "KCA\r\n": 
+                print("stopped")
+                ack = True
+                
+
+
+def write_to_serial():
+    global ack
+    if joystick_count > 0:
+        joystick = pygame.joystick.Joystick(0)
+        joystick.init()
+
+        print(f"Joystick found: {joystick.get_name()}")
+        debounce = 0
+        while True:
+            # pygame.event.pump()
+            # choose 1 button to control slide then config "slide_signal" in the handle button funtion
+            for event in pygame.event.get():
+                if event.type == pygame.JOYBUTTONDOWN:
+                    handle_button_press(event.button, buffer)
+                if event.type == pygame.JOYBUTTONUP:
+                    handle_button_release(event.button, buffer)
+                if event.type == pygame.JOYAXISMOTION:
+                    handle_axis_motion(event.axis, event.value, buffer)
+                if event.type == pygame.JOYHATMOTION:
+                    x_value, y_value = event.value
+                    handle_dpad_x(x_value)
+                    handle_dpad_y(y_value)
+            newValue = False
+            if idleFlag == False:
+                if slide_signal[1] != 0 or slide_signal[0] !=0:
                     newValue = True
                     stopFlag = False
-                    break
-        if newValue == True:  
-            if slide_signal[1] != 0 or slide_signal[0] != 0: # need rework logic here
-                if slide_signal[1] == 1:
-                    string = '!AUTOS#'
-                elif slide_signal[1] == 2:
-                    string = '!STOPS#'
-                elif slide_signal[0] == 1:
-                    string = '!LEFTS#'
-                elif slide_signal[0] == 2:
-                    string = '!RIGHTS#'
-                print('send: ', string)
-                serialObject.write(bytes(str(string), encoding='utf-8'))
-            else:       
-                string = ':'.join(str(x) for x in buffer)
-                string = '!' + string + 'M#'
-                print('send: ', string)
-                serialObject.write(bytes(str(string), encoding='utf-8'))
-            ack = False
-    pygame.quit()
+                for b in buffer:
+                    if (b != 0):
+                        newValue = True
+                        stopFlag = False
+                        break
+            if newValue == True and ack == True:  
+                if slide_signal[1] != 0 or slide_signal[0] != 0: # need rework logic here
+                    if slide_signal[1] == 1:
+                        string = '!AUTOS#'
+                    elif slide_signal[1] == 2:
+                        string = '!STOPS#'
+                    elif slide_signal[0] == 1:
+                        string = '!LEFTS#'
+                    elif slide_signal[0] == 2:
+                        string = '!RIGHTS#'
+                    print('send: ', string)
+                    serialObject.write(bytes(str(string), encoding='utf-8'))
+                else:   
+                    string = ':'.join(str(x) for x in buffer)
+                    string = '!' + string + 'M#'
+                    print('send: ', string)
+                    serialObject.write(bytes(str(string), encoding='utf-8'))
+                ack = False
+        pygame.quit()
 
-else:
-    print("No joystick found.")
+    else:
+        print("No joystick found.")
+
+read_thread = threading.Thread(target=read_from_serial, daemon=True)
+write_thread = threading.Thread(target=write_to_serial, daemon=True)
+
+read_thread.start()
+write_thread.start()
+
+write_thread.join()
+
+serialObject.close()
+print("Done.")
