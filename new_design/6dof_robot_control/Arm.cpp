@@ -29,18 +29,18 @@ void Arm::onStart(){
   digitalWrite(EN5_PIN, LOW);
   digitalWrite(EN6_PIN, LOW);
   // joint #2
-  singleJointMove(DIR2_PIN, HIGH, PUL2_PIN, 5582);
+  singleJointMove_onStart(DIR2_PIN, HIGH, PUL2_PIN, 5582);
   // joint #3
-  singleJointMove(DIR3_PIN, LOW, PUL3_PIN, 6569);
+  singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, 6569);
   // joint #5
-  singleJointMove(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
+  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
 
   this->joint[4] = 90;
   // First move
   double output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
-  this->generalAutoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+  //this->generalAutoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
   ForwardK(this->joint, this->position); // calculate Xcurr by FK
 }
 
@@ -153,6 +153,36 @@ int Arm::validateJoint(double* input){
   return 0;
 }
 
+void Arm::singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530)
+{
+  digitalWrite(DIR_PIN, DIR);
+  for (int i = 0; i < totSteps; i++)
+  {
+   if (totSteps > (2*accRate + 1)){
+      if (i < accRate){
+        //acceleration
+        delValue = delValue - incValue;
+      } else if (i > (totSteps - accRate)){
+        //decceleration
+        delValue = delValue + incValue;
+      }
+    } else {
+      //no space for proper acceleration/decceleration
+      if (i < ((totSteps - (totSteps % 2))/2)){
+        //acceleration
+        delValue = delValue - incValue;
+      } else if (i > ((totSteps + (totSteps % 2))/2)){
+        //decceleration
+        delValue = delValue + incValue;
+      }
+    }
+    digitalWrite(PUL_PIN, HIGH);
+    delayMicroseconds(delValue);
+    digitalWrite(PUL_PIN, LOW);
+    delayMicroseconds(delValue);
+  }
+}
+
 void Arm::singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530)
 {
   digitalWrite(DIR_PIN, DIR);
@@ -214,89 +244,62 @@ void Arm::manualMove(double* input) // int delValue = 4000
   }
 }
 
-void Arm::generalAutoMove(double* Xnext, double vel0, double acc0, double velini, double velfin){
-  this->sender->sendData("!Start Calculate new Position");
+void Arm::calculateTotalSteps(double* output, double* nextPostion, double* nextJoint){
   double Jcurr[6]; // tmp for this->currJoint;
-  double Xcurr[6]; // current //{x, y, z, ZYZ Euler angles}
-  double Jnext[6]; // target joints
   memcpy(Jcurr, this->joint, NUM_BYTES_BUFFER);
-  ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
-  InverseK(Xnext, Jnext); // calculate Jnext by IK
-  String data_print = "!JNEXT: ";
-  for (int i = 0; i < 6; ++i){
-    if (!isfinite(Jnext[i])) {
-        this->sender->sendData("!Danger! The number is not finite");
-        return;
+  InverseK(nextPostion, nextJoint); // calculate Jnext by IK
+  for(int i = 0; i < 6; i++){ // calculate steps
+    output[i] = (nextJoint[i] - Jcurr[i])/DL[i];
+  }
+} // validate before move
+
+void Arm::generalAutoMove(int i, double* numberStepToGo, double* numberStepDone, unsigned long &timeout, double incValue = 3.5, int accRate = 530){
+  if( (fabs(numberStepToGo[i]) > 0.2) && ( fabs(numberStepToGo[i]) - numberStepDone[i] > 0.2) ){
+    if (fabs(numberStepToGo[i]) > (2*accRate + 1)){
+      if (numberStepDone[i] < accRate){
+        //acceleration
+        timeout = timeout - incValue;
+      } else if (numberStepDone[i] > (fabs(numberStepToGo[i]) - accRate)){
+        //decceleration
+          timeout =  timeout + incValue;
+      }
+    } else {
+      //no space for proper acceleration/decceleration
+      if (numberStepDone[i] < (fabs(numberStepToGo[i])/2)){
+        //acceleration
+          timeout =  timeout - incValue;
+      } else if (numberStepDone[i] > (fabs(numberStepToGo[i])/2)){
+        //decceleration
+          timeout =  timeout +  timeout;
+      }
     }
-    data_print += Jnext[i];
-    data_print += ":";
-  }
-  this->sender->sendData(data_print);
-  //Move
-  int canMove = validateJoint(Jnext);
-  if (canMove == 0){
-    this->sender->sendData("!MOVING...");
-    goStrightLine(this->joint, Jnext, vel0, acc0, velini, velfin);
-    memcpy(this->joint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
-    ForwardK(this->joint, this->position); //Update currX
-    this->sender->sendData("!MOVE DONE");
-  }
-  else{
-    data_print = "!Joint out of range : Joint ";
-    data_print += canMove;
-    this->sender->sendData(data_print);
+    if ( numberStepToGo[i] > 0.2 ) {
+      //Rotate positive direction
+      digitalWrite(this->DIR_PINS[i], HIGH);
+      if (PULstat[i] == 0) {
+        digitalWrite(this->PUL_PINS[i], HIGH);
+        PULstat[i] = 1;
+      } else {
+        digitalWrite(this->PUL_PINS[i], LOW);
+        PULstat[i] = 0;
+      }
+      this->joint[i] = this->joint[i] + DL[i]/2.0;
+    } 
+    else if ( numberStepToGo[i] < -0.2 ) {
+      //Rotate negative direction
+      digitalWrite(this->DIR_PINS[i], LOW);
+      if (PULstat[i] == 0) {
+        digitalWrite(this->PUL_PINS[i], HIGH);
+        PULstat[i] = 1;
+      } else {
+        digitalWrite(this->PUL_PINS[i], LOW);
+        PULstat[i] = 0;
+      }
+      this->joint[i] = this->joint[i] - DL[i]/2.0;
+    }
+    numberStepDone[i] = numberStepDone[i] + 0.5;
   }
 }
-
-// void Arm::manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin){
-//   //Move
-//   int canMove = validateJoint(Jnext);
-//   if (canMove == 0){
-//     #ifdef DEBUG
-//     this->sender->sendData("MOVING...");
-//     #endif
-//     goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin); // write new funtion to move minor step by gamepad
-//     memcpy(this->joint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
-//     ForwardK(this->joint, this->position); //Update currX
-//     #ifdef DEBUG
-//     this->sender->sendData("!MOVE DONE");
-//     #endif
-//   }
-//   else{
-//     String data_print = "!Joint out of range : Joint ";
-//     data_print += canMove;
-//     this->sender->sendData(data_print);
-//   }
-// }
-
-// void Arm::calculateNewJoint_manual(double* output, double* input){
-//   // INIT NEW JOINT ARRAY;
-//   for (int j = 0; j < 6; j++) 
-//   {
-//       output[j] = this->joint[j]; 
-//   }
-//   // caculate new joint
-//   for (int j = 0; j < 6; ++j) {
-//     if ( (input[j] >= 0.9) && (input[j] <= 1.1)) {
-//       //Rotate positive direction
-//       output[j] += ANGLE_PER_COMMAND;
-//     } 
-//     else if ( (input[j] >= 1.9) && (input[j] <= 2.1) ) {
-//       //Rotate negative direction
-//       output[j] -= ANGLE_PER_COMMAND;
-//     }
-//   }
-//   #ifdef DEBUG
-//   String data_print = "!GET SUCCESS JOINT  ";
-//   for (int j = 0; j < 6; j++)
-//   {
-//     data_print += output[j];
-//     data_print += ":";
-//     // data_print += i; 
-//   }
-//   this->sender->sendData(data_print);
-// }
-
 
 /*************************************************/
 

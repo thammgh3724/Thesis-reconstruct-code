@@ -43,8 +43,9 @@
 #define INIT 0
 #define HOME 1
 #define MANUAL_MOVING 2 
-#define AUTO_MOVING 2 
-#define STOP 3
+#define GENERAL_AUTO_MOVING 3
+#define STOP 4
+#define DETECT_HAND_AUTO_MOVING 5
 
 // Define action to do
 #define NO_ACTION    0

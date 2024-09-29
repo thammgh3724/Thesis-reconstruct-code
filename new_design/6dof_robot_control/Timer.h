@@ -8,13 +8,13 @@ class Timer {
     private:
         unsigned long long previousTime;
         unsigned long long currentTime;
-        unsigned long timeout;
 
     public:
         Timer();
         ~Timer();
         void setLoopAction(unsigned long timeout, unsigned long long currentTime);
         bool checkTimeoutAction();
+        unsigned long timeout;
 };
 
 #endif

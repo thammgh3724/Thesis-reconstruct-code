@@ -31,7 +31,10 @@ class Arm {
         void printCurrentJoint();
         void printCurrentPos();
 
+        int validateJoint(double* input);
         void manualMove(double* input);
+        void calculateTotalSteps(double* output, double* nextPostion, double* nextJoint);
+        void generalAutoMove(int i, double* numberStepToGo, double* numberStepDone, unsigned long &timeout, double incValue = 3.5, int accRate = 530);
 
     private:
         //robot geometry
@@ -56,10 +59,8 @@ class Arm {
 
     private:
         // funtions for general move
-        int validateJoint(double* input);
         void singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530);
-        void generalAutoMove(double* Xnext, double vel0, double acc0, double velini, double velfin);
-        // void calculateNewJoint_manual(double* output, double* input);
+        void singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530); // can not be interrupt
 
     private:
         // variables for specific use case move

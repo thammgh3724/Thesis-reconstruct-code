@@ -42,10 +42,19 @@ void System::arm_fsm(){
         switch (this->nextArmAction)
         {
         case ARM_AUTO_MOVE_POSITION_ACTION:
-            this->arm->setState(AUTO_MOVING);
+            this->arm->setState(GENERAL_AUTO_MOVING);
+            this->arm->calculateTotalSteps(this->output_arm6_auto_2, this->output_arm6_auto_1, this->output_arm6_auto_3);
+            if(this->arm->validateJoint(this->output_arm6_auto_3) == 0){
+                //can move
+                this->arm->setState(GENERAL_AUTO_MOVING);
+                for(int i = 0; i < 6; i++){
+                    this->output_arm6_auto_3[i] = 0.0;
+                    this->timer_arm[i]->setLoopAction(4000, micros()); //int delValue = 4000
+                }
+            }
             break;
         case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
-            this->arm->setState(AUTO_MOVING);
+            this->arm->setState(DETECT_HAND_AUTO_MOVING);
             break;
         case ARM_MANUAL_MOVE_DISTANCE_ACTION:
             this->arm->setState(MANUAL_MOVING);
@@ -71,15 +80,33 @@ void System::arm_fsm(){
             break;
         }
         break;
+    case GENERAL_AUTO_MOVING:
+        switch (this->nextArmAction)
+        {
+        case ARM_AUTO_MOVE_POSITION_ACTION:
+            this->arm->setState(GENERAL_AUTO_MOVING);
+            for(int i = 0; i < 6; i++){
+                if(this->timer_arm[i]->checkTimeoutAction()) {
+                    this->arm->generalAutoMove(i, this->output_arm6_auto_2, this->output_arm6_auto_3, this->timer_arm[i]->timeout);
+                }
+            }
+            break;
+        case ARM_STOP_ACTION:
+            this->arm->setState(STOP);
+            break;
+        default:
+            break;
+        }
+        break;
     case STOP:
         // waiting new action
         switch (this->nextArmAction)
         {
         case ARM_AUTO_MOVE_POSITION_ACTION:
-            this->arm->setState(AUTO_MOVING);
+            this->arm->setState(GENERAL_AUTO_MOVING);
             break;
         case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
-            this->arm->setState(AUTO_MOVING);
+            this->arm->setState(DETECT_HAND_AUTO_MOVING);
             break;
         case ARM_MANUAL_MOVE_DISTANCE_ACTION:
             this->arm->setState(MANUAL_MOVING);

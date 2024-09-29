@@ -34,6 +34,7 @@ class System {
         double output_arm6_mannual_2[6];
         double output_arm6_auto_1[6];
         double output_arm6_auto_2[6];
+        double output_arm6_auto_3[6];
         double output_slider[6];
         double output_arm2[2];
 
