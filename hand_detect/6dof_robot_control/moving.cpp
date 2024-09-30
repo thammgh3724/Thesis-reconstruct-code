@@ -31,6 +31,20 @@ void ArmMoving::listen(){
     read();
 }
 
+void ArmMoving::sliderInit(){
+  this->currPosSlider = 0;
+  if(inductiveSrDetect() == LOW) return;
+  while (inductiveSrDetect() != LOW){
+    digitalWrite(SLIDER_DIR,HIGH);
+    for (int i = 0 ; i <100 ;i++){
+      digitalWrite(SLIDER_PUL,HIGH); 
+      delayMicroseconds(250); 
+      digitalWrite(SLIDER_PUL,LOW); 
+      delayMicroseconds(250); 
+    }
+  }
+  Serial.println("!SLIDER INIT DONE");
+}
 void ArmMoving::move(){
   // !init#
   if(position == "init") {
@@ -41,6 +55,8 @@ void ArmMoving::move(){
     this->printCurJoint();
     this->printCurPos();
     Serial.println("!INIT DONE");
+    // Init for Slider
+    this->sliderInit();
   }
   // !gohome#
   // not working
@@ -54,7 +70,7 @@ void ArmMoving::move(){
   }
   // !0:0:0:0:0:0A#
   else if(position.endsWith("A")){
-    // set position
+    // set positionAUTO
     Serial.println("!AUTO START");
     double output[6];
     if(getAxis(output)){
@@ -99,16 +115,23 @@ void ArmMoving::move(){
     Serial.println("!GO HAND DONE");
     position = "";
   }
-  // !0:0:0:0:0:0M#
+  // !0:0:0:0:0:0:0M#  add more one value for slider pos
   else if(position.endsWith("M")){
     // set position
     #ifdef DEBUG
     Serial.println("!GO MANUAL START");
     #endif
-    double output[6];
+    double output[7];
     if(getDataManual(output)){
-      this->manualMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+      double armOutput[6];
+      for (int i = 0 ; i < 6;i++){
+        armOutput[i] = output[i];
+      }
+      this->manualMove(armOutput, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+
     }
+    //add for slider
+    this->sliderMove(output[6]);
     Serial.println("!GO MANUAL DONE");
     position = "";
   }
@@ -120,6 +143,7 @@ void ArmMoving::move(){
         Serial.println("!LIMIT MOVE DETECT");
         return;
       }
+
       digitalWrite(SLIDER_DIR,HIGH);
       for (int i = 0 ; i < 100 ; i++){
         digitalWrite(SLIDER_PUL,HIGH); 
@@ -336,7 +360,30 @@ void ArmMoving::autoMove_detectHand(double* Xnext, double vel0, double acc0, dou
     Serial.println(data_print);
   }
 }
-
+void ArmMoving::sliderMove(double sliderPosNext){
+  //Move
+  if (sliderPosNext > 280 || sliderPosNext < 0 ) return;
+  if (sliderPosNext > this->currPosSlider){
+    double stepMove = sliderPosNext - this->currPosSlider;
+    digitalWrite(SLIDER_DIR,LOW);
+    for (int i = 0 ; i < 100 ; i++){
+      digitalWrite(SLIDER_PUL,HIGH); 
+      delayMicroseconds(250); 
+      digitalWrite(SLIDER_PUL,LOW); 
+      delayMicroseconds(250); 
+    }
+  }
+  else if (sliderPosNext < this->currPosSlider){
+    double stepMove = this->currPosSlider - sliderPosNext;
+    digitalWrite(SLIDER_DIR,HIGH);
+    for (int i = 0 ; i < 100 ; i++){
+      digitalWrite(SLIDER_PUL,HIGH); 
+      delayMicroseconds(250); 
+      digitalWrite(SLIDER_PUL,LOW); 
+      delayMicroseconds(250); 
+    }
+  }
+}
 void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin){
   //Move
   int canMove = validateJoint(Jnext);
@@ -446,8 +493,8 @@ bool ArmMoving::getDataModel(double* output){
 
 bool ArmMoving::getDataManual(double* output){
   // get data from gamepad
-    double data[6];
-    for (int i = 0; i < 6; i++) 
+    double data[7];
+    for (int i = 0; i < 7; i++) 
     {
         data[i] = 0.0; 
     }
@@ -455,7 +502,7 @@ bool ArmMoving::getDataManual(double* output){
     String token = "";
     int i = 0;
     for (int idx = 0; idx < posLen + 1; idx++) {
-        if (i == 6) break;
+        if (i == 7) break;
         if (position[idx] != ':' && position[idx] != '\0' && position[idx] != 'M') {
             token += position[idx];
         } 
@@ -471,7 +518,7 @@ bool ArmMoving::getDataManual(double* output){
     }
     #ifdef DEBUG
     String data_print1 = "!GET SUCCESS DATA  ";
-    for (int j = 0; j < 6; j++)
+    for (int j = 0; j < 7; j++)
     {
       data_print1 += data[j];
       data_print1 += ":";
@@ -494,6 +541,8 @@ bool ArmMoving::getDataManual(double* output){
         output[j] -= ANGLE_PER_COMMAND;
       }
     }
+    // add for slider
+    output[6] = data[6];
     #ifdef DEBUG
     String data_print = "!GET SUCCESS JOINT  ";
     for (int j = 0; j < 6; j++)

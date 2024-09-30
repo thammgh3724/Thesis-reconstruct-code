@@ -208,9 +208,6 @@ if joystick_count > 0:
             print('send: ', string)
             serialObject.write(bytes(str(string), encoding='utf-8'))
             ack = False
-        #if newValue == False and stopFlag == False and ack == True:
-            #stopFlag = True
-            #string = "!000000#"
             #print('send: ', string)
             #serialObject.write(bytes(str(string), encoding='utf-8'))
             #ack = False

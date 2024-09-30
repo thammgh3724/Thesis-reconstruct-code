@@ -9,6 +9,7 @@ int inductiveSrDetect();
 
 class ArmMoving {
 private:
+  double currPosSlider; // add for slider
   double currJoint[6]; // current joints angle
   double currX[6]; // current {x, y, z, ZYZ Euler angles}
   double buffer[6];
@@ -35,6 +36,9 @@ public:
   bool getDataModel(double* output);
   bool getAxis(double* output);
   bool getDataManual(double* output);
+  // add for slider
+  void sliderInit();
+  void sliderMove(double SliderPosNext);
 };
 
 #endif
