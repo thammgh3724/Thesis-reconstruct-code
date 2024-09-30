@@ -39,8 +39,7 @@ void setup() {
   // digitalWrite(PUL4_PIN, LOW);  // gear ratio = 56/20 = 2.8
   // digitalWrite(DIR4_PIN, LOW);  //LOW = positive direction
 
-  // digitalWrite(PUL5_PIN, LOW);  // gear ratio =
- 42/20 = 2.1
+  // digitalWrite(PUL5_PIN, LOW);  // gear ratio =42/20 = 2.1
   // digitalWrite(DIR5_PIN, LOW);  //LOW = positive direction
 
   // digitalWrite(PUL6_PIN, LOW);  // gear ratio = 1

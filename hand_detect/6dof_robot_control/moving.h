@@ -38,7 +38,7 @@ public:
   bool getDataManual(double* output);
   // add for slider
   void sliderInit();
-  void sliderMove(double SliderPosNext);
+  void sliderMove(double SliderPosNext, bool autoMove);
 };
 
 #endif

@@ -31,7 +31,6 @@ serialObject.write(bytes(str(initalstring), encoding='utf-8'))
 
 # INitialize input values
 buffer = [0, 0, 0, 0, 0, 0, 0, 0]
-slide_signal = [0,0]
 newValue = False
 
 def handle_button_release(button, buffer):

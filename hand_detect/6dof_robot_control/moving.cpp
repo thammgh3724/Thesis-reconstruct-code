@@ -129,12 +129,11 @@ void ArmMoving::move(){
       }
       this->manualMove(armOutput, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
       // add for slider
-      if (output[7] != 1){
-        this->sliderMove(output[6], false);
-      }
-      else{
-        this->sliderMove(output[6], true);
-      }
+      
+      this->sliderMove(output[6], false);
+      // else{
+        // this->sliderMove(output[6], true);
+      // }
     }
     position = "";
   }
@@ -366,7 +365,7 @@ void ArmMoving::autoMove_detectHand(double* Xnext, double vel0, double acc0, dou
 void ArmMoving::sliderMove(double sliderPosNext,bool autoMove = false){
   //Move
   if (sliderPosNext > 280 || sliderPosNext < 0 ) return;
-  if (autoMove = false){
+  // if (autoMove = false){
     if (sliderPosNext > this->currPosSlider){
       double stepMove = sliderPosNext - this->currPosSlider;
       digitalWrite(SLIDER_DIR,LOW);
@@ -389,29 +388,29 @@ void ArmMoving::sliderMove(double sliderPosNext,bool autoMove = false){
     }
     this->currPosSlider = sliderPosNext;
     Serial.println("!GO SLIDE DONE");
-  }
-  else if (autoMove = true){
-    while(true){
-      if (inductiveSrDetect() == 0){
-        digitalWrite(SLIDER_DIR, !digitalRead(SLIDER_DIR));
-        for (int i = 0 ;i <100 ;i++){
-          digitalWrite(SLIDER_PUL, HIGH);
-          delayMicroseconds(250);
-          digitalWrite(SLIDER_PUL,LOW);
-          delayMicroseconds(250);
-        }
-        continue;
-      }
-      digitalWrite(SLIDER_PUL, HIGH);
-      delayMicroseconds(250);
-      digitalWrite(SLIDER_PUL,LOW);
-      delayMicroseconds(250);
-      read();
-      if (position == "STOPS"){
-        break;
-      }
-    }
-  }
+  // }
+  // else if (autoMove = true){
+  //   while(true){
+  //     if (inductiveSrDetect() == 0){
+  //       digitalWrite(SLIDER_DIR, !digitalRead(SLIDER_DIR));
+  //       for (int i = 0 ;i <100 ;i++){
+  //         digitalWrite(SLIDER_PUL, HIGH);
+  //         delayMicroseconds(250);
+  //         digitalWrite(SLIDER_PUL,LOW);
+  //         delayMicroseconds(250);
+  //       }
+  //       continue;
+  //     }
+  //     digitalWrite(SLIDER_PUL, HIGH);
+  //     delayMicroseconds(250);
+  //     digitalWrite(SLIDER_PUL,LOW);
+  //     delayMicroseconds(250);
+  //     // read();
+  //     if (position == "STOPS"){
+  //       break;
+  //     }
+  //   }
+  // }
 }
 void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin){
   //Move
