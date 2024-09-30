@@ -36,11 +36,12 @@ void Arm::onStart(){
   singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
-
+  /*
   this->joint[4] = 90;
   // First move
   double output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
   //this->generalAutoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
+  */
   ForwardK(this->joint, this->position); // calculate Xcurr by FK
 }
 
@@ -154,36 +155,6 @@ int Arm::validateJoint(double* input){
 }
 
 void Arm::singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530)
-{
-  digitalWrite(DIR_PIN, DIR);
-  for (int i = 0; i < totSteps; i++)
-  {
-   if (totSteps > (2*accRate + 1)){
-      if (i < accRate){
-        //acceleration
-        delValue = delValue - incValue;
-      } else if (i > (totSteps - accRate)){
-        //decceleration
-        delValue = delValue + incValue;
-      }
-    } else {
-      //no space for proper acceleration/decceleration
-      if (i < ((totSteps - (totSteps % 2))/2)){
-        //acceleration
-        delValue = delValue - incValue;
-      } else if (i > ((totSteps + (totSteps % 2))/2)){
-        //decceleration
-        delValue = delValue + incValue;
-      }
-    }
-    digitalWrite(PUL_PIN, HIGH);
-    delayMicroseconds(delValue);
-    digitalWrite(PUL_PIN, LOW);
-    delayMicroseconds(delValue);
-  }
-}
-
-void Arm::singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530)
 {
   digitalWrite(DIR_PIN, DIR);
   for (int i = 0; i < totSteps; i++)
@@ -346,7 +317,7 @@ void Arm::autoMove_detectHand(double* Xnext, double vel0, double acc0, double ve
   int canMove = validateJoint(Jnext);
   if (canMove == 0){
     this->sender->sendData("!MOVING...");
-    goStrightLine(this->joint, Jnext, vel0, acc0, velini, velfin);
+//    goStrightLine(this->joint, Jnext, vel0, acc0, velini, velfin);
     memcpy(this->joint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
     ForwardK(this->joint, this->position); //Update currX
     this->sender->sendData("!MOVE DONE");

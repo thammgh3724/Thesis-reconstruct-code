@@ -49,7 +49,7 @@ class Arm {
         const double d4 = 117.50;
         const double d6 = 28.0;
 
-        bool PULstat[6] = {false, false, false, false, false, false};
+        bool PULstat[6] = {0, 0, 0, 0, 0, 0};
         int PUL_PINS[6] = {PUL1_PIN, PUL2_PIN, PUL3_PIN, PUL4_PIN, PUL5_PIN, PUL6_PIN};
         int DIR_PINS[6] = {DIR1_PIN, DIR2_PIN, DIR3_PIN, DIR4_PIN, DIR5_PIN, DIR6_PIN}; 
 
@@ -59,7 +59,6 @@ class Arm {
 
     private:
         // funtions for general move
-        void singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530);
         void singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530); // can not be interrupt
 
     private:

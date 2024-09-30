@@ -104,6 +104,9 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
     else if(this->command == "gohome"){
       return ARM_GOHOME_ACTION;
     }
+    else if(this->command == "astop"){
+      return ARM_STOP_ACTION;
+    }
     // !0:0:0:0:0:0A#
     else if(this->command.endsWith("A")){
       return ARM_AUTO_MOVE_POSITION_ACTION;
@@ -161,5 +164,11 @@ Sender::Sender(){};
 Sender::~Sender(){};
 
 void Sender::sendData(String data){
+  #ifdef DEBUG
   Serial.println(data);
+  #endif
+}
+
+void Sender::sendACK(String ack){
+  Serial.println(ack);
 }

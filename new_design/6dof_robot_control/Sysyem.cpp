@@ -34,15 +34,22 @@ void System::arm_fsm(){
     switch (this->arm->getCurrentState())
     {
     case INIT:
-        this->arm->onStart();
-        this->arm->setState(HOME);
+        // waiting init action
+        switch (this->nextArmAction)
+        {
+        case ARM_INIT_ACTION:
+            this->arm->onStart(); // cannot interrupt
+            this->arm->setState(HOME);
+            break;
+        default:
+            break;
+        }
         break;
     case HOME:
         // waiting new action
         switch (this->nextArmAction)
         {
         case ARM_AUTO_MOVE_POSITION_ACTION:
-            this->arm->setState(GENERAL_AUTO_MOVING);
             this->arm->calculateTotalSteps(this->output_arm6_auto_2, this->output_arm6_auto_1, this->output_arm6_auto_3);
             if(this->arm->validateJoint(this->output_arm6_auto_3) == 0){
                 //can move
@@ -59,6 +66,9 @@ void System::arm_fsm(){
         case ARM_MANUAL_MOVE_DISTANCE_ACTION:
             this->arm->setState(MANUAL_MOVING);
             this->timer_arm[0]->setLoopAction(4000, micros()); //int delValue = 4000
+            break;
+        case ARM_STOP_ACTION:
+            this->arm->setState(STOP);
             break;
         default:
             break;
@@ -125,10 +135,19 @@ void System::distributeAction(){
     switch (this->nextAction)
     {
     case ARM_INIT_ACTION:
+        this->nextArmAction = ARM_INIT_ACTION;
         this->listener->consumeCommand(ARM_INIT_ACTION, nullptr);
+        this->nextAction = NO_ACTION;
         break;
     case ARM_GOHOME_ACTION:
+        this->nextArmAction = ARM_GOHOME_ACTION;
         this->listener->consumeCommand(ARM_GOHOME_ACTION, nullptr);
+        this->nextAction = NO_ACTION;
+        break;
+    case ARM_STOP_ACTION:
+        this->nextArmAction = ARM_STOP_ACTION;
+        this->listener->consumeCommand(ARM_STOP_ACTION, nullptr);
+        this->nextAction = NO_ACTION;
         break;
     case ARM_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextArmAction = ARM_MANUAL_MOVE_DISTANCE_ACTION;
@@ -151,10 +170,6 @@ void System::distributeAction(){
         break;
     case SLIDER_AUTO_MOVE_FREE_ACTION:
         this->listener->consumeCommand(SLIDER_AUTO_MOVE_FREE_ACTION, nullptr);
-        break;
-    case ARM_STOP_ACTION:
-        this->nextArmAction = ARM_STOP_ACTION;
-        this->listener->consumeCommand(ARM_STOP_ACTION, nullptr);
         this->nextAction = NO_ACTION;
         break;
     default:

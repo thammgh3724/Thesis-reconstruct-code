@@ -28,6 +28,7 @@ class Sender {
         Sender();
         ~Sender();
         void sendData(String data);
+        void sendACK(String ack);
 };
 
 #endif
