@@ -366,7 +366,7 @@ void ArmMoving::sliderMove(double sliderPosNext){
   if (sliderPosNext > this->currPosSlider){
     double stepMove = sliderPosNext - this->currPosSlider;
     digitalWrite(SLIDER_DIR,LOW);
-    for (int i = 0 ; i < 100 ; i++){
+    for (int i = 0 ; i < stepMove*100 ; i++){
       digitalWrite(SLIDER_PUL,HIGH); 
       delayMicroseconds(250); 
       digitalWrite(SLIDER_PUL,LOW); 
@@ -376,13 +376,14 @@ void ArmMoving::sliderMove(double sliderPosNext){
   else if (sliderPosNext < this->currPosSlider){
     double stepMove = this->currPosSlider - sliderPosNext;
     digitalWrite(SLIDER_DIR,HIGH);
-    for (int i = 0 ; i < 100 ; i++){
+    for (int i = 0 ; i < stepMove*100 ; i++){
       digitalWrite(SLIDER_PUL,HIGH); 
       delayMicroseconds(250); 
       digitalWrite(SLIDER_PUL,LOW); 
       delayMicroseconds(250); 
     }
   }
+  this->currPosSlider = sliderPosNext;
 }
 void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin){
   //Move
