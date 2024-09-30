@@ -121,18 +121,21 @@ void ArmMoving::move(){
     #ifdef DEBUG
     Serial.println("!GO MANUAL START");
     #endif
-    double output[7];
+    double output[8];
     if(getDataManual(output)){
       double armOutput[6];
       for (int i = 0 ; i < 6;i++){
         armOutput[i] = output[i];
       }
       this->manualMove(armOutput, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
-
+      // add for slider
+      if (output[7] != 1){
+        this->sliderMove(output[6], false);
+      }
+      else{
+        this->sliderMove(output[6], true);
+      }
     }
-    //add for slider
-    this->sliderMove(output[6]);
-    Serial.println("!GO MANUAL DONE");
     position = "";
   }
   // Sliders Control
@@ -360,30 +363,55 @@ void ArmMoving::autoMove_detectHand(double* Xnext, double vel0, double acc0, dou
     Serial.println(data_print);
   }
 }
-void ArmMoving::sliderMove(double sliderPosNext){
+void ArmMoving::sliderMove(double sliderPosNext,bool autoMove = false){
   //Move
   if (sliderPosNext > 280 || sliderPosNext < 0 ) return;
-  if (sliderPosNext > this->currPosSlider){
-    double stepMove = sliderPosNext - this->currPosSlider;
-    digitalWrite(SLIDER_DIR,LOW);
-    for (int i = 0 ; i < stepMove*100 ; i++){
-      digitalWrite(SLIDER_PUL,HIGH); 
-      delayMicroseconds(250); 
-      digitalWrite(SLIDER_PUL,LOW); 
-      delayMicroseconds(250); 
+  if (autoMove = false){
+    if (sliderPosNext > this->currPosSlider){
+      double stepMove = sliderPosNext - this->currPosSlider;
+      digitalWrite(SLIDER_DIR,LOW);
+      for (int i = 0 ; i < stepMove*100 ; i++){
+        digitalWrite(SLIDER_PUL,HIGH); 
+        delayMicroseconds(250); 
+        digitalWrite(SLIDER_PUL,LOW); 
+        delayMicroseconds(250); 
+      }
+    }
+    else if (sliderPosNext < this->currPosSlider){
+      double stepMove = this->currPosSlider - sliderPosNext;
+      digitalWrite(SLIDER_DIR,HIGH);
+      for (int i = 0 ; i < stepMove*100 ; i++){
+        digitalWrite(SLIDER_PUL,HIGH); 
+        delayMicroseconds(250); 
+        digitalWrite(SLIDER_PUL,LOW); 
+        delayMicroseconds(250); 
+      }
+    }
+    this->currPosSlider = sliderPosNext;
+    Serial.println("!GO SLIDE DONE");
+  }
+  else if (autoMove = true){
+    while(true){
+      if (inductiveSrDetect() == 0){
+        digitalWrite(SLIDER_DIR, !digitalRead(SLIDER_DIR));
+        for (int i = 0 ;i <100 ;i++){
+          digitalWrite(SLIDER_PUL, HIGH);
+          delayMicroseconds(250);
+          digitalWrite(SLIDER_PUL,LOW);
+          delayMicroseconds(250);
+        }
+        continue;
+      }
+      digitalWrite(SLIDER_PUL, HIGH);
+      delayMicroseconds(250);
+      digitalWrite(SLIDER_PUL,LOW);
+      delayMicroseconds(250);
+      read();
+      if (position == "STOPS"){
+        break;
+      }
     }
   }
-  else if (sliderPosNext < this->currPosSlider){
-    double stepMove = this->currPosSlider - sliderPosNext;
-    digitalWrite(SLIDER_DIR,HIGH);
-    for (int i = 0 ; i < stepMove*100 ; i++){
-      digitalWrite(SLIDER_PUL,HIGH); 
-      delayMicroseconds(250); 
-      digitalWrite(SLIDER_PUL,LOW); 
-      delayMicroseconds(250); 
-    }
-  }
-  this->currPosSlider = sliderPosNext;
 }
 void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin){
   //Move
@@ -395,6 +423,7 @@ void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velin
     goStrightLine(this->currJoint, Jnext, vel0, acc0, velini, velfin);
     memcpy(this->currJoint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
     ForwardK(this->currJoint, this->currX); //Update currX
+    Serial.println("!GO MANUAL DONE");
     #ifdef DEBUG
     Serial.println("!MOVE DONE");
     #endif
@@ -494,8 +523,8 @@ bool ArmMoving::getDataModel(double* output){
 
 bool ArmMoving::getDataManual(double* output){
   // get data from gamepad
-    double data[7];
-    for (int i = 0; i < 7; i++) 
+    double data[8];
+    for (int i = 0; i < 8; i++) 
     {
         data[i] = 0.0; 
     }
@@ -503,7 +532,7 @@ bool ArmMoving::getDataManual(double* output){
     String token = "";
     int i = 0;
     for (int idx = 0; idx < posLen + 1; idx++) {
-        if (i == 7) break;
+        if (i == 8) break;
         if (position[idx] != ':' && position[idx] != '\0' && position[idx] != 'M') {
             token += position[idx];
         } 
@@ -519,7 +548,7 @@ bool ArmMoving::getDataManual(double* output){
     }
     #ifdef DEBUG
     String data_print1 = "!GET SUCCESS DATA  ";
-    for (int j = 0; j < 7; j++)
+    for (int j = 0; j < 8; j++)
     {
       data_print1 += data[j];
       data_print1 += ":";
@@ -542,8 +571,16 @@ bool ArmMoving::getDataManual(double* output){
         output[j] -= ANGLE_PER_COMMAND;
       }
     }
-    // add for slider
-    output[6] = data[6];
+    // add for slider 
+    if (data[6] == 1 ){
+      output[6] = this->currPosSlider + 1;
+    }
+    else if (data[6] == 2 ){
+      output[6] = this->currPosSlider - 1;
+    }
+    else if (data[7] == 1){
+      output[7] = 1;
+    }
     #ifdef DEBUG
     String data_print = "!GET SUCCESS JOINT  ";
     for (int j = 0; j < 6; j++)

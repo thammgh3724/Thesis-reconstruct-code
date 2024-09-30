@@ -30,7 +30,7 @@ initalstring = "!init#"
 serialObject.write(bytes(str(initalstring), encoding='utf-8'))
 
 # INitialize input values
-buffer = [0, 0, 0, 0, 0, 0]
+buffer = [0, 0, 0, 0, 0, 0, 0, 0]
 slide_signal = [0,0]
 newValue = False
 
@@ -144,25 +144,25 @@ def handle_button_press(button, buffer):
 def handle_dpad_x(value):
     global debounce
     if value == 1.0:
-        slide_signal[0] = 1
+        buffer[6] = 1
         print("D-pad right pressed")
     elif value == -1.0:
-        slide_signal[0] = 2
+        buffer[6] = 2
         print("D-pad left pressed")
     else:
-        slide_signal[0] = 0
+        buffer[6] = 0
         print("D-pad X-axis released")
         # debounce = 0
 
 def handle_dpad_y(value):
     if value == 1.0:
-        slide_signal[1] = 1
+        buffer[7] = 1
         print("D-pad down pressed")
     elif value == -1.0:
-        slide_signal[1] = 2
+        buffer[7] = 2
         print("D-pad up pressed")
     else:
-        slide_signal[1] = 0
+        buffer[7] = 0
         print("D-pad Y-axis released")
 
 def read_from_serial():
@@ -206,31 +206,16 @@ def write_to_serial():
                     handle_dpad_y(y_value)
             newValue = False
             if idleFlag == False:
-                if slide_signal[1] != 0 or slide_signal[0] !=0:
-                    newValue = True
-                    stopFlag = False
                 for b in buffer:
                     if (b != 0):
                         newValue = True
                         stopFlag = False
                         break
             if newValue == True and ack == True:  
-                if slide_signal[1] != 0 or slide_signal[0] != 0: # need rework logic here
-                    if slide_signal[1] == 1:
-                        string = '!AUTOS#'
-                    elif slide_signal[1] == 2:
-                        string = '!STOPS#'
-                    elif slide_signal[0] == 1:
-                        string = '!LEFTS#'
-                    elif slide_signal[0] == 2:
-                        string = '!RIGHTS#'
-                    print('send: ', string)
-                    serialObject.write(bytes(str(string), encoding='utf-8'))
-                else:   
-                    string = ':'.join(str(x) for x in buffer)
-                    string = '!' + string + 'M#'
-                    print('send: ', string)
-                    serialObject.write(bytes(str(string), encoding='utf-8'))
+                string = ':'.join(str(x) for x in buffer)
+                string = '!' + string + 'M#'
+                print('send: ', string)
+                serialObject.write(bytes(str(string), encoding='utf-8'))
                 ack = False
         pygame.quit()
 
