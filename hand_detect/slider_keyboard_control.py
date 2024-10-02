@@ -2,7 +2,8 @@ from pynput.keyboard import Key, Listener
 import serial
 import threading
 
-serialPort = 'COM4'
+serialPort = '/dev/ttyACM0'
+# serialPort = 'COM4'
 serialBaudrate = 115200
 
 serialObject = serial.Serial(

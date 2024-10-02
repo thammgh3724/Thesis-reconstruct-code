@@ -38,7 +38,8 @@ public:
   bool getDataManual(double* output);
   // add for slider
   void sliderInit();
-  void sliderMove(double SliderPosNext, bool autoMove);
+  void sliderMove(double SliderPosNext);
+  void ArmMoving::singleSliderMove( uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 400, int incValue = 15, int accRate = 20);
 };
 
 #endif
