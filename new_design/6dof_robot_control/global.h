@@ -50,7 +50,7 @@
 // Define action to do
 #define NO_ACTION    0
 #define UNKNOW_ACTION    1
-#define ARM_INIT_ACTION    2
+#define INIT_ACTION    2 // use for 2 object
 #define ARM_GOHOME_ACTION    3
 #define ARM_AUTO_MOVE_POSITION_ACTION    4
 #define ARM_AUTO_MOVE_DETECT_HAND_ACTION    5
@@ -59,6 +59,10 @@
 #define SLIDER_AUTO_MOVE_FREE_ACTION    8
 #define ARM_STOP_ACTION    9
 #define SLIDER_STOP_ACTION    10
+#define ARM_INIT_ACTION       11
+#define SLIDER_INIT_ACTION    12
+#define SLIDER_AUTO_MOVE_DETECT_HAND_ACTION     13
+#define SLIDER_AUTO_MOVE_POSITION_ACTION        14
 
 //{x, y, z, ZYZ Euler angles} for Home position
 const float Xhome[6] = { 164.5, 0.0, 241.0, 90.0, 180.0, -90.0 };

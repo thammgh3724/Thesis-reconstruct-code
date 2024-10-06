@@ -8,8 +8,11 @@ class Slider {
     private:
         int state;
         double position;
-        const double MAX_POSITION = 180.0;
+        const double MAX_POSITION = 280.0;
         const double MIN_POSITION = 0.0;
+        bool PULstat = 0;
+        int PUL_PINS = SLIDER_PUL;
+        int DIR_PINS = SLIDER_DIR; 
     
     public:
         Slider();
@@ -20,7 +23,10 @@ class Slider {
         double getCurrentPosition();
         void setPosition(double position);
         void doAction();
-
+        void manualMove(double input);
+        int inductiveSrDetect();
+        int validatePosition(double input);
+        void generalAutoMove(uint8_t DIR, int totSteps, int delValue = 400, int incValue = 15, int accRate = 20);
 };
 
 

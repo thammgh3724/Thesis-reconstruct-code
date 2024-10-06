@@ -20,7 +20,7 @@ class System {
         Sender* sender;
         Timer* timer_arm[6]; // 6 timer for arm to take loop action for 6 joint
                              // can creat more
- 
+        Timer* timer_slider;
 
     public:
         System();
@@ -35,7 +35,8 @@ class System {
         double output_arm6_auto_1[6];
         double output_arm6_auto_2[6];
         double output_arm6_auto_3[6];
-        double output_slider[6];
+        double output_slider_manual;
+        double output_slider_auto;
         double output_arm2[2];
 
     private:

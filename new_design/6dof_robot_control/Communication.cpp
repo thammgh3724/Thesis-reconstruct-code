@@ -42,6 +42,8 @@ void Listener::consumeCommand(int action, double* output){
   {
   case ARM_INIT_ACTION:
     break;
+  case SLIDER_INIT_ACTION:
+    break;
   case ARM_GOHOME_ACTION:
     break;
   case ARM_MANUAL_MOVE_DISTANCE_ACTION:
@@ -81,6 +83,12 @@ void Listener::consumeCommand(int action, double* output){
     getDoubleArrayData(output, 1, commandLength, 'S');
     break;
   case SLIDER_AUTO_MOVE_FREE_ACTION:
+    for (int i = 0; i < 1; i++) 
+    {
+        output[i] = 0.0; 
+    }
+    commandLength = this->command.length(); 
+    getDoubleArrayData(output, 1, commandLength, 'X');
     break;
   case ARM_STOP_ACTION:
     break;
@@ -97,7 +105,7 @@ void Listener::consumeCommand(int action, double* output){
 int Listener::parseCommandToAction(){ // need 1 command "STOP"
   if(this->isCommandReady){
     if(this->command == "init") {
-      return ARM_INIT_ACTION;
+      return INIT_ACTION;
     }
     // !gohome#
     // not working
@@ -122,6 +130,9 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
     // Sliders Control
     else if (this->command.endsWith("S")) {
       return SLIDER_MANUAL_MOVE_DISTANCE_ACTION;  
+    }
+    else if (this->command.endsWith("X")) {
+      return SLIDER_AUTO_MOVE_FREE_ACTION;  
     }
     else {
       return UNKNOW_ACTION;
