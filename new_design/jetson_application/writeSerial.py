@@ -14,6 +14,9 @@ class Message:
     def getMessage(self):
         return self.message
 
+    def encodeMessage(self):
+        return f"{self.message}".encode('utf-8')
+
     def increaseCall(self):
         self.retryCount += 1
 
@@ -25,14 +28,14 @@ class Message:
     
 
 class WriteSerialObject(threading.Thread):
-    def __init__(self, serialObj, ack_queue) -> None:
+    def __init__(self, serialObj, ack_event) -> None:
         threading.Thread.__init__(self)
         self.serialObj = serialObj
         self.messageQueue = queue.Queue(maxsize=QUEUE_MAX_SIZE)
         self.lastSentMessage = None
         self.retryCount = 0
         self.isRunning = False
-        self.ack_queue = ack_queue
+        self.ack_event = ack_event
 
     def addMessage(self, message: 'Message'):
         if not self.messageQueue.full():
@@ -54,11 +57,10 @@ class WriteSerialObject(threading.Thread):
                     self.serialObj.write(currentMessage.encodeMessage())
                     self.lastSentMessage = currentMessage
                     print(f"Sent message: {currentMessage.getMessage()}")
-                
+
                 # Wait for ACK or retry
-                ack = self.waitForAck()
-                if not ack:
-                    time.sleep(TIMEOUT_MS / 1000.0)
+                ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1000.0)
+                if not ack_received:
                     self.retryCount += 1
                     if self.retryCount >= MAX_RETRY:
                         print(f"Failed to send message after {MAX_RETRY} retries, dropping message")
@@ -69,16 +71,12 @@ class WriteSerialObject(threading.Thread):
                 else:
                     self.messageQueue.get()
                     self.retryCount = 0
+                    self.ack_event.clear()  # Reset ACK status for next message
                     print("ACK received, moving to next message")
             else:
                 time.sleep(0.1)
 
-    def waitForAck(self):
-        try:
-            ack = self.ack_queue.get(timeout=TIMEOUT_MS / 1000.0)
-            return ack
-        except queue.Empty:
-            return False
+
         
 if __name__ == "__main__":
     pass

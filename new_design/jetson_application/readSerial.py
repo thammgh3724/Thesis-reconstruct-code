@@ -2,12 +2,12 @@ import threading
 import time
 
 class ReadSerialObject(threading.Thread):
-    def __init__(self, serialObj, ack_queue, messageHandler=None):
+    def __init__(self, serialObj, ack_event, messageHandler=None):
         threading.Thread.__init__(self)
         self.serialObj = serialObj
         self.isReading = False
         self.messageHandler = messageHandler
-        self.ack_queue = ack_queue
+        self.ack_event = ack_event
 
     def stop(self):
         self.isReading = False
@@ -23,14 +23,15 @@ class ReadSerialObject(threading.Thread):
             time.sleep(0.1)
 
     def processIncomingData(self, data):
-        ack_messages = ["I!#", "I#", "IM#", "IA#", "IHA#", "ISL#", "IAS#"]
+        ack_messages = ["I!#", "IM#", "IA#", "IHA#", "ISL#", "IAS#"]
         
         if data in ack_messages:
             print(f"ACK received: {data}")
-            # Send ACK to the queue
-            self.ack_queue.put(True)
+            # Signal ACK received
+            self.ack_event.set()
         else:
             print(f"Unknown message received: {data}")
+
 
 if __name__ == "__main__":
     pass

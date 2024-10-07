@@ -5,6 +5,7 @@ from readSerial import ReadSerialObject
 import serial
 import time
 import queue
+import threading
 
 '''
 Function getPort() use for finding and get arduino port's name
@@ -25,11 +26,12 @@ def main():
     baud_rate = 115200
     serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
     
-    ack_queue = queue.Queue(maxsize=1)
+    # Use ack_event to share ACK status between read and write threads
+    ack_event = threading.Event()
     
     # Initialize all objects
-    write_serial = WriteSerialObject(serial_obj, ack_queue)
-    read_serial = ReadSerialObject(serial_obj, ack_queue)
+    write_serial = WriteSerialObject(serial_obj, ack_event)
+    read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
 
     # Start all threads
@@ -38,18 +40,17 @@ def main():
     gamepad_handler.start()
 
     try:
-        #Send !init# to initialize the arm
+        # Send !init# to initialize the arm
         init_message = Message("!init#")
         write_serial.addMessage(init_message)
         print("Sent initialization message: !init#")
 
         # Wait for ACK I!# from Arduino
         while True:
-            if not ack_queue.empty():
-                ack = ack_queue.get()
-                if ack:
-                    print("Initialization ACK received: I!#")
-                    break
+            if ack_event.is_set():
+                print("Initialization ACK received: I!#")
+                ack_event.clear()  # Clear event after receiving ACK
+                break
             time.sleep(0.1)
 
         # Enter gamepad control loop
@@ -57,12 +58,12 @@ def main():
             # Check for new input from gamepad
             if gamepad_handler.newValue:
                 buffer = gamepad_handler.getBuffer()
-                mode = gamepad_handler.getMode()
+                mode = gamepad_handler.mode
 
                 # Format the message based on mode
                 if mode == "gamepad":
                     # Convert buffer to message format
-                    message_content = format_gamepad_message(buffer, "A")
+                    message_content = format_gamepad_message(buffer, "M")
                 else:
                     message_content = "AUTO MODE COMMAND"  # Placeholder for auto mode command
 
