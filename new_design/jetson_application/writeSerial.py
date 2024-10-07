@@ -14,9 +14,6 @@ class Message:
     def getMessage(self):
         return self.message
 
-    def encodeMessage(self):
-        return f"!{self.message}#\n".encode('utf-8')
-
     def increaseCall(self):
         self.retryCount += 1
 

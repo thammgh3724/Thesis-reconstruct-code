@@ -17,6 +17,9 @@ class GamepadHandler(threading.Thread):
     def getBuffer(self):
         return self.buffer
     
+    def getMode(self):
+        return self.mode
+    
     def getSlidersSignal(self):
         return self.slide_signal
 

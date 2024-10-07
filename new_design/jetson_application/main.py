@@ -16,8 +16,12 @@ def getPort():
             return p.name
     raise IOError("Arduino port not found!!!")
 
+def format_gamepad_message(buffer, mode_char):
+    # Format the buffer into the required message format !x:x:x:x:x:x#
+    return f"!{':'.join(map(str, buffer))}{mode_char}#"
+
 def main():
-    serial_port = getPort() 
+    serial_port = getPort()
     baud_rate = 115200
     serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
     
@@ -34,22 +38,37 @@ def main():
     gamepad_handler.start()
 
     try:
+        #Send !init# to initialize the arm
+        init_message = Message("!init#")
+        write_serial.addMessage(init_message)
+        print("Sent initialization message: !init#")
+
+        # Wait for ACK I!# from Arduino
+        while True:
+            if not ack_queue.empty():
+                ack = ack_queue.get()
+                if ack:
+                    print("Initialization ACK received: I!#")
+                    break
+            time.sleep(0.1)
+
+        # Enter gamepad control loop
         while True:
             # Check for new input from gamepad
             if gamepad_handler.newValue:
                 buffer = gamepad_handler.getBuffer()
-                slider_signal = gamepad_handler.getSlidersSignal()
-                mode = gamepad_handler.mode
+                mode = gamepad_handler.getMode()
 
                 # Format the message based on mode
                 if mode == "gamepad":
-                    message_content = f"{buffer}|{slider_signal}"
+                    # Convert buffer to message format
+                    message_content = format_gamepad_message(buffer, "A")
                 else:
                     message_content = "AUTO MODE COMMAND"  # Placeholder for auto mode command
 
                 # Add STOP message if buffer is all zeros
                 if buffer == [0] * len(buffer):
-                    message_content = "STOP"
+                    message_content = "!STOP#"
 
                 message = Message(message_content)
                 
@@ -74,8 +93,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-
-
-
-
