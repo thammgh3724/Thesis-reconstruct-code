@@ -175,9 +175,7 @@ Sender::Sender(){};
 Sender::~Sender(){};
 
 void Sender::sendData(String data){
-  #ifdef DEBUG
   Serial.println(data);
-  #endif
 }
 
 void Sender::sendACK(String ack){

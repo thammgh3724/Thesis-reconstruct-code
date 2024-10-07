@@ -40,6 +40,9 @@ void System::arm_fsm(){
         case ARM_INIT_ACTION:
             this->arm->onStart(); // cannot interrupt
             this->arm->setState(HOME);
+            #ifdef DEBUG
+            this->sender->sendData("!GO STATE HOME");
+            #endif
             break;
         default:
             break;
@@ -51,13 +54,24 @@ void System::arm_fsm(){
         {
         case ARM_AUTO_MOVE_POSITION_ACTION:
             this->arm->calculateTotalSteps(this->output_arm6_auto_2, this->output_arm6_auto_1, this->output_arm6_auto_3);//rename fuck
+            #ifdef DEBUG
+            String data_print = "!Total Step: ";
+            #endif
             if(this->arm->validateJoint(this->output_arm6_auto_3) == 0){
                 //can move
                 this->arm->setState(GENERAL_AUTO_MOVING);
                 for(int i = 0; i < 6; i++){
                     this->output_arm6_auto_3[i] = 0.0;
-                    this->timer_arm[i]->setLoopAction(4000, micros()); //int delValue = 4000
+                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 4000
+                    #ifdef DEBUG
+                    data_print += String(this->output_arm6_auto_2[i]);
+                    data_print += ":";
+                    #endif
                 }
+                #ifdef DEBUG
+                this->sender->sendData(data_print);
+                this->sender->sendData("!GO AUTO POSITION");
+                #endif
             }
             break;
         case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
@@ -65,10 +79,16 @@ void System::arm_fsm(){
             break;
         case ARM_MANUAL_MOVE_DISTANCE_ACTION:
             this->arm->setState(MANUAL_MOVING);
-            this->timer_arm[0]->setLoopAction(4000, micros()); //int delValue = 4000
+            this->timer_arm[0]->setLoopAction(2000, micros()); //int delValue = 4000
+            #ifdef DEBUG
+            this->sender->sendData("!GO MANUAL");
+            #endif
             break;
         case ARM_STOP_ACTION:
             this->arm->setState(STOP);
+            #ifdef DEBUG
+            this->sender->sendData("!STOP");
+            #endif
             break;
         default:
             break;
@@ -103,6 +123,9 @@ void System::arm_fsm(){
             break;
         case ARM_STOP_ACTION:
             this->arm->setState(STOP);
+            #ifdef DEBUG
+            this->sender->sendData("!STOP");
+            #endif
             break;
         default:
             break;
@@ -120,7 +143,10 @@ void System::arm_fsm(){
             break;
         case ARM_MANUAL_MOVE_DISTANCE_ACTION:
             this->arm->setState(MANUAL_MOVING);
-            this->timer_arm[0]->setLoopAction(4000, micros()); //int delValue = 4000
+            this->timer_arm[0]->setLoopAction(2000, micros()); //int delValue = 4000
+            #ifdef DEBUG
+            this->sender->sendData("!GO MANUAL");
+            #endif
             break;
         default:
             break;
@@ -131,101 +157,101 @@ void System::arm_fsm(){
     }
 }
 
-void System::slider_fsm(){
-    switch (this->slider1->getCurrentState())
-    {
-    case INIT:
-        // waiting init action
-        switch (this->nextSliderAction)
-        {
-        case SLIDER_INIT_ACTION:
-            this->slider1->onStart(); // cannot interrupt
-            this->slider1->setState(HOME);
-            break;
-        default:
-            break;
-        }
-        break;
-    case HOME:
-        // waiting new action
-        switch (this->nextSliderAction)
-        {
-        case SLIDER_AUTO_MOVE_FREE_ACTION:
-            if(this->slider1->validatePosition(this->output_slider_auto) == 0){
-                //can move
-                this->slider1->setState(GENERAL_AUTO_MOVING);
-                this->output_slider_auto = 0.0;
-                this->timer_slider->setLoopAction(4000, micros()); 
-            }
-            break;
-        case SLIDER_AUTO_MOVE_DETECT_HAND_ACTION:
-            this->slider1->setState(DETECT_HAND_AUTO_MOVING);
-            break;
-        case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
-            this->slider1->setState(MANUAL_MOVING);
-            this->timer_slider->setLoopAction(4000, micros()); //int delValue = 4000
-            break;
-        case SLIDER_STOP_ACTION:
-            this->slider1->setState(STOP);
-            break;
-        default:
-            break;
-        }
-        break;
-    case MANUAL_MOVING:
-        switch (this->nextSliderAction)
-        {
-        case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
-            this->slider1->setState(MANUAL_MOVING);
-            if(this->timer_slider->checkTimeoutAction()) {
-                this->slider1->manualMove(this->output_slider_manual);
-            }
-            break;
-        case SLIDER_STOP_ACTION:
-            this->slider1->setState(STOP);
-            break;
-        default:
-            break;
-        }
-        break;
-    case GENERAL_AUTO_MOVING:
-        switch (this->nextSliderAction)
-        {
-        case SLIDER_AUTO_MOVE_FREE_ACTION:
-            this->slider1->setState(GENERAL_AUTO_MOVING);
-            if(this->timer_slider->checkTimeoutAction()) {
-                this->slider1->generalAutoMove(i, this->output_arm6_auto_2, this->output_arm6_auto_3, this->timer_arm[i]->timeout);
-            }
-            break;
-        case SLIDER_STOP_ACTION:
-            this->slider1->setState(STOP);
-            break;
-        default:
-            break;
-        }
-        break;
-    case STOP:
-        // waiting new action
-        switch (this->nextSliderAction)
-        {
-        case SLIDER_AUTO_MOVE_FREE_ACTION:
-            this->slider1->setState(GENERAL_AUTO_MOVING);
-            break;
-        case SLIDER_AUTO_MOVE_DETECT_HAND_ACTION:
-            this->slider1->setState(DETECT_HAND_AUTO_MOVING);
-            break;
-        case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
-            this->slider1->setState(MANUAL_MOVING);
-            this->timer_slider->setLoopAction(4000, micros()); //int delValue = 4000
-            break;
-        default:
-            break;
-        }
-        break;
-    default:
-        break;
-    }
-}
+// void System::slider_fsm(){
+//     switch (this->slider1->getCurrentState())
+//     {
+//     case INIT:
+//         // waiting init action
+//         switch (this->nextSliderAction)
+//         {
+//         case SLIDER_INIT_ACTION:
+//             this->slider1->onStart(); // cannot interrupt
+//             this->slider1->setState(HOME);
+//             break;
+//         default:
+//             break;
+//         }
+//         break;
+//     case HOME:
+//         // waiting new action
+//         switch (this->nextSliderAction)
+//         {
+//         case SLIDER_AUTO_MOVE_FREE_ACTION:
+//             if(this->slider1->validatePosition(this->output_slider_auto) == 0){
+//                 //can move
+//                 this->slider1->setState(GENERAL_AUTO_MOVING);
+//                 this->output_slider_auto = 0.0;
+//                 this->timer_slider->setLoopAction(4000, micros()); 
+//             }
+//             break;
+//         case SLIDER_AUTO_MOVE_DETECT_HAND_ACTION:
+//             this->slider1->setState(DETECT_HAND_AUTO_MOVING);
+//             break;
+//         case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
+//             this->slider1->setState(MANUAL_MOVING);
+//             this->timer_slider->setLoopAction(4000, micros()); //int delValue = 4000
+//             break;
+//         case SLIDER_STOP_ACTION:
+//             this->slider1->setState(STOP);
+//             break;
+//         default:
+//             break;
+//         }
+//         break;
+//     case MANUAL_MOVING:
+//         switch (this->nextSliderAction)
+//         {
+//         case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
+//             this->slider1->setState(MANUAL_MOVING);
+//             if(this->timer_slider->checkTimeoutAction()) {
+//                 this->slider1->manualMove(this->output_slider_manual);
+//             }
+//             break;
+//         case SLIDER_STOP_ACTION:
+//             this->slider1->setState(STOP);
+//             break;
+//         default:
+//             break;
+//         }
+//         break;
+//     case GENERAL_AUTO_MOVING:
+//         switch (this->nextSliderAction)
+//         {
+//         case SLIDER_AUTO_MOVE_FREE_ACTION:
+//             this->slider1->setState(GENERAL_AUTO_MOVING);
+//             if(this->timer_slider->checkTimeoutAction()) {
+//                 this->slider1->generalAutoMove(i, this->output_arm6_auto_2, this->output_arm6_auto_3, this->timer_arm[i]->timeout);
+//             }
+//             break;
+//         case SLIDER_STOP_ACTION:
+//             this->slider1->setState(STOP);
+//             break;
+//         default:
+//             break;
+//         }
+//         break;
+//     case STOP:
+//         // waiting new action
+//         switch (this->nextSliderAction)
+//         {
+//         case SLIDER_AUTO_MOVE_FREE_ACTION:
+//             this->slider1->setState(GENERAL_AUTO_MOVING);
+//             break;
+//         case SLIDER_AUTO_MOVE_DETECT_HAND_ACTION:
+//             this->slider1->setState(DETECT_HAND_AUTO_MOVING);
+//             break;
+//         case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
+//             this->slider1->setState(MANUAL_MOVING);
+//             this->timer_slider->setLoopAction(4000, micros()); //int delValue = 4000
+//             break;
+//         default:
+//             break;
+//         }
+//         break;
+//     default:
+//         break;
+//     }
+//}
 
 void System::distributeAction(){
     switch (this->nextAction)
@@ -264,7 +290,7 @@ void System::distributeAction(){
         break;
     case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextSliderAction = SLIDER_MANUAL_MOVE_DISTANCE_ACTION;
-        this->listener->consumeCommand(SLIDER_MANUAL_MOVE_DISTANCE_ACTION,&this->output_slider_manual)
+        this->listener->consumeCommand(SLIDER_MANUAL_MOVE_DISTANCE_ACTION,&this->output_slider_manual);
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_AUTO_MOVE_FREE_ACTION:

@@ -27,6 +27,7 @@ class System {
         ~System();
         void communicate();
         void arm_fsm();
+        void slider_fsm();
 
     private: 
         // attributes as static variables using for store array
