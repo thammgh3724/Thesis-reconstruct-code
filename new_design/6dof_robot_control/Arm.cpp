@@ -36,17 +36,24 @@ void Arm::onStart(){
   singleJointMove_onStart(DIR2_PIN, HIGH, PUL2_PIN, 5582);
   // joint #3
   singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, 6569);
+// // joint #4
+  singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / dl4));
   // joint #5
-  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
+  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((90-10) / dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
-  this->joint[4] = 90;
+  this->joint[3] = 180;
+  this->joint[4] = 0;
   /*
   // First move
   double output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
   //this->generalAutoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
   */
   ForwardK(this->joint, this->position); // calculate Xcurr by FK
+  #ifdef DEBUG
+  this->printCurrentJoint();
+  this->printCurrentPos();
+  #endif
 }
 
 int Arm::getCurrentState(){
@@ -289,7 +296,7 @@ void Arm::generalAutoMove(int i, double* numberStepToGo, double* numberStepDone,
     data_print += " move done";
     this->sender->sendData(data_print);
     ForwardK(this->joint, this->position);
-    this->printCurrentPos();
+    this->printCurrentJoint();
   }
   #endif
 }

@@ -107,9 +107,9 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
     if(this->command == "init") {
       return INIT_ACTION;
     }
-    // !gohome#
+    // !agohome#
     // not working
-    else if(this->command == "gohome"){
+    else if(this->command == "agohome"){
       return ARM_GOHOME_ACTION;
     }
     else if(this->command == "astop"){
