@@ -6,6 +6,10 @@
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
+#ifdef DEBUG
+int done_auto[6] = {0, 0, 0, 0, 0, 0};
+#endif
+
 Arm::Arm(){
   this->state = INIT;
   for (int i = 0; i < 6; ++i){
@@ -36,8 +40,8 @@ void Arm::onStart(){
   singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((180-10) / dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
-  /*
   this->joint[4] = 90;
+  /*
   // First move
   double output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
   //this->generalAutoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
@@ -224,22 +228,29 @@ void Arm::calculateTotalSteps(double* output, double* nextPostion, double* nextJ
   }
 } // validate before move
 
+double Arm::double_abs(double num) {
+  if ( num < 0.1 ) {
+    num = 0 - num;
+  }
+  return num;
+}
+
 void Arm::generalAutoMove(int i, double* numberStepToGo, double* numberStepDone, unsigned long &timeout, double incValue = 3.5, int accRate = 530){
-  if( (fabs(numberStepToGo[i]) > 0.2) && ( fabs(numberStepToGo[i]) - numberStepDone[i] > 0.2) ){
-    if (fabs(numberStepToGo[i]) > (2*accRate + 1)){
+  if( (double_abs(numberStepToGo[i]) > 0.2) && ( (double_abs(numberStepToGo[i]) - numberStepDone[i]) > 0.2) ){
+    if (double_abs(numberStepToGo[i]) > (2*accRate + 1)){
       if (numberStepDone[i] < accRate){
         //acceleration
-        timeout = timeout - incValue;
-      } else if (numberStepDone[i] > (fabs(numberStepToGo[i]) - accRate)){
+        if(timeout > 6.0) timeout = timeout - incValue;
+      } else if (numberStepDone[i] > (double_abs(numberStepToGo[i]) - accRate)){
         //decceleration
           timeout =  timeout + incValue;
       }
     } else {
       //no space for proper acceleration/decceleration
-      if (numberStepDone[i] < (fabs(numberStepToGo[i])/2)){
+      if (numberStepDone[i] < (double_abs(numberStepToGo[i])/2)){
         //acceleration
-          timeout =  timeout - incValue;
-      } else if (numberStepDone[i] > (fabs(numberStepToGo[i])/2)){
+          if(timeout > 6.0) timeout =  timeout - incValue;
+      } else if (numberStepDone[i] > (double_abs(numberStepToGo[i])/2)){
         //decceleration
           timeout =  timeout +  timeout;
       }
@@ -270,6 +281,17 @@ void Arm::generalAutoMove(int i, double* numberStepToGo, double* numberStepDone,
     }
     numberStepDone[i] = numberStepDone[i] + 0.5;
   }
+  #ifdef DEBUG
+  else if (done_auto[i] == 0) {
+    done_auto[i] = 1;
+    String data_print = "!Joint ";
+    data_print += String(i);
+    data_print += " move done";
+    this->sender->sendData(data_print);
+    ForwardK(this->joint, this->position);
+    this->printCurrentPos();
+  }
+  #endif
 }
 
 /*************************************************/
