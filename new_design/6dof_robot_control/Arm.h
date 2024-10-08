@@ -60,7 +60,7 @@ class Arm {
     private:
         // funtions for general move
         void singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530); // can not be interrupt
-
+        double double_abs(double num);
     private:
         // variables for specific use case move
         bool isFirstmove = false; 
