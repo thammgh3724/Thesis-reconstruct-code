@@ -59,11 +59,10 @@ class WriteSerialObject(threading.Thread):
                 
                 # Send only if message is new or requires retry
                 if not self.lastSentMessage.compareMessage(currentMessage):
+                    print(f"SENDING: {currentMessage.getMessage()}")
                     self.serialObj.write(currentMessage.encodeMessage())
                     self.lastSentMessage = copy.deepcopy(currentMessage)
                     print(f"Sent message: {currentMessage.getMessage()}")
-                    self.messageQueue.get()
-                else: 
                     self.messageQueue.get()
                 # Wait for ACK or retry
                 # ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1000.0)
@@ -75,10 +74,10 @@ class WriteSerialObject(threading.Thread):
                 #         self.retryCount = 0
                 #     else:
                 #         print(f"Retrying to send message: {currentMessage.getMessage()}")
-                # else:
-                #     self.messageQueue.get()
-                #     self.retryCount = 0
-                #     self.ack_event.clear()  # Reset ACK status for next message
+                else:
+                    self.messageQueue.get()
+                    # self.retryCount = 0
+                    # self.ack_event.clear()  # Reset ACK status for next message
                 #     # print("ACK received, moving to next message")
             else:
                 time.sleep(0.1)

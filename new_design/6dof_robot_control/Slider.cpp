@@ -7,19 +7,20 @@ Slider::Slider(){
 
 Slider::~Slider(){};
 
-void Slider::onStart(){
+int Slider::onStart(){
     // go home here
     this->position = 0;
-    if(inductiveSrDetect() == LOW) return;
-    while (inductiveSrDetect() != LOW){
-        digitalWrite(SLIDER_DIR,HIGH);
-        for (int i = 0 ; i <100 ;i++){
-            digitalWrite(SLIDER_PUL,HIGH); 
-            delayMicroseconds(250);
-            digitalWrite(SLIDER_PUL,LOW); 
-            delayMicroseconds(250); 
-        }
+    if(inductiveSrDetect() == HIGH) return 0;
+    digitalWrite(this->DIR_PINS,HIGH);
+    while (inductiveSrDetect() != HIGH){
+      digitalWrite(this->PUL_PINS,HIGH);
+      this->PULstat = 1;
+      delayMicroseconds(250);
+      digitalWrite(this->PUL_PINS,LOW);
+      this->PULstat = 0;
+      delayMicroseconds(250); 
     }
+    return 1;
 }
 
 int Slider::getCurrentState(){
@@ -61,16 +62,16 @@ void Slider::manualMove(double input){
       digitalWrite(this->DIR_PINS, LOW);
       if (PULstat == 0) {
         digitalWrite(this->PUL_PINS, HIGH);
-        PULstat = 1;
+        this->PULstat = 1;
       } else {
         digitalWrite(this->PUL_PINS, LOW);
-        PULstat = 0;
+        this->PULstat = 0;
       }
       this->position = this->position - 1;
     }
 }
 int Slider::validatePosition(double input){
-    if(input <0 || input > 280) return 1;
+    if(input <0 || input > 28000) return 1;
     return 0; 
 }
 void Slider::generalAutoMove(uint8_t DIR, int totSteps, int delValue = 400, int incValue = 15, int accRate = 20){

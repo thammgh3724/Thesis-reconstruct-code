@@ -8,7 +8,7 @@ class Slider {
     private:
         int state;
         double position;
-        const double MAX_POSITION = 280.0;
+        const double MAX_POSITION = 28000.0;
         const double MIN_POSITION = 0.0;
         bool PULstat = 0;
         int PUL_PINS = SLIDER_PUL;
@@ -17,7 +17,7 @@ class Slider {
     public:
         Slider();
         ~Slider();
-        void onStart();
+        int onStart();
         int getCurrentState();
         void setState(int state);
         double getCurrentPosition();

@@ -33,7 +33,7 @@ def main():
     
     # Initialize all objects
     write_serial = WriteSerialObject(serial_obj, ack_event)
-    read_serial = ReadSerialObject(serial_obj, ack_event)
+    # read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
 
     # Start all threads
@@ -46,12 +46,12 @@ def main():
         init_message = Message("!init#")
         write_serial.addMessage(init_message)
         print("Sent initialization message: !init#")
-        time.sleep(15)
+        time.sleep(10)
         # Wait for ACK I!# from Arduino
         while True:
             if ack_event.is_set():
                 print("Initialization ACK received: I!#")
-                ack_event.clear()  # Clear event after receiving ACK
+                # ack_event.clear()  # Clear event after receiving ACK
                 break
             time.sleep(0.1)
 
@@ -100,7 +100,8 @@ def main():
 if __name__ == "__main__":
     main()
     # print(getPort())  
-    # serial_port = getPort()
+    # serial_port = getPort()\cx=-098   
+    
     # baud_rate = 115200
     # serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
 
