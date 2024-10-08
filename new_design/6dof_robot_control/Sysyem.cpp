@@ -144,8 +144,30 @@ void System::arm_fsm(){
         break;
     case STOP:
         // waiting new action
-        if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION){
-            this->arm->setState(GENERAL_AUTO_MOVING);
+        if (this->nextArmAction == ARM_GOHOME_ACTION){
+            
+        }
+        else if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION){
+            this->arm->calculateTotalSteps(this->output_arm6_auto_2, this->output_arm6_auto_1, this->output_arm6_auto_3);//rename fuck
+            #ifdef DEBUG
+            String data_print = "!Total Step: ";
+            #endif
+            if(this->arm->validateJoint(this->output_arm6_auto_3) == 0){
+                //can move
+                this->arm->setState(GENERAL_AUTO_MOVING);
+                for(int i = 0; i < 6; i++){
+                    this->output_arm6_auto_3[i] = 0.0;
+                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 4000
+                    #ifdef DEBUG
+                    data_print += String(this->output_arm6_auto_2[i]);
+                    data_print += ":";
+                    #endif
+                }
+                #ifdef DEBUG
+                this->sender->sendData(data_print);
+                this->sender->sendData("!GO AUTO POSITION");
+                #endif
+            }
         }
         else if (this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION){
             this->arm->setState(DETECT_HAND_AUTO_MOVING);
