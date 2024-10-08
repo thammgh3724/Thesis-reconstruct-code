@@ -3,7 +3,7 @@
 
 #include "Arduino.h"
 #include "global.h"
-#include "communication.h"
+#include "Communication.h"
 
 class Arm {
     private:

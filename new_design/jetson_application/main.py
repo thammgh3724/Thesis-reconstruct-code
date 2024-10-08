@@ -22,21 +22,21 @@ def format_gamepad_message(buffer, mode_char):
     return f"!{':'.join(map(str, buffer))}{mode_char}#"
 
 def main():
-    serial_port = getPort()
+    serial_port = '/dev/ttyACM0'
     baud_rate = 115200
     serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
-    
     # Use ack_event to share ACK status between read and write threads
+    time.sleep(10)
     ack_event = threading.Event()
     
     # Initialize all objects
     write_serial = WriteSerialObject(serial_obj, ack_event)
-    read_serial = ReadSerialObject(serial_obj, ack_event)
+    # read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
 
     # Start all threads
     write_serial.start()
-    read_serial.start()
+    # read_serial.start()
     gamepad_handler.start()
 
     try:
@@ -44,21 +44,22 @@ def main():
         init_message = Message("!init#")
         write_serial.addMessage(init_message)
         print("Sent initialization message: !init#")
-
+        time.sleep(10)
         # Wait for ACK I!# from Arduino
         while True:
-            if ack_event.is_set():
+            if write_serial.ack_event.is_set():
                 print("Initialization ACK received: I!#")
-                ack_event.clear()  # Clear event after receiving ACK
+                # ack_event.clear()  # Clear event after receiving ACK
                 break
             time.sleep(0.1)
-
+        print("Start controlling")
+        print(write_serial.ack_event)
         # Enter gamepad control loop
         while True:
             # Check for new input from gamepad
             if gamepad_handler.newValue:
                 buffer = gamepad_handler.getBuffer()
-                mode = gamepad_handler.mode
+                mode = gamepad_handler.getMode()
 
                 # Format the message based on mode
                 if mode == "gamepad":
@@ -69,7 +70,7 @@ def main():
 
                 # Add STOP message if buffer is all zeros
                 if buffer == [0] * len(buffer):
-                    message_content = "!STOP#"
+                    message_content = "!astop#"
 
                 message = Message(message_content)
                 
@@ -83,9 +84,9 @@ def main():
     except KeyboardInterrupt:
         print("Stopping threads...")
         write_serial.stop()
-        read_serial.stop()
+        # read_serial.stop()
         write_serial.join()
-        read_serial.join()
+        # read_serial.join()
         gamepad_handler.join()
         print("All threads stopped.")
 
