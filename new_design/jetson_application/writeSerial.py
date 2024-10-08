@@ -5,7 +5,7 @@ import copy
 
 QUEUE_MAX_SIZE = 10
 MAX_RETRY = 3
-TIMEOUT_MS = 100
+TIMEOUT_MS = 1000
 
 class Message:
     def __init__(self, message, retryCount=0) -> None:
@@ -21,14 +21,15 @@ class Message:
     def increaseCall(self):
         self.retryCount += 1
 
+    def compareMessage(self, messageObj):
+        return self.getMessage() == messageObj.getMessage()
+
     def setCallCounter(self, retryCount):
         self.retryCount = retryCount
 
     def excessCall(self, limitCall):
         return self.retryCount > limitCall
     
-    def compareMessage(self, messageObj):
-        return self.getMessage() == messageObj.getMessage()
 
 class WriteSerialObject(threading.Thread):
     def __init__(self, serialObj, ack_event) -> None:
@@ -50,8 +51,8 @@ class WriteSerialObject(threading.Thread):
         self.isRunning = False
 
     def run(self):
-        self.isRunning = True
         self.ack_event.set()
+        self.isRunning = True
         while self.isRunning:
             if not self.messageQueue.empty():
                 currentMessage = self.messageQueue.queue[0]
@@ -78,11 +79,9 @@ class WriteSerialObject(threading.Thread):
                 #     self.messageQueue.get()
                 #     self.retryCount = 0
                 #     self.ack_event.clear()  # Reset ACK status for next message
-                #     print("ACK received, moving to next message")
+                #     # print("ACK received, moving to next message")
             else:
                 time.sleep(0.1)
 
-
-        
 if __name__ == "__main__":
     pass

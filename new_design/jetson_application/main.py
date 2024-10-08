@@ -6,6 +6,7 @@ import serial
 import time
 import queue
 import threading
+import serial.tools.list_ports
 
 '''
 Function getPort() use for finding and get arduino port's name
@@ -25,13 +26,14 @@ def main():
     serial_port = '/dev/ttyACM0'
     baud_rate = 115200
     serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
-    # Use ack_event to share ACK status between read and write threads
+    # Waiting for the creation of serial object
     time.sleep(10)
+    # Use ack_event to share ACK status between read and write threads
     ack_event = threading.Event()
     
     # Initialize all objects
     write_serial = WriteSerialObject(serial_obj, ack_event)
-    # read_serial = ReadSerialObject(serial_obj, ack_event)
+    read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
 
     # Start all threads
@@ -44,20 +46,21 @@ def main():
         init_message = Message("!init#")
         write_serial.addMessage(init_message)
         print("Sent initialization message: !init#")
-        time.sleep(10)
+        time.sleep(15)
         # Wait for ACK I!# from Arduino
         while True:
-            if write_serial.ack_event.is_set():
+            if ack_event.is_set():
                 print("Initialization ACK received: I!#")
-                # ack_event.clear()  # Clear event after receiving ACK
+                ack_event.clear()  # Clear event after receiving ACK
                 break
             time.sleep(0.1)
+
         print("Start controlling")
-        print(write_serial.ack_event)
         # Enter gamepad control loop
         while True:
             # Check for new input from gamepad
-            if gamepad_handler.newValue:
+            if gamepad_handler.newValue: 
+                slider_signal = gamepad_handler.getSlidersSignal()
                 buffer = gamepad_handler.getBuffer()
                 mode = gamepad_handler.getMode()
 
@@ -66,6 +69,7 @@ def main():
                     # Convert buffer to message format
                     message_content = format_gamepad_message(buffer, "M")
                 else:
+                    #TODO: ADD AUTO MODE AND OTHER MODE LATER
                     message_content = "AUTO MODE COMMAND"  # Placeholder for auto mode command
 
                 # Add STOP message if buffer is all zeros
@@ -90,8 +94,17 @@ def main():
         gamepad_handler.join()
         print("All threads stopped.")
 
-    finally:
-        serial_obj.close()
+    # finally:
+    #     serial_obj.close()
 
 if __name__ == "__main__":
     main()
+    # print(getPort())  
+    # serial_port = getPort()
+    # baud_rate = 115200
+    # serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
+
+    # time.sleep(10)
+
+    # serial_obj.write(bytes(str("!init#"), encoding='utf-8'))
+    # time.sleep(20)
