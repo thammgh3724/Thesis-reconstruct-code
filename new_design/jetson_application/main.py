@@ -25,7 +25,7 @@ def format_gamepad_message(buffer, mode_char):
 def main():
     serial_port = '/dev/ttyACM0'
     baud_rate = 115200
-    # serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
+    serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
     # Waiting for the creation of serial object
     time.sleep(10)
     # Use ack_event to share ACK status between read and write threads
@@ -84,6 +84,10 @@ def main():
                 if buffer == [0] * len(buffer):
                     message_content = "!astop#"
 
+                if slider_signal == [0] * len(slider_signal):
+                    slideMsg = Message(slider_signal)
+                    write_serial.addMessage(slideMsg)
+
                 print(f"Message is: {message_content}")
                 message = Message(message_content)
                 
@@ -102,7 +106,7 @@ def main():
         # read_serial.stop()
         write_serial.join()
         # read_serial.join()
-        # gamepad_handler.join()
+        gamepad_handler.join()
         print("All threads stopped.")
 
     finally:
