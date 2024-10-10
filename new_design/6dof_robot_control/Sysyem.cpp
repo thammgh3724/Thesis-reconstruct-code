@@ -40,6 +40,7 @@ void System::arm_fsm(){
         {
         case ARM_INIT_ACTION:
             this->arm->onStart(); // cannot interrupt
+            this->nextArmAction == ARM_STOP_ACTION;
             this->arm->setState(STOP);
             #ifdef DEBUG
             this->sender->sendData("!GO STATE STOP");
@@ -58,6 +59,9 @@ void System::arm_fsm(){
         }
         else if(this->nextArmAction == ARM_STOP_ACTION){
             this->arm->setState(STOP);
+            #ifdef DEBUG
+            this->sender->sendData("!GO STATE STOP");
+            #endif
         }
         else {
         }
@@ -66,9 +70,10 @@ void System::arm_fsm(){
         if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION)
         {
             if(this->arm->isAutoMoveDone()) {
+                this->nextArmAction == ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
-                this->sender->sendData("!STOP");
+                this->sender->sendData("!GO STATE STOP");
                 #endif
             }
             else {
@@ -140,11 +145,6 @@ void System::arm_fsm(){
     default:
         break;
     }
-    #ifdef DEBUG
-      String curState = "State: ";
-      curState += String(this->arm->getCurrentState());
-      this->sender->sendData(curState);
-    #endif
 }
 
 // void System::slider_fsm(){
