@@ -36,7 +36,7 @@ class WriteSerialObject(threading.Thread):
         threading.Thread.__init__(self)
         self.serialObj = serialObj
         self.messageQueue = queue.Queue(maxsize=QUEUE_MAX_SIZE)
-        self.lastSentMessage = Message("")
+        self.lastSentMessage = Message("!#")
         self.retryCount = 0
         self.isRunning = False
         self.ack_event = ack_event
@@ -60,12 +60,12 @@ class WriteSerialObject(threading.Thread):
             if not self.messageQueue.empty():
                 currentMessage = self.messageQueue.queue[0]
                 if not self.lastSentMessage.compareMessage(currentMessage):
-                    # self.serialObj.write(currentMessage.encodeMessage())
+                    self.serialObj.write(currentMessage.encodeMessage())
                     self.lastSentMessage = copy.deepcopy(currentMessage)
                     print(f"Sent message: {currentMessage.getMessage()}")
                     self.messageQueue.get()  
                 else:
-                    print(f"Duplicate message found, skipping and removing: {currentMessage.getMessage()}")
+                    #print(f"Duplicate message found, skipping and removing: {currentMessage.getMessage()}")
                     self.messageQueue.get() 
                 # Wait for ACK or retry
                 # ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1000.0)
