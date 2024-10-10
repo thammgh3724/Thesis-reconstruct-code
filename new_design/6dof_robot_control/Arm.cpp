@@ -6,9 +6,6 @@
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
-#ifdef DEBUG
-int done_auto[6] = {0, 0, 0, 0, 0, 0};
-#endif
 
 Arm::Arm(){
   this->state = INIT;
@@ -17,6 +14,8 @@ Arm::Arm(){
     this->position[i] = 0.0;
     this->nextJoint[i] = 0.0;
     this->nextPosition[i] = 0.0;
+    this->numberStepToGo[i] = 0.0;
+    this->numberStepDone[i] = 0.0;
   }
   this->sender = new Sender();
 };
@@ -37,9 +36,9 @@ void Arm::onStart(){
   // joint #3
   singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, 6569);
 // // joint #4
-  singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / dl4));
+  singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / this->dl4));
   // joint #5
-  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((90-10) / dl5)); // minus 10 in initial 
+  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((90-10) / this->dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
   this->joint[3] = 180;
@@ -112,6 +111,30 @@ void Arm::setNextPosition(double* position){
   }
 }
 
+void Arm::getNumberStepDone(double* output){
+  for(int i = 0; i < 6; i++){
+      output[i] = this->numberStepDone[i];
+  }
+}
+
+void Arm::setNumberStepDone(double* steps){
+  for(int i = 0; i < 6; i++){
+      this->numberStepDone[i] = position[i];
+  }
+}
+
+void Arm::getNumberStepToGo(double* output){
+  for(int i = 0; i < 6; i++){
+      output[i] = this->numberStepToGo[i];
+  }
+}
+
+void Arm::setNumberStepToGo(double* steps){
+  for(int i = 0; i < 6; i++){
+      this->numberStepToGo[i] = position[i];
+  }
+}
+
 void Arm::printCurrentJoint(){
   String result = "!Curr joint : ";
   for (int i = 0; i < 6; ++i){
@@ -135,28 +158,27 @@ void Arm::printCurrentPos(){
 }
 
 /************************************************/
-// change while and delay
 
-int Arm::validateJoint(double* input){
+int Arm::validateNextJoint(){
   for (int i = 0; i < 6; ++i){
     switch (i){
       case 0:
-        if (input[i] > MAX_JOINT_ANGLE[0] || input[i] < MIN_JOINT_ANGLE[0]) return 1;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[0] || this->nextJoint[i] < MIN_JOINT_ANGLE[0]) return 1;
         break; 
       case 1:
-        if (input[i] > MAX_JOINT_ANGLE[1] || input[i] < MIN_JOINT_ANGLE[1]) return 2;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[1] || this->nextJoint[i] < MIN_JOINT_ANGLE[1]) return 2;
         break; 
       case 2:
-        if (input[i] > MAX_JOINT_ANGLE[2] || input[i] < MIN_JOINT_ANGLE[2]) return 3;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[2] || this->nextJoint[i] < MIN_JOINT_ANGLE[2]) return 3;
         break;
       case 3:
-        if (input[i] > MAX_JOINT_ANGLE[3] || input[i] < MIN_JOINT_ANGLE[3]) return 4;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[3] || this->nextJoint[i] < MIN_JOINT_ANGLE[3]) return 4;
         break;
       case 4:
-        if (input[i] > MAX_JOINT_ANGLE[4] || input[i] < MIN_JOINT_ANGLE[4]) return 5;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[4] || this->nextJoint[i] < MIN_JOINT_ANGLE[4]) return 5;
         break;
       case 5:
-        if (input[i] > MAX_JOINT_ANGLE[5] || input[i] < MIN_JOINT_ANGLE[5]) return 6;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[5] || this->nextJoint[i] < MIN_JOINT_ANGLE[5]) return 6;
         break;
       default:
         break;
@@ -199,7 +221,7 @@ void Arm::manualMove(double* input) // int delValue = 4000
 {
   // input = data from gamepad
   for (int i = 0; i < 6; ++i) {
-    if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) ) {
+    if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) ) {
       //Rotate positive direction
       digitalWrite(this->DIR_PINS[i], HIGH);
       if (PULstat[i] == 0) {
@@ -209,9 +231,9 @@ void Arm::manualMove(double* input) // int delValue = 4000
         digitalWrite(this->PUL_PINS[i], LOW);
         PULstat[i] = 0;
       }
-      this->joint[i] = this->joint[i] + DL[i]/2.0;
+      this->joint[i] = this->joint[i] + this->DL[i]/2.0;
     } 
-    else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
+    else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
       //Rotate negative direction
       digitalWrite(this->DIR_PINS[i], LOW);
       if (PULstat[i] == 0) {
@@ -221,17 +243,18 @@ void Arm::manualMove(double* input) // int delValue = 4000
         digitalWrite(this->PUL_PINS[i], LOW);
         PULstat[i] = 0;
       }
-      this->joint[i] = this->joint[i] - DL[i]/2.0;
+      this->joint[i] = this->joint[i] - this->DL[i]/2.0;
     }
   }
 }
 
-void Arm::calculateTotalSteps(double* output, double* nextPostion, double* nextJoint){
-  double Jcurr[6]; // tmp for this->currJoint;
-  memcpy(Jcurr, this->joint, NUM_BYTES_BUFFER);
-  InverseK(nextPostion, nextJoint); // calculate Jnext by IK
+void Arm::calculateNextJoint() {
+  InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
+}
+
+void Arm::calculateTotalSteps(){
   for(int i = 0; i < 6; i++){ // calculate steps
-    output[i] = (nextJoint[i] - Jcurr[i])/DL[i];
+    this->numberStepToGo[i] = (this->nextJoint[i] - this->joint[i])/this->DL[i];
   }
 } // validate before move
 
@@ -242,27 +265,40 @@ double Arm::double_abs(double num) {
   return num;
 }
 
-void Arm::generalAutoMove(int i, double* numberStepToGo, double* numberStepDone, unsigned long &timeout, double incValue = 3.5, int accRate = 530){
-  if( (double_abs(numberStepToGo[i]) > 0.2) && ( (double_abs(numberStepToGo[i]) - numberStepDone[i]) > 0.2) ){
-    if (double_abs(numberStepToGo[i]) > (2*accRate + 1)){
-      if (numberStepDone[i] < accRate){
+void Arm::initjointAutoMoveDone(){
+  for(int i = 0; i < 6; i++) {
+    this->jointAutoMoveDone[i] = 0;
+  }
+}
+
+bool Arm::isAutoMoveDone(){
+  for(int i = 0; i < 6; i++) {
+    if (this->jointAutoMoveDone[i] == 0) return 0;
+  }
+  return 1;
+}
+
+void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, int accRate = 530){
+  if( (double_abs(this->numberStepToGo[i]) > 0.2) && ( (double_abs(this->numberStepToGo[i]) - this->numberStepDone[i]) > 0.2) ){
+    if (double_abs(this->numberStepToGo[i]) > (2*accRate + 1)){
+      if (this->numberStepDone[i] < accRate){
         //acceleration
         if(timeout > 6.0) timeout = timeout - incValue;
-      } else if (numberStepDone[i] > (double_abs(numberStepToGo[i]) - accRate)){
+      } else if (this->numberStepDone[i] > (double_abs(this->numberStepToGo[i]) - accRate)){
         //decceleration
-          timeout =  timeout + incValue;
+        if(timeout < 4000.0)  timeout =  timeout + incValue;
       }
     } else {
       //no space for proper acceleration/decceleration
-      if (numberStepDone[i] < (double_abs(numberStepToGo[i])/2)){
+      if (this->numberStepDone[i] < (double_abs(this->numberStepToGo[i])/2)){
         //acceleration
           if(timeout > 6.0) timeout =  timeout - incValue;
-      } else if (numberStepDone[i] > (double_abs(numberStepToGo[i])/2)){
+      } else if (this->numberStepDone[i] > (double_abs(this->numberStepToGo[i])/2)){
         //decceleration
-          timeout =  timeout +  timeout;
+          if(timeout < 4000.0) timeout =  timeout +  incValue;
       }
     }
-    if ( numberStepToGo[i] > 0.2 ) {
+    if ( this->numberStepToGo[i] > 0.2 ) {
       //Rotate positive direction
       digitalWrite(this->DIR_PINS[i], HIGH);
       if (PULstat[i] == 0) {
@@ -272,9 +308,9 @@ void Arm::generalAutoMove(int i, double* numberStepToGo, double* numberStepDone,
         digitalWrite(this->PUL_PINS[i], LOW);
         PULstat[i] = 0;
       }
-      this->joint[i] = this->joint[i] + DL[i]/2.0;
-    } 
-    else if ( numberStepToGo[i] < -0.2 ) {
+      this->joint[i] = this->joint[i] + this->DL[i]/2.0;
+    }
+    else if ( this->numberStepToGo[i] < -0.2 ) {
       //Rotate negative direction
       digitalWrite(this->DIR_PINS[i], LOW);
       if (PULstat[i] == 0) {
@@ -284,358 +320,101 @@ void Arm::generalAutoMove(int i, double* numberStepToGo, double* numberStepDone,
         digitalWrite(this->PUL_PINS[i], LOW);
         PULstat[i] = 0;
       }
-      this->joint[i] = this->joint[i] - DL[i]/2.0;
+      this->joint[i] = this->joint[i] - this->DL[i]/2.0;
     }
-    numberStepDone[i] = numberStepDone[i] + 0.5;
+    this->numberStepDone[i] = this->numberStepDone[i] + 0.5;
   }
-  #ifdef DEBUG
-  else if (done_auto[i] == 0) {
-    done_auto[i] = 1;
+  else if (this->jointAutoMoveDone[i] == 0) {
+    this->jointAutoMoveDone[i] = 1;
+    #ifdef DEBUG
     String data_print = "!Joint ";
     data_print += String(i);
     data_print += " move done";
     this->sender->sendData(data_print);
     ForwardK(this->joint, this->position);
     this->printCurrentJoint();
+    #endif
   }
-  #endif
 }
 
 /*************************************************/
 
-void Arm::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin){
-  this->sender->sendData("!Start Calculate new Position");
-  double Jcurr[6]; // tmp for this->currJoint;
-  double Xcurr[6]; // current //{x, y, z, ZYZ Euler angles}
-  double Jnext[6]; // target joints
-  memcpy(Jcurr, this->joint, NUM_BYTES_BUFFER);
-  ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
-  InverseK(Xnext, Jnext); // calculate Jnext by IK
-  // just move joint 4 in initial move
-  if(this->isFirstmove == false) {
-    Jnext[3] = Jcurr[3];
-    this->sender->sendData("!Dont rotate joint 4");
-    if (isHorizontalMove) {
-      Jnext[1] = Jcurr[1];
-      Jnext[2] = Jcurr[2];
-      Jnext[3] = Jcurr[3];
-      Jnext[4] = Jcurr[4];
-      Jnext[5] = Jcurr[5];
-      this->sender->sendData("!Move only joint 1 in horizontal");
-    }
-    if (isLengthwiseMove) {
-      // joint 5 alway move up when robot go down
-      // need rework
-      int angleJ2Move = Jnext[1] - Jcurr[1];
-      int angleJ3Move = Jnext[2] - Jcurr[2];
-      Jnext[4] = Jcurr[4] + angleJ2Move + angleJ3Move;
-    }
-  } 
-  memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
-  String data_print = "!JNEXT: ";
-  for (int i = 0; i < 6; ++i){
-    if (!isfinite(Jnext[i])) {
-        this->sender->sendData("!Danger! The number is not finite");
-        return;
-    }
-    data_print += Jnext[i];
-    data_print += ":";
-  }
-  this->sender->sendData(data_print);
-  //Move
-  int canMove = validateJoint(Jnext);
-  if (canMove == 0){
-    this->sender->sendData("!MOVING...");
-//    goStrightLine(this->joint, Jnext, vel0, acc0, velini, velfin);
-    memcpy(this->joint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
-    ForwardK(this->joint, this->position); //Update currX
-    this->sender->sendData("!MOVE DONE");
-  }
-  else{
-    data_print = "!Joint out of range : Joint ";
-    data_print += canMove;
-    this->sender->sendData(data_print);
-  }
-}
+// void Arm::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin){
+//   this->sender->sendData("!Start Calculate new Position");
+//   double Jcurr[6]; // tmp for this->currJoint;
+//   double Xcurr[6]; // current //{x, y, z, ZYZ Euler angles}
+//   double Jnext[6]; // target joints
+//   memcpy(Jcurr, this->joint, NUM_BYTES_BUFFER);
+//   ForwardK(Jcurr, Xcurr); // calculate Xcurr by FK
+//   InverseK(Xnext, Jnext); // calculate Jnext by IK
+//   // just move joint 4 in initial move
+//   if(this->isFirstmove == false) {
+//     Jnext[3] = Jcurr[3];
+//     this->sender->sendData("!Dont rotate joint 4");
+//     if (isHorizontalMove) {
+//       Jnext[1] = Jcurr[1];
+//       Jnext[2] = Jcurr[2];
+//       Jnext[3] = Jcurr[3];
+//       Jnext[4] = Jcurr[4];
+//       Jnext[5] = Jcurr[5];
+//       this->sender->sendData("!Move only joint 1 in horizontal");
+//     }
+//     if (isLengthwiseMove) {
+//       // joint 5 alway move up when robot go down
+//       // need rework
+//       int angleJ2Move = Jnext[1] - Jcurr[1];
+//       int angleJ3Move = Jnext[2] - Jcurr[2];
+//       Jnext[4] = Jcurr[4] + angleJ2Move + angleJ3Move;
+//     }
+//   } 
+//   memcpy(Jcurr, Jnext, NUM_BYTES_BUFFER); //Store Jnext
+//   String data_print = "!JNEXT: ";
+//   for (int i = 0; i < 6; ++i){
+//     if (!isfinite(Jnext[i])) {
+//         this->sender->sendData("!Danger! The number is not finite");
+//         return;
+//     }
+//     data_print += Jnext[i];
+//     data_print += ":";
+//   }
+//   this->sender->sendData(data_print);
+//   //Move
+//   int canMove = validateJoint(Jnext);
+//   if (canMove == 0){
+//     this->sender->sendData("!MOVING...");
+// //    goStrightLine(this->joint, Jnext, vel0, acc0, velini, velfin);
+//     memcpy(this->joint, Jnext, NUM_BYTES_BUFFER); //Update currJoint
+//     ForwardK(this->joint, this->position); //Update currX
+//     this->sender->sendData("!MOVE DONE");
+//   }
+//   else{
+//     data_print = "!Joint out of range : Joint ";
+//     data_print += canMove;
+//     this->sender->sendData(data_print);
+//   }
+// }
 
-void Arm::calculateNewPosition_detectHand(double* output, double* input){
-  // INIT AXIS ARRAY;
-  for (int i = 0; i < 6; i++) 
-  {
-      output[i] = this->position[i]; 
-  }
-  // caculate new position
-  output[1] = output[1] + ( (-40.0/177.0)*(input[0]-320.0) );
-  output[2] = output[2] + ( (-75.0/73.0)*(input[1]-240.0) );
-  String data_print = "!GET SUCCESS POSITION  ";
-  for (int j = 0; j < 6; j++)
-  {
-    data_print += output[j];
-    data_print += ":";
-    // data_print += i; 
-  }
-  this->sender->sendData(data_print);
-}
+// void Arm::calculateNewPosition_detectHand(double* output, double* input){
+//   // INIT AXIS ARRAY;
+//   for (int i = 0; i < 6; i++) 
+//   {
+//       output[i] = this->position[i]; 
+//   }
+//   // caculate new position
+//   output[1] = output[1] + ( (-40.0/177.0)*(input[0]-320.0) );
+//   output[2] = output[2] + ( (-75.0/73.0)*(input[1]-240.0) );
+//   String data_print = "!GET SUCCESS POSITION  ";
+//   for (int j = 0; j < 6; j++)
+//   {
+//     data_print += output[j];
+//     data_print += ":";
+//     // data_print += i; 
+//   }
+//   this->sender->sendData(data_print);
+// }
 
 /************************************************/
 /*Kinematic functions*/
-// change while and delay
-void Arm::goStrightLine(double* xfi, double* xff, double vel0, double acc0, double velini, double velfin){
-  //
-  double lmax = max(abs(xff[0]-xfi[0]),abs(xff[1]-xfi[1]));
-  lmax = max(lmax,abs(xff[2]-xfi[2]));
-  lmax = max(lmax,abs(xff[3]-xfi[3]));
-  lmax = max(lmax,abs(xff[4]-xfi[4]));
-  lmax = max(lmax,abs(xff[5]-xfi[5]));
-  unsigned long preMil = micros();
-  double l = 0.0;
-  vel0 = min(vel0,sqrt(lmax*acc0+0.5*velini*velini+0.5*velfin*velfin));
-  unsigned long curMil = micros();
-  unsigned long t = 0;
-  double tap = vel0/acc0-velini/acc0;
-  double lap = velini*tap+acc0*tap*tap/2.0;
-  double lcsp = lmax-(vel0*vel0/2.0/acc0-velfin*velfin/2.0/acc0);
-  double tcsp = (lcsp-lap)/vel0+tap;
-  double tfin = vel0/acc0-velfin/acc0+tcsp;
-  while (curMil-preMil<=tfin){
-    t = curMil-preMil;
-    //acceleration phase
-    if (t<=tap) {
-      l = velini*t+acc0*t*t/2.0;
-    }
-    //contant maximum speed phase
-    if (t>tap && t<=tcsp) {
-      l = lap+vel0*(t-tap);
-    }
-    //deceleration phase
-    if (t>tcsp) {
-      l = lcsp+vel0*(t-tcsp)-acc0*(t-tcsp)*(t-tcsp)/2.0;
-    }
-  
-    //trajectory x and y as a function of l
-    double Xx[6];
-    Xx[0]=xfi[0]+(xff[0]-xfi[0])/lmax*l;
-    Xx[1]=xfi[1]+(xff[1]-xfi[1])/lmax*l;
-    Xx[2]=xfi[2]+(xff[2]-xfi[2])/lmax*l;
-    Xx[3]=xfi[3]+(xff[3]-xfi[3])/lmax*l;
-    Xx[4]=xfi[4]+(xff[4]-xfi[4])/lmax*l;
-    Xx[5]=xfi[5]+(xff[5]-xfi[5])/lmax*l;
-    
-    goTrajectory(Xx);
-    curMil = micros();
-  }
-}
-
-void Arm::goTrajectory(double* Jf){
-  
-  //execution
-  int delF=2;
-  // joint #1
-  if (Jf[0]-this->joint[0]>0.0) { // positive direction of rotation
-    digitalWrite(DIR1_PIN, HIGH);
-    while (Jf[0]-this->joint[0]>dl1/2.0) {
-      if (PULstat[0] == 0) {
-        digitalWrite(PUL1_PIN, HIGH);
-        PULstat[0] = 1;
-      } else {
-        digitalWrite(PUL1_PIN, LOW);
-        PULstat[0] = 0;
-      }
-      //this->joint[0] = Jf[0];
-      this->joint[0] = this->joint[0] + dl1/2.0;
-      if (Jf[0]-this->joint[0]>dl1/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  } else {
-    digitalWrite(DIR1_PIN, LOW);
-    while (-Jf[0]+this->joint[0]>dl1/2.0) {
-      if (PULstat[0] == 0) {
-        digitalWrite(PUL1_PIN, HIGH);
-        PULstat[0] = 1;
-      } else {
-        digitalWrite(PUL1_PIN, LOW);
-        PULstat[0] = 0;
-      }
-      //this->joint[0] = Jf[0];
-      this->joint[0] = this->joint[0] - dl1/2.0;
-      if (-Jf[0]+this->joint[0]>dl1/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  }
-  // joint #2
-  if (Jf[1]-this->joint[1]>0.0) { // positive direction of rotation
-    digitalWrite(DIR2_PIN, HIGH);
-    while (Jf[1]-this->joint[1]>dl2/2.0) {
-      if (PULstat[1] == 0) {
-        digitalWrite(PUL2_PIN, HIGH);
-        PULstat[1] = 1;
-      } else {
-        digitalWrite(PUL2_PIN, LOW);
-        PULstat[1] = 0;
-      }
-      //this->joint[1] = Jf[1];
-      this->joint[1] = this->joint[1] + dl2/2.0;
-      if (Jf[1]-this->joint[1]>dl2/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  } else {
-    digitalWrite(DIR2_PIN, LOW);
-    while (-Jf[1]+this->joint[1]>dl2/2.0) {
-      if (PULstat[1] == 0) {
-        digitalWrite(PUL2_PIN, HIGH);
-        PULstat[1] = 1;
-      } else {
-        digitalWrite(PUL2_PIN, LOW);
-        PULstat[1] = 0;
-      }
-      //this->joint[1] = Jf[1];
-      this->joint[1] = this->joint[1] - dl2/2.0;
-      if (-Jf[1]+this->joint[1]>dl2/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  }
-  // joint #3
-  if (Jf[2]-this->joint[2]>0.0) { // positive direction of rotation
-    digitalWrite(DIR3_PIN, HIGH);
-    while (Jf[2]-this->joint[2]>dl3/2.0) {
-      if (PULstat[2] == 0) {
-        digitalWrite(PUL3_PIN, HIGH);
-        PULstat[2] = 1;
-      } else {
-        digitalWrite(PUL3_PIN, LOW);
-        PULstat[2] = 0;
-      }
-      //this->joint[2] = Jf[2];
-      this->joint[2] = this->joint[2] + dl3/2.0;
-      if (Jf[2]-this->joint[2]>dl3/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  } else {
-    digitalWrite(DIR3_PIN, LOW);
-    while (-Jf[2]+this->joint[2]>dl3/2.0) {
-      if (PULstat[2] == 0) {
-        digitalWrite(PUL3_PIN, HIGH);
-        PULstat[2] = 1;
-      } else {
-        digitalWrite(PUL3_PIN, LOW);
-        PULstat[2] = 0;
-      }
-      //this->joint[2] = Jf[2];
-      this->joint[2] = this->joint[2] - dl3/2.0;
-      if (-Jf[2]+this->joint[2]>dl3/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  }
-  // joint #4
-  if (Jf[3]-this->joint[3]>0.0) { // positive direction of rotation
-    digitalWrite(DIR4_PIN, HIGH);
-    while (Jf[3]-this->joint[3]>dl4/2.0) {
-      if (PULstat[3] == 0) {
-        digitalWrite(PUL4_PIN, HIGH);
-        PULstat[3] = 1;
-      } else {
-        digitalWrite(PUL4_PIN, LOW);
-        PULstat[3] = 0;
-      }
-      //this->joint[3] = Jf[3];
-      this->joint[3] = this->joint[3] + dl4/2.0;
-      if (Jf[3]-this->joint[3]>dl4/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  } else {
-    digitalWrite(DIR4_PIN, LOW);
-    while (-Jf[3]+this->joint[3]>dl4/2.0) {
-      if (PULstat[3] == 0) {
-        digitalWrite(PUL4_PIN, HIGH);
-        PULstat[3] = 1;
-      } else {
-        digitalWrite(PUL4_PIN, LOW);
-        PULstat[3] = 0;
-      }
-      //this->joint[3] = Jf[3];
-      this->joint[3] = this->joint[3] - dl4/2.0;
-      if (-Jf[3]+this->joint[3]>dl4/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  }
-  // joint #5
-  if (Jf[4]-this->joint[4]>0.0) { // positive direction of rotation
-    digitalWrite(DIR5_PIN, HIGH);
-    while (Jf[4]-this->joint[4]>dl5/2.0) {
-      if (PULstat[4] == 0) {
-        digitalWrite(PUL5_PIN, HIGH);
-        PULstat[4] = 1;
-      } else {
-        digitalWrite(PUL5_PIN, LOW);
-        PULstat[4] = 0;
-      }
-      //this->joint[4] = Jf[4];
-      this->joint[4] = this->joint[4] + dl5/2.0;
-      if (Jf[4]-this->joint[4]>dl5/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  } else {
-    digitalWrite(DIR5_PIN, LOW);
-    while (-Jf[4]+this->joint[4]>dl5/2.0) {
-      if (PULstat[4] == 0) {
-        digitalWrite(PUL5_PIN, HIGH);
-        PULstat[4] = 1;
-      } else {
-        digitalWrite(PUL5_PIN, LOW);
-        PULstat[4] = 0;
-      }
-      //this->joint[4] = Jf[4];
-      this->joint[4] = this->joint[4] - dl5/2.0;
-      if (-Jf[4]+this->joint[4]>dl5/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  }
-  // joint #6
-  if (Jf[5]-this->joint[5]>0.0) { // positive direction of rotation
-    digitalWrite(DIR6_PIN, HIGH);
-    while (Jf[5]-this->joint[5]>dl6/2.0) {
-      if (PULstat[5] == 0) {
-        digitalWrite(PUL6_PIN, HIGH);
-        PULstat[5] = 1;
-      } else {
-        digitalWrite(PUL6_PIN, LOW);
-        PULstat[5] = 0;
-      }
-      //this->joint[5] = Jf[5];
-      this->joint[5] = this->joint[5] + dl6/2.0;
-      if (Jf[5]-this->joint[5]>dl6/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  } else {
-    digitalWrite(DIR6_PIN, LOW);
-    while (-Jf[5]+this->joint[5]>dl6/2.0) {
-      if (PULstat[5] == 0) {
-        digitalWrite(PUL6_PIN, HIGH);
-        PULstat[5] = 1;
-      } else {
-        digitalWrite(PUL6_PIN, LOW);
-        PULstat[5] = 0;
-      }
-      //this->joint[5] = Jf[5];
-      this->joint[5] = this->joint[5] - dl6/2.0;
-      if (-Jf[5]+this->joint[5]>dl6/2.0) {
-        delayMicroseconds(delF);
-      }
-    }
-  }
-}
-
 void Arm::InverseK(double* Xik, double* Jik)
 {
   // inverse kinematics

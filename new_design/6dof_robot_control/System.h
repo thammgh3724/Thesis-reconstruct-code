@@ -31,14 +31,11 @@ class System {
 
     private: 
         // attributes as static variables using for store array
-        double output_arm6_mannual_1[6];
-        double output_arm6_mannual_2[6];
-        double output_arm6_auto_1[6];
-        double output_arm6_auto_2[6];
-        double output_arm6_auto_3[6];
+        double gamepad_data[6];
+        double nextPosition_data[6];
+        double model_data[6];
         double output_slider_manual;
         double output_slider_auto;
-        double output_arm2[2];
 
     private:
         void distributeAction();
