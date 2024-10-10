@@ -10,9 +10,9 @@ Slider::~Slider(){};
 int Slider::onStart(){
     // go home here
     this->position = 0;
-    if(inductiveSrDetect() == HIGH) return 0;
+    if(inductiveSrDetect() == LOW) return 0;
     digitalWrite(this->DIR_PINS,HIGH);
-    while (inductiveSrDetect() != HIGH){
+    while (inductiveSrDetect() != LOW){
       digitalWrite(this->PUL_PINS,HIGH);
       this->PULstat = 1;
       delayMicroseconds(250);
@@ -45,7 +45,7 @@ int Slider::inductiveSrDetect() {
 }
 
 void Slider::manualMove(double input){
-    if ( (input >= 0.9) && (input <= 1.1) && (this->position + 1 <= MAX_POSITION) ) {
+    if ( (input >= 0.9) && (input <= 1.1) && (this->position -1 >= MIN_POSITION) ) {
       //Rotate positive direction
       digitalWrite(this->DIR_PINS, HIGH);
       if (PULstat == 0) {
@@ -55,9 +55,9 @@ void Slider::manualMove(double input){
         digitalWrite(this->PUL_PINS, LOW);
         PULstat = 0;
       }
-      this->position = this->position + 1;
+      this->position = this->position - 1;
     } 
-    else if ( (input >= 1.9) && (input <= 2.1) && (this->position - 1 >= MIN_POSITION )) {
+    else if ( (input >= 1.9) && (input <= 2.1) && (this->position + 1 <= MAX_POSITION )) {
       //Rotate negative direction
       digitalWrite(this->DIR_PINS, LOW);
       if (PULstat == 0) {
@@ -67,7 +67,7 @@ void Slider::manualMove(double input){
         digitalWrite(this->PUL_PINS, LOW);
         this->PULstat = 0;
       }
-      this->position = this->position - 1;
+      this->position = this->position + 1;
     }
 }
 int Slider::validatePosition(double input){
