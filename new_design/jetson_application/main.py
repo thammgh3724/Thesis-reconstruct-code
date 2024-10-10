@@ -65,7 +65,7 @@ def main():
         # Enter gamepad control loop
         while True:
             # Check for new input from gamepad
-            print(f"Size of write queu: {write_serial.messageQueue.qsize()}")
+            print(f"Size of write queue: {write_serial.messageQueue.qsize()}")
             if gamepad_handler.newValue: 
                 print("NEW VALUE")
                 slider_signal = gamepad_handler.getSlidersSignal()
