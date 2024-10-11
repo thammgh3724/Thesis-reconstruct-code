@@ -64,26 +64,7 @@
 #define SLIDER_AUTO_MOVE_DETECT_HAND_ACTION     13
 #define SLIDER_AUTO_MOVE_POSITION_ACTION        14
 
-//{x, y, z, ZYZ Euler angles} for Home position
-const float Xhome[6] = { 164.5, 0.0, 241.0, 90.0, 180.0, -90.0 };
-
-//Angle per step move = microstep / gear_ratio
-const double dl1 = 360.0/200.0/32.0/4.8;
-const double dl2 = 360.0/200.0/32.0/4.0;
-const double dl3 = 360.0/200.0/32.0/5.0;
-const double dl4 = 360.0/200.0/16.0/2.9;
-const double dl5 = 360.0/200.0/16.0/2.1;
-const double dl6 = 360.0/200.0/16.0/1.0;
-
-const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};
-
 //Debug flag
 #define DEBUG
-
-/*
-250 <= x <= 220
--160 <= y <= 160
-49 <= z <= 292
-*/
 
 #endif

@@ -176,18 +176,28 @@ class GamepadHandler(threading.Thread):
             while True:
                 for event in pygame.event.get():
                     if event.type == pygame.JOYBUTTONDOWN:
+                        self.newValue = True
                         self.handle_button_press(event.button)
-                    if event.type == pygame.JOYBUTTONUP:
+                    elif event.type == pygame.JOYBUTTONUP:
+                        self.newValue = False
                         self.handle_button_release(event.button)
-                    if event.type == pygame.JOYAXISMOTION:
+                    elif event.type == pygame.JOYAXISMOTION:
                         self.handle_axis_motion(event.axis, event.value)
-                    if event.type == pygame.JOYHATMOTION:
+                        if self.buffer == [0] * len(self.buffer):
+                            self.newValue = False
+                        else:
+                            self.newValue = True
+                    elif event.type == pygame.JOYHATMOTION:
                         x_value, y_value = event.value
                         self.handle_dpad_x(x_value)
                         self.handle_dpad_y(y_value)
-
+                        if (x_value == 0 and y_value == 0):
+                            self.newValue = False
+                        else: 
+                            self.newValue = True
+                    else:
+                        self.newValue = False
                 # Update newValue flag if there are changes
-                self.newValue = True  
                 time.sleep(0.01)
 
 if __name__ == "__main__":

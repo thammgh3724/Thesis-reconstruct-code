@@ -41,95 +41,47 @@ void System::arm_fsm(){
         if(this->nextArmAction == ARM_INIT_ACTION)
         {
             this->arm->onStart(); // cannot interrupt
-            this->arm->setState(HOME);
+            this->nextArmAction == ARM_STOP_ACTION;
+            this->arm->setState(STOP);
             #ifdef DEBUG
-            this->sender->sendData("!GO STATE HOME");
+            this->sender->sendData("!GO STATE STOP");
             #endif
         }
         else{
         }
         break;
-    case HOME:
-        // waiting new action
-        #ifdef DEBUG
-        if (count == 1){
-            String nxt = "! next arm action :" + String(this->nextArmAction);
-            count = 0;
-            this->sender->sendData(nxt);
-        }
-        #endif
-        if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION){
-            this->arm->calculateTotalSteps(this->output_arm6_auto_2, this->output_arm6_auto_1, this->output_arm6_auto_3);//rename fuck
-            #ifdef DEBUG
-            String data_print = "!Total Step: ";
-            #endif
-            if(this->arm->validateJoint(this->output_arm6_auto_3) == 0){
-                //can move
-                this->arm->setState(GENERAL_AUTO_MOVING);
-                for(int i = 0; i < 6; i++){
-                    this->output_arm6_auto_3[i] = 0.0;
-                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 4000
-                    #ifdef DEBUG
-                    data_print += String(this->output_arm6_auto_2[i]);
-                    data_print += ":";
-                    #endif
-                }
-                #ifdef DEBUG
-                this->sender->sendData(data_print);
-                this->sender->sendData("!GO AUTO POSITION");
-                #endif
-            }
-        }
-        else if (this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION){
-            this->arm->setState(DETECT_HAND_AUTO_MOVING);
-        }
-        else if (this->nextArmAction ==  ARM_MANUAL_MOVE_DISTANCE_ACTION){
-            this->arm->setState(MANUAL_MOVING);
-            this->timer_arm[0]->setLoopAction(2000, micros()); //int delValue = 4000
-            #ifdef DEBUG
-            this->sender->sendData("!GO MANUAL");
-            #endif
-        }
-        else if (this->nextArmAction == ARM_STOP_ACTION){
-            this->arm->setState(STOP);
-            #ifdef DEBUG
-            this->sender->sendData("!STOP");
-            #endif
-        }
-        else {
-        }
-        #ifdef DEBUG
-        if (count == 1){
-            String nxt = "! next arm action :" + String(this->nextArmAction);
-            count = 0;
-            this->sender->sendData(nxt);
-        }
-        #endif
-        break;
     case MANUAL_MOVING:
         if(this->nextArmAction == ARM_MANUAL_MOVE_DISTANCE_ACTION){
             this->arm->setState(MANUAL_MOVING);
             if(this->timer_arm[0]->checkTimeoutAction()) {
-                this->arm->manualMove(this->output_arm6_mannual_1);
+                this->arm->manualMove(this->gamepad_data);
             }
         }
         else if(this->nextArmAction == ARM_STOP_ACTION){
             this->arm->setState(STOP);
+            #ifdef DEBUG
+            this->sender->sendData("!GO STATE STOP");
+            #endif
         }
         else {
         }
         break;
     case GENERAL_AUTO_MOVING:
-        // #ifdef DEBUG
-        //     this->sender->sendData("!in auto moving");
-        // #endif
-
         if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION)
         {
-            this->arm->setState(GENERAL_AUTO_MOVING);
-            for(int i = 0; i < 6; i++){
-                if(this->timer_arm[i]->checkTimeoutAction()) {
-                    this->arm->generalAutoMove(i, this->output_arm6_auto_2, this->output_arm6_auto_3, this->timer_arm[i]->timeout);
+            if(this->arm->isAutoMoveDone()) {
+                this->nextArmAction == ARM_STOP_ACTION;
+                this->arm->setState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!GO STATE STOP");
+                #endif
+            }
+            else {
+                this->arm->setState(GENERAL_AUTO_MOVING);
+                for(int i = 0; i < 6; i++){
+                    if(this->timer_arm[i]->checkTimeoutAction()) {
+                        this->arm->generalAutoMove(i, this->timer_arm[i]->timeout);
+                    }
                 }
             }
         }
@@ -145,26 +97,34 @@ void System::arm_fsm(){
     case STOP:
         // waiting new action
         if (this->nextArmAction == ARM_GOHOME_ACTION){
-            
+            this->arm->setNextPosition(this->arm->home_position);
+            this->arm->setNextJoint(this->arm->home_joint);
+            this->arm->calculateTotalSteps();
+            double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            this->arm->setNumberStepDone(initNumberStepsDone);
+            this->arm->initjointAutoMoveDone();
+            this->arm->setState(GENERAL_AUTO_MOVING);
+            for(int i = 0; i < 6; i++){
+                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+            }
+            #ifdef DEBUG
+            this->sender->sendData("!GO HOME");
+            #endif
         }
         else if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION){
-            this->arm->calculateTotalSteps(this->output_arm6_auto_2, this->output_arm6_auto_1, this->output_arm6_auto_3);//rename fuck
-            #ifdef DEBUG
-            String data_print = "!Total Step: ";
-            #endif
-            if(this->arm->validateJoint(this->output_arm6_auto_3) == 0){
+            this->arm->setNextPosition(this->nextPosition_data);
+            this->arm->calculateNextJoint();
+            if(this->arm->validateNextJoint() == 0){
                 //can move
+                this->arm->calculateTotalSteps();
+                double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                this->arm->setNumberStepDone(initNumberStepsDone);
+                this->arm->initjointAutoMoveDone();
                 this->arm->setState(GENERAL_AUTO_MOVING);
                 for(int i = 0; i < 6; i++){
-                    this->output_arm6_auto_3[i] = 0.0;
-                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 4000
-                    #ifdef DEBUG
-                    data_print += String(this->output_arm6_auto_2[i]);
-                    data_print += ":";
-                    #endif
+                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
                 }
                 #ifdef DEBUG
-                this->sender->sendData(data_print);
                 this->sender->sendData("!GO AUTO POSITION");
                 #endif
             }
@@ -185,11 +145,6 @@ void System::arm_fsm(){
     default:
         break;
     }
-    #ifdef DEBUG
-      String curState = "State: ";
-      curState += String(this->arm->getCurrentState());
-      this->sender->sendData(curState);
-    #endif
 }
 
 void System::slider_fsm(){
@@ -307,17 +262,17 @@ void System::distributeAction(){
         break;
     case ARM_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextArmAction = ARM_MANUAL_MOVE_DISTANCE_ACTION;
-        this->listener->consumeCommand(ARM_MANUAL_MOVE_DISTANCE_ACTION, this->output_arm6_mannual_1);
+        this->listener->consumeCommand(ARM_MANUAL_MOVE_DISTANCE_ACTION, this->gamepad_data);
         this->nextAction = NO_ACTION;
         break;
     case ARM_AUTO_MOVE_POSITION_ACTION:
         this->nextArmAction = ARM_AUTO_MOVE_POSITION_ACTION;
-        this->listener->consumeCommand(ARM_AUTO_MOVE_POSITION_ACTION, this->output_arm6_auto_1);
+        this->listener->consumeCommand(ARM_AUTO_MOVE_POSITION_ACTION, this->nextPosition_data);
         this->nextAction = NO_ACTION;
         break;
     case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
         this->nextArmAction = ARM_AUTO_MOVE_DETECT_HAND_ACTION;
-        this->listener->consumeCommand(ARM_AUTO_MOVE_DETECT_HAND_ACTION, this->output_arm2);
+        this->listener->consumeCommand(ARM_AUTO_MOVE_DETECT_HAND_ACTION, this->model_data);
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
