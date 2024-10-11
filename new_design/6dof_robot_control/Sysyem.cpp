@@ -31,6 +31,7 @@ void System::communicate(){
     this->listener->readData(); // read 1 char per loop, command ready if have "#"
     this->nextAction = this->listener->parseCommandToAction(); // if command ready -> read cmd and return action need to do 
     this->distributeAction(); // consume command (get needed data and reset cmd to "") and distribute action to the right object 
+    // and send ACK here
 }
 
 void System::arm_fsm(){
@@ -133,7 +134,7 @@ void System::arm_fsm(){
         }
         else if (this->nextArmAction == ARM_MANUAL_MOVE_DISTANCE_ACTION){
             this->arm->setState(MANUAL_MOVING);
-            this->timer_arm[0]->setLoopAction(1500, micros()); //int delValue = 4000
+            this->timer_arm[0]->setLoopAction(1000, micros()); //int delValue = 4000
             #ifdef DEBUG
             this->sender->sendData("!GO MANUAL");
             #endif
@@ -238,7 +239,7 @@ void System::slider_fsm(){
     }
 }
 
-void System::distributeAction(){
+void System::distributeAction(){ // send ACK here
     switch (this->nextAction)
     {
     case INIT_ACTION:
@@ -246,11 +247,13 @@ void System::distributeAction(){
         this->nextSliderAction = SLIDER_INIT_ACTION;
         this->listener->consumeCommand(ARM_INIT_ACTION, nullptr);
         this->listener->consumeCommand(SLIDER_INIT_ACTION,nullptr);
+        this->sender->sendACK("!I#");
         this->nextAction = NO_ACTION;
         break;
     case ARM_GOHOME_ACTION:
         this->nextArmAction = ARM_GOHOME_ACTION;
         this->listener->consumeCommand(ARM_GOHOME_ACTION, nullptr);
+        this->sender->sendACK("!AH#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_GOHOME_ACTION:
@@ -260,36 +263,42 @@ void System::distributeAction(){
     case ARM_STOP_ACTION:
         this->nextArmAction = ARM_STOP_ACTION;
         this->listener->consumeCommand(ARM_STOP_ACTION, nullptr);
+        this->sender->sendACK("!AS#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_STOP_ACTION:
         this->nextSliderAction = SLIDER_STOP_ACTION;
         this->listener->consumeCommand(SLIDER_STOP_ACTION,nullptr);
+        this->sender->sendACK("!SS#");
         this->nextAction = NO_ACTION;
-        break;
     case ARM_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextArmAction = ARM_MANUAL_MOVE_DISTANCE_ACTION;
         this->listener->consumeCommand(ARM_MANUAL_MOVE_DISTANCE_ACTION, this->gamepad_data);
+        this->sender->sendACK("!M#");
         this->nextAction = NO_ACTION;
         break;
     case ARM_AUTO_MOVE_POSITION_ACTION:
         this->nextArmAction = ARM_AUTO_MOVE_POSITION_ACTION;
         this->listener->consumeCommand(ARM_AUTO_MOVE_POSITION_ACTION, this->nextPosition_data);
+        this->sender->sendACK("!A#");
         this->nextAction = NO_ACTION;
         break;
     case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
         this->nextArmAction = ARM_AUTO_MOVE_DETECT_HAND_ACTION;
         this->listener->consumeCommand(ARM_AUTO_MOVE_DETECT_HAND_ACTION, this->model_data);
+        this->sender->sendACK("!HA#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextSliderAction = SLIDER_MANUAL_MOVE_DISTANCE_ACTION;
         this->listener->consumeCommand(SLIDER_MANUAL_MOVE_DISTANCE_ACTION,&this->output_slider_manual);
+        this->sender->sendACK("!S#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_AUTO_MOVE_FREE_ACTION:
         this->nextSliderAction = SLIDER_AUTO_MOVE_FREE_ACTION;
         this->listener->consumeCommand(SLIDER_AUTO_MOVE_FREE_ACTION,&this->output_slider_auto);
+        this->sender->sendACK("!X#");
         this->nextAction = NO_ACTION;
         break;
     default:
