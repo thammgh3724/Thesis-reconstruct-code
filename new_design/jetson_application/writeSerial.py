@@ -36,7 +36,7 @@ class WriteSerialObject(threading.Thread):
         threading.Thread.__init__(self)
         self.serialObj = serialObj
         self.messageQueue = queue.Queue(maxsize=QUEUE_MAX_SIZE)
-        self.lastSentMessage = Message("!#")
+        self.lastSentMessage = Message("!#")  # Placeholder for last sent message
         self.retryCount = 0
         self.isRunning = False
         self.ack_event = ack_event
@@ -45,8 +45,10 @@ class WriteSerialObject(threading.Thread):
         return self.messageQueue.qsize()
 
     def addMessage(self, message: 'Message'):
+        # Only add if queue is not full and message is different from last sent
         if not self.messageQueue.full():
-            self.messageQueue.put(message)
+            if not self.lastSentMessage.compareMessage(message):
+                self.messageQueue.put(message)
         else:
             print("Queue is full, unable to add message")
 
@@ -54,36 +56,23 @@ class WriteSerialObject(threading.Thread):
         self.isRunning = False
 
     def run(self):
-        self.ack_event.set()
+        self.ack_event.set()  # Set ACK initially to prevent stalling
         self.isRunning = True
         while self.isRunning:
             if not self.messageQueue.empty():
-                currentMessage = self.messageQueue.queue[0]
+                currentMessage = self.messageQueue.queue[0]  # Get the top message
+                
                 if not self.lastSentMessage.compareMessage(currentMessage):
                     self.serialObj.write(currentMessage.encodeMessage())
                     self.lastSentMessage = copy.deepcopy(currentMessage)
-                    print(f"Sent message: {currentMessage.getMessage()}")
-                    self.messageQueue.get()  
-                else:
-                    #print(f"Duplicate message found, skipping and removing: {currentMessage.getMessage()}")
-                    self.messageQueue.get() 
-                # Wait for ACK or retry
-                # ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1000.0)
-                # if not ack_received:
-                #     self.retryCount += 1
-                #     if self.retryCount >= MAX_RETRY:
-                #         print(f"Failed to send mes sage after {MAX_RETRY} retries, dropping message")
-                #         self.messageQueue.get()
-                #         self.retryCount = 0
-                #     else:
-                #         print(f"Retrying to send message: {currentMessage.getMessage()}")
-                # else:
-                #     self.messageQueue.get()
-                #     self.retryCount = 0
-                #     self.ack_event.clear()  # Reset ACK status for next message
-                #     # print("ACK received, moving to next message")
+
+                # Remove the message from the queue after sending or skipping
+                self.messageQueue.get()
+                
+                # Placeholder for ACK and retry logic
+                # You can implement ACK wait and retry logic here if needed
             else:
-                time.sleep(0.1)
+                time.sleep(0.1)  # Sleep if queue is empty to avoid busy-waiting
 
 if __name__ == "__main__":
     pass
