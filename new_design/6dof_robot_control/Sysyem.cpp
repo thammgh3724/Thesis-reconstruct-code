@@ -133,7 +133,7 @@ void System::arm_fsm(){
         }
         else if (this->nextArmAction == ARM_MANUAL_MOVE_DISTANCE_ACTION){
             this->arm->setState(MANUAL_MOVING);
-            this->timer_arm[0]->setLoopAction(2000, micros()); //int delValue = 4000
+            this->timer_arm[0]->setLoopAction(1500, micros()); //int delValue = 4000
             #ifdef DEBUG
             this->sender->sendData("!GO MANUAL");
             #endif
@@ -253,10 +253,17 @@ void System::distributeAction(){
         this->listener->consumeCommand(ARM_GOHOME_ACTION, nullptr);
         this->nextAction = NO_ACTION;
         break;
-    case STOP_ACTION:
+    case SLIDER_GOHOME_ACTION:
+        this->nextSliderAction = SLIDER_GOHOME_ACTION;
+        this->listener->consumeCommand(SLIDER_GOHOME_ACTION, nullptr);
+        this->nextAction = NO_ACTION;
+    case ARM_STOP_ACTION:
         this->nextArmAction = ARM_STOP_ACTION;
-        this->nextSliderAction = SLIDER_STOP_ACTION;
         this->listener->consumeCommand(ARM_STOP_ACTION, nullptr);
+        this->nextAction = NO_ACTION;
+        break;
+    case SLIDER_STOP_ACTION:
+        this->nextSliderAction = SLIDER_STOP_ACTION;
         this->listener->consumeCommand(SLIDER_STOP_ACTION,nullptr);
         this->nextAction = NO_ACTION;
         break;

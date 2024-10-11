@@ -112,8 +112,14 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
     else if(this->command == "agohome"){
       return ARM_GOHOME_ACTION;
     }
+    else if (this->command == "sgohome"){
+      return SLIDER_GOHOME_ACTION;
+    }
     else if(this->command == "astop"){
-      return STOP_ACTION;
+      return ARM_STOP_ACTION;
+    }
+    else if( this->command == "sstop"){
+      return SLIDER_STOP_ACTION;
     }
     // !0:0:0:0:0:0A#
     else if(this->command.endsWith("A")){
