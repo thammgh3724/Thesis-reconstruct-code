@@ -38,8 +38,7 @@ void System::arm_fsm(){
     {
     case INIT:
         // waiting init action
-        if(this->nextArmAction == ARM_INIT_ACTION)
-        {
+        if (this->nextArmAction == ARM_INIT_ACTION){
             this->arm->onStart(); // cannot interrupt
             this->nextArmAction == ARM_STOP_ACTION;
             this->arm->setState(STOP);
@@ -158,11 +157,10 @@ void System::slider_fsm(){
             this->sender->sendData("!SLIDER INIT");
             #endif
             int tmp = this->slider1->onStart(); // cannot interrupt
-            if ( tmp == 0){
-                #ifdef DEBUG
-                this->sender->sendData("!return 0");
-                #endif
-            }
+            #ifdef DEBUG
+            String tmp_str = "!return count :" + String(tmp);
+            this->sender->sendData(tmp_str);
+            #endif
             this->slider1->setState(HOME);
         }
         else{
@@ -176,7 +174,7 @@ void System::slider_fsm(){
                 //can move
                 this->slider1->setState(GENERAL_AUTO_MOVING);
                 this->output_slider_auto = 0.0;
-                this->timer_slider->setLoopAction(4000, micros()); 
+                this->timer_slider->setLoopAction(400, micros()); 
             }
         }
         else if (this->nextSliderAction ==  SLIDER_AUTO_MOVE_DETECT_HAND_ACTION){
@@ -184,7 +182,7 @@ void System::slider_fsm(){
         }
         else if (this->nextSliderAction ==  SLIDER_MANUAL_MOVE_DISTANCE_ACTION){
             this->slider1->setState(MANUAL_MOVING);
-            this->timer_slider->setLoopAction(400, micros()); //int delValue = 400
+            this->timer_slider->setLoopAction(100, micros()); //int delValue = 400
         }
         else if (this->nextSliderAction == SLIDER_STOP_ACTION){
             this->slider1->setState(STOP);
@@ -230,7 +228,7 @@ void System::slider_fsm(){
         }
         else if (this->nextSliderAction ==  SLIDER_MANUAL_MOVE_DISTANCE_ACTION){
             this->slider1->setState(MANUAL_MOVING);
-            this->timer_slider->setLoopAction(400, micros()); //int delValue = 4000
+            this->timer_slider->setLoopAction(100, micros()); //int delValue = 4000
         }
         else{
         }
@@ -255,9 +253,11 @@ void System::distributeAction(){
         this->listener->consumeCommand(ARM_GOHOME_ACTION, nullptr);
         this->nextAction = NO_ACTION;
         break;
-    case ARM_STOP_ACTION:
+    case STOP_ACTION:
         this->nextArmAction = ARM_STOP_ACTION;
+        this->nextSliderAction = SLIDER_STOP_ACTION;
         this->listener->consumeCommand(ARM_STOP_ACTION, nullptr);
+        this->listener->consumeCommand(SLIDER_STOP_ACTION,nullptr);
         this->nextAction = NO_ACTION;
         break;
     case ARM_MANUAL_MOVE_DISTANCE_ACTION:

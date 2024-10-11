@@ -86,6 +86,8 @@ def main():
                 if slider_signal != [0] * len(slider_signal):
                     slideMsg = Message(format_gamepad_message(slider_signal, "S"))
                     write_serial.addMessage(slideMsg)
+                else: 
+                    write_serial.addMessage(Message("!sstop#"))
 
                 #print(f"Message is: {message_content}")
                 message = Message(message_content)

@@ -48,21 +48,36 @@
 #define DETECT_HAND_AUTO_MOVING 5
 
 // Define action to do
-#define NO_ACTION    0
-#define UNKNOW_ACTION    1
-#define INIT_ACTION    2 // use for 2 object
-#define ARM_GOHOME_ACTION    3
-#define ARM_AUTO_MOVE_POSITION_ACTION    4
-#define ARM_AUTO_MOVE_DETECT_HAND_ACTION    5
-#define ARM_MANUAL_MOVE_DISTANCE_ACTION    6
-#define SLIDER_MANUAL_MOVE_DISTANCE_ACTION    7
-#define SLIDER_AUTO_MOVE_FREE_ACTION    8
-#define ARM_STOP_ACTION    9
-#define SLIDER_STOP_ACTION    10
-#define ARM_INIT_ACTION       11
-#define SLIDER_INIT_ACTION    12
+#define NO_ACTION                               0
+#define UNKNOW_ACTION                           1
+#define INIT_ACTION                             2 // use for 2 object
+#define ARM_GOHOME_ACTION                       3
+#define ARM_AUTO_MOVE_POSITION_ACTION           4
+#define ARM_AUTO_MOVE_DETECT_HAND_ACTION        5
+#define ARM_MANUAL_MOVE_DISTANCE_ACTION         6
+#define SLIDER_MANUAL_MOVE_DISTANCE_ACTION      7
+#define SLIDER_AUTO_MOVE_FREE_ACTION            8
+#define SLIDER_STOP_ACTION                      10
+#define ARM_INIT_ACTION                         11
+#define SLIDER_INIT_ACTION                      12
 #define SLIDER_AUTO_MOVE_DETECT_HAND_ACTION     13
 #define SLIDER_AUTO_MOVE_POSITION_ACTION        14
+#define STOP_ACTION                             15
+#define ARM_STOP_ACTION                         9
+#define SLIDER_STOP_ACTION                      16
+
+//{x, y, z, ZYZ Euler angles} for Home position
+const float Xhome[6] = { 164.5, 0.0, 241.0, 90.0, 180.0, -90.0 };
+
+//Angle per step move = microstep / gear_ratio
+const double dl1 = 360.0/200.0/32.0/4.8;
+const double dl2 = 360.0/200.0/32.0/4.0;
+const double dl3 = 360.0/200.0/32.0/5.0;
+const double dl4 = 360.0/200.0/16.0/2.9;
+const double dl5 = 360.0/200.0/16.0/2.1;
+const double dl6 = 360.0/200.0/16.0/1.0;
+
+const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};
 
 //Debug flag
 #define DEBUG

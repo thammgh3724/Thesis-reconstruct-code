@@ -113,7 +113,7 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
       return ARM_GOHOME_ACTION;
     }
     else if(this->command == "astop"){
-      return ARM_STOP_ACTION;
+      return STOP_ACTION;
     }
     // !0:0:0:0:0:0A#
     else if(this->command.endsWith("A")){
