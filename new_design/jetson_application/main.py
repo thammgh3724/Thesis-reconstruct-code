@@ -24,8 +24,10 @@ def main():
     serial_port = '/dev/ttyACM0'
     baud_rate = 115200
     serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
-    # Wait for the creation of serial object
+    
+    # Wait for the creation of the serial object to stabilize the connection
     time.sleep(10)
+    
     # Use ack_event to share ACK status between read and write threads
     ack_event = threading.Event()
     
@@ -39,26 +41,23 @@ def main():
     read_serial.start()
     write_serial.start()
 
-    write_serial.ack_event.set()
-    read_serial.ack_event.set()
-
     # Timer for STOP signal debounce
     last_stop_time = 0
     STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
 
     try:
-        # Send !init# to initialize the arm
+        # Send !init# to initialize the robotic arm
         init_message = Message("!init#")
         write_serial.addMessage(init_message)
         print("Sent initialization message: !init#")
-        time.sleep(10)
 
         # Wait for ACK I!# from Arduino
         while True:
             if ack_event.is_set():
                 print("Initialization ACK received: I!#")
+                ack_event.clear()  # Reset ACK event for next message
                 break
-            time.sleep(0.1)
+            time.sleep(0.1)  # Short delay to avoid busy-waiting
 
         print("Start controlling")
 
@@ -76,7 +75,7 @@ def main():
                     # Format the message based on mode
                     message_content = format_gamepad_message(buffer, "M")
 
-                    # If buffer contains all zeros, we send a STOP signal
+                    # If the buffer contains all zeros, send a STOP signal
                     if buffer == [0] * len(buffer):
                         current_time = time.time()
                         if current_time - last_stop_time > STOP_INTERVAL:
@@ -86,7 +85,7 @@ def main():
                         message = Message(message_content)
                         write_serial.addMessage(message)
 
-                    # Need time considering creating a thread for slider.
+                    # Need to consider creating a separate thread for sliders.
                     if slider_signal != [0] * len(slider_signal):
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
                         write_serial.addMessage(slideMsg)
