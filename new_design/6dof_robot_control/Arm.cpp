@@ -48,7 +48,7 @@ void Arm::onStart(){
   double output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
   //this->generalAutoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
   */
-  ForwardK(this->joint, this->position); // calculate Xcurr by FK
+  this->updateCurrentPosition();
   #ifdef DEBUG
   this->printCurrentJoint();
   this->printCurrentPos();
@@ -163,22 +163,22 @@ int Arm::validateNextJoint(){
   for (int i = 0; i < 6; ++i){
     switch (i){
       case 0:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[0] || this->nextJoint[i] < MIN_JOINT_ANGLE[0]) return 1;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[0] || this->nextJoint[i] < MIN_JOINT_ANGLE[0] || !isfinite(this->nextJoint[0])) return 1;
         break; 
       case 1:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[1] || this->nextJoint[i] < MIN_JOINT_ANGLE[1]) return 2;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[1] || this->nextJoint[i] < MIN_JOINT_ANGLE[1] || !isfinite(this->nextJoint[1])) return 2;
         break; 
       case 2:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[2] || this->nextJoint[i] < MIN_JOINT_ANGLE[2]) return 3;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[2] || this->nextJoint[i] < MIN_JOINT_ANGLE[2] || !isfinite(this->nextJoint[2])) return 3;
         break;
       case 3:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[3] || this->nextJoint[i] < MIN_JOINT_ANGLE[3]) return 4;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[3] || this->nextJoint[i] < MIN_JOINT_ANGLE[3] || !isfinite(this->nextJoint[3])) return 4;
         break;
       case 4:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[4] || this->nextJoint[i] < MIN_JOINT_ANGLE[4]) return 5;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[4] || this->nextJoint[i] < MIN_JOINT_ANGLE[4] || !isfinite(this->nextJoint[4])) return 5;
         break;
       case 5:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[5] || this->nextJoint[i] < MIN_JOINT_ANGLE[5]) return 6;
+        if (this->nextJoint[i] > MAX_JOINT_ANGLE[5] || this->nextJoint[i] < MIN_JOINT_ANGLE[5] || !isfinite(this->nextJoint[5])) return 6;
         break;
       default:
         break;
@@ -254,9 +254,14 @@ void Arm::calculateNextJoint() {
 
 void Arm::calculateTotalSteps(){
   for(int i = 0; i < 6; i++){ // calculate steps
-    this->numberStepToGo[i] = (this->nextJoint[i] - this->joint[i])/this->DL[i];
+    if( double_abs(this->nextJoint[i]) + double_abs(this->joint[i]) > 359.5) {
+      this->numberStepToGo[i] = 0; // dont rotate if need to rotate 1 circle - 360
+    }
+    else {
+      this->numberStepToGo[i] = (this->nextJoint[i] - this->joint[i])/this->DL[i];
+    }
   }
-} // validate before move
+}
 
 double Arm::double_abs(double num) {
   if ( num < 0.1 ) {
@@ -276,6 +281,10 @@ bool Arm::isAutoMoveDone(){
     if (this->jointAutoMoveDone[i] == 0) return 0;
   }
   return 1;
+}
+
+void Arm::updateCurrentPosition(){
+  ForwardK(this->joint, this->position);
 }
 
 void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, int accRate = 530){
@@ -331,13 +340,62 @@ void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, 
     data_print += String(i);
     data_print += " move done";
     this->sender->sendData(data_print);
-    ForwardK(this->joint, this->position);
+    this->updateCurrentPosition();
     this->printCurrentJoint();
     #endif
   }
 }
 
 /*************************************************/
+
+// void Arm::calculateNextPosition_detectHand(double* model_data){
+//   for (int i = 0; i < 6; i++) 
+//   {
+//       this->nextPosition[i] = this->position[i]; 
+//   }
+//   // caculate new position
+//   this->nextPosition[1] = this->nextPosition[1] + ( (-40.0/177.0)*(model_data[0]-320.0) );
+//   this->nextPosition[2] = this->nextPosition[2] + ( (-75.0/73.0)*(model_data[1]-240.0) );
+// }
+
+
+void Arm::calculateHorizontalNextPosition_detectHand(double* model_data){
+  for (int i = 0; i < 6; i++) 
+  {
+      this->nextPosition[i] = this->position[i]; 
+  }
+  // caculate new position
+  this->nextPosition[1] = this->nextPosition[1] + ( (-40.0/177.0)*(model_data[0]-320.0) );
+}
+
+void Arm::calculateHorizontalNextJoint_detectHand(){
+  InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
+  this->nextJoint[1] = this->position[1];
+  this->nextJoint[2] = this->position[2];
+  this->nextJoint[3] = this->position[3];
+  this->nextJoint[4] = this->position[4];
+  this->nextJoint[5] = this->position[5];
+  //Move only joint 1 in horizontal
+}
+
+void Arm::calculateLengthwiseNextPosition_detectHand(double* model_data){
+  for (int i = 0; i < 6; i++) 
+  {
+      this->nextPosition[i] = this->position[i]; 
+  }
+  // caculate new position
+  this->nextPosition[2] = this->nextPosition[2] + ( (-75.0/73.0)*(model_data[1]-240.0) );
+}
+
+void Arm::calculateLengthwiseNextJoint_detectHand(){
+  InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
+  // dont move joint 4
+  this->nextJoint[3] = this->position[3];
+  // self calculate for joint 5 move
+  int angleJ2Move = this->nextJoint[1] - this->position[1];
+  int angleJ3Move = this->nextJoint[2] - this->position[2];
+  this->nextJoint[4] = this->position[4] + angleJ2Move + angleJ3Move;
+}
 
 // void Arm::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin){
 //   this->sender->sendData("!Start Calculate new Position");
