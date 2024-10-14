@@ -42,6 +42,7 @@ void System::arm_fsm(){
         if (this->nextArmAction == ARM_INIT_ACTION){
             this->arm->onStart(); // cannot interrupt
             this->nextArmAction == ARM_STOP_ACTION;
+            this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
             #ifdef DEBUG
             this->sender->sendData("!GO STATE STOP");
@@ -58,6 +59,7 @@ void System::arm_fsm(){
             }
         }
         else if(this->nextArmAction == ARM_STOP_ACTION){
+            this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
             #ifdef DEBUG
             this->sender->sendData("!GO STATE STOP");
@@ -70,6 +72,7 @@ void System::arm_fsm(){
         if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION)
         {
             if(this->arm->isAutoMoveDone()) {
+                this->arm->updateCurrentPosition();
                 this->nextArmAction == ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
@@ -86,6 +89,37 @@ void System::arm_fsm(){
             }
         }
         else if (this->nextArmAction == ARM_STOP_ACTION){
+            this->arm->updateCurrentPosition();
+            this->arm->setState(STOP);
+            #ifdef DEBUG
+            this->sender->sendData("!STOP");
+            #endif
+        }
+        else{
+        }
+        break;
+    case DETECT_HAND_AUTO_MOVING:
+        if (this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION)
+        {
+            if(this->arm->isAutoMoveDone()) {
+                this->arm->updateCurrentPosition();
+                this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION;
+                this->arm->setState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!GO STATE STOP");
+                #endif
+            }
+            else {
+                this->arm->setState(DETECT_HAND_AUTO_MOVING);
+                for(int i = 0; i < 6; i++){
+                    if(this->timer_arm[i]->checkTimeoutAction()) {
+                        this->arm->generalAutoMove(i, this->timer_arm[i]->timeout);
+                    }
+                }
+            }
+        }
+        else if (this->nextArmAction == ARM_STOP_ACTION){
+            this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
             #ifdef DEBUG
             this->sender->sendData("!STOP");
@@ -130,7 +164,53 @@ void System::arm_fsm(){
             }
         }
         else if (this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION){
-            this->arm->setState(DETECT_HAND_AUTO_MOVING);
+            if(this->arm->isHorizontalMove) {
+                // set up horizontal move
+                this->arm->calculateHorizontalNextPosition_detectHand(this->model_data);
+                this->arm->calculateHorizontalNextJoint_detectHand();
+                if(this->arm->validateNextJoint() == 0){
+                    //can move
+                    this->arm->calculateTotalSteps();
+                    double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                    this->arm->setNumberStepDone(initNumberStepsDone);
+                    this->arm->initjointAutoMoveDone();
+                    this->arm->setState(DETECT_HAND_AUTO_MOVING);
+                    for(int i = 0; i < 6; i++){
+                        this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                            #ifdef DEBUG
+                        this->sender->sendData("!GO DETECT HAND - HORIZONTAL");
+                        #endif
+                    }
+                }
+                this->arm->isHorizontalMove = false;
+            } else if(this->arm->isLengthwiseMove) {
+                // set up lengthwise move
+                this->arm->calculateLengthwiseNextPosition_detectHand(this->model_data);
+                this->arm->calculateLengthwiseNextJoint_detectHand();
+                if(this->arm->validateNextJoint() == 0){
+                    //can move
+                    this->arm->calculateTotalSteps();
+                    double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                    this->arm->setNumberStepDone(initNumberStepsDone);
+                    this->arm->initjointAutoMoveDone();
+                    this->arm->setState(DETECT_HAND_AUTO_MOVING);
+                    for(int i = 0; i < 6; i++){
+                        this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                        #ifdef DEBUG
+                        this->sender->sendData("!GO DETECT HAND - LENGTHWISE");
+                        #endif
+                    }
+                }
+                this->arm->isLengthwiseMove = false;
+            }
+            else {
+                this->arm->updateCurrentPosition();
+                this->nextArmAction == ARM_STOP_ACTION;
+                this->arm->setState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!GO STATE STOP");
+                #endif
+            }
         }
         else if (this->nextArmAction == ARM_MANUAL_MOVE_DISTANCE_ACTION){
             this->arm->setState(MANUAL_MOVING);
@@ -287,6 +367,8 @@ void System::distributeAction(){ // send ACK here
     case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
         this->nextArmAction = ARM_AUTO_MOVE_DETECT_HAND_ACTION;
         this->listener->consumeCommand(ARM_AUTO_MOVE_DETECT_HAND_ACTION, this->model_data);
+        this->arm->isHorizontalMove = true;
+        this->arm->isLengthwiseMove = true;
         this->sender->sendACK("!HA#");
         this->nextAction = NO_ACTION;
         break;

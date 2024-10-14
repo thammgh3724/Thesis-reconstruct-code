@@ -14,7 +14,6 @@ class ReadSerialObject(threading.Thread):
 
     def run(self):
         """ Continuously read data from the serial port """
-        self.ack_event.set()
         self.isReading = True
         while self.isReading:
             if self.serialObj.in_waiting > 0:
@@ -24,14 +23,15 @@ class ReadSerialObject(threading.Thread):
             time.sleep(0.1)
 
     def processIncomingData(self, data):
-        ack_messages = ["I!#", "IM#", "IA#", "IHA#", "ISL#", "IAS#"]
+        # Define the list of valid ACK messages
+        #ack_messages = ["!I#", "!AH#", "!AS#", "!SS#", "!M#", "!A#", "!HA#", "!S#", "!X#"]
         
-        if data in ack_messages:
+        if data.startswith("!"):
             print(f"ACK received: {data}")
-            # Signal ACK received
+            # Signal ACK received by setting the event
+            self.ack_event.set()
         else:
             print(f"Unknown message received: {data}")
-
 
 if __name__ == "__main__":
     pass

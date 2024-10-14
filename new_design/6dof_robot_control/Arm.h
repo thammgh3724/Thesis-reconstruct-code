@@ -48,7 +48,27 @@ class Arm {
         void calculateTotalSteps();
         void initjointAutoMoveDone();
         bool isAutoMoveDone();
+        void updateCurrentPosition();
         void generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, int accRate = 530);
+
+    public:
+        // funtions for specific use case move Lengthwise
+        void calculateHorizontalNextPosition_detectHand(double* model_data);
+        void calculateHorizontalNextJoint_detectHand();
+        void calculateLengthwiseNextPosition_detectHand(double* model_data);
+        void calculateLengthwiseNextJoint_detectHand();
+        // void autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin);
+        // void calculateNewPosition_detectHand(double* output, double* input);
+
+    public:
+        // variables for specific use case move
+        bool isHorizontalMove = false;
+        bool isLengthwiseMove = false;
+
+    private:
+        // funtions for general move
+        void singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530); // can not be interrupt
+        double double_abs(double num);
 
     private:
         //robot geometry
@@ -80,22 +100,6 @@ class Arm {
         const double velG = 0.25e-4;
         double start_vel = 1 * velG;
         double end_vel = 1 * velG; 
-
-    private:
-        // funtions for general move
-        void singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int delValue = 4000, int incValue = 7, int accRate = 530); // can not be interrupt
-        double double_abs(double num);
-
-    private:
-        // variables for specific use case move
-        bool isFirstmove = false; 
-        bool isHorizontalMove = false;
-        bool isLengthwiseMove = false;
-
-    private:
-        // funtions for specific use case move
-        void autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin);
-        void calculateNewPosition_detectHand(double* output, double* input);
 
     private:
         // kinematic funtions
