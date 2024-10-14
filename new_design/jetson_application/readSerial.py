@@ -24,9 +24,9 @@ class ReadSerialObject(threading.Thread):
 
     def processIncomingData(self, data):
         # Define the list of valid ACK messages
-        ack_messages = ["!I#", "!AH#", "!AS#", "!SS#", "!M#", "!A#", "!HA#", "!S#", "!X#"]
+        #ack_messages = ["!I#", "!AH#", "!AS#", "!SS#", "!M#", "!A#", "!HA#", "!S#", "!X#"]
         
-        if data in ack_messages:
+        if data.startswith("!"):
             print(f"ACK received: {data}")
             # Signal ACK received by setting the event
             self.ack_event.set()
