@@ -3,7 +3,7 @@ import queue
 import time
 import copy
 
-QUEUE_MAX_SIZE = 10
+QUEUE_MAX_SIZE = 100
 MAX_RETRY = 3
 TIMEOUT_MS = 1000
 
