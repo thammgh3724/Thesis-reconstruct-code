@@ -24,12 +24,19 @@ class GamepadHandler(threading.Thread):
         return self.slide_signal
 
     def toggle_mode(self):
-        """Toggle between 'gamepad' and 'auto' modes."""
+        """Toggle between 'gamepad', 'hand_detect', and 'auto' modes."""
         current_time = time.time()
         if current_time - self.last_toggle_time > self.debounce_time:
-            self.mode = "auto" if self.mode == "gamepad" else "gamepad"
+            # Switch between gamepad, hand_detect, and auto
+            if self.mode == "gamepad":
+                self.mode = "hand_detect"
+            elif self.mode == "hand_detect":
+                self.mode = "auto"
+            else:
+                self.mode = "gamepad"
             print(f"Switched mode to: {self.mode}")
             self.last_toggle_time = current_time
+
 
     def handle_dpad_x(self, value):
         global debounce
@@ -85,8 +92,9 @@ class GamepadHandler(threading.Thread):
         elif button == 8:
             print("Left trigger (L2) pressed")
             debounce = 1
-        elif button == 9:
+        elif button == 9: # Button to change mode, can modify
             print("Right trigger (R2) pressed")
+            self.toggle_mode()
             debounce = 2
         else: 
             print("Hello there!")

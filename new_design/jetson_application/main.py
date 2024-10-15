@@ -1,5 +1,6 @@
 from serialObjectSingleton import SerialSingleton
 from gamepad import GamepadHandler
+from handDetect import HandDetectHandler
 from writeSerial import WriteSerialObject, Message
 from readSerial import ReadSerialObject
 import serial
@@ -35,6 +36,7 @@ def main():
     write_serial = WriteSerialObject(serial_obj, ack_event)
     read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
+    hand_detect_handler = HandDetectHandler()
 
     # Start all threads
     gamepad_handler.start()
@@ -65,6 +67,7 @@ def main():
         while True:
             mode = gamepad_handler.getMode()
 
+            # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
                 # Process gamepad inputs
                 if gamepad_handler.newValue: 
@@ -95,6 +98,23 @@ def main():
                     if current_time - last_stop_time > STOP_INTERVAL:
                         write_serial.addMessage(Message("!astop#"))
                         last_stop_time = current_time
+            
+            # SYSTEM MODE: HAND DETECTION
+            elif mode == "hand_detect":
+                if not hand_detect_handler_started:
+                    print("Switching to hand_detect mode")
+                    hand_detect_handler.start()  # Start the hand detect thread
+                    hand_detect_handler_started = True
+
+                # Check if hand_detect_handler has detected a hand position
+                if hand_detect_handler.hand_position:
+                    x_center, y_center = hand_detect_handler.hand_position[0]  # Get the hand position
+                    message_content = f"!{x_center}:{y_center}H#\0"  # Format message
+                    message = Message(message_content)
+                    
+                    # Add the message to the write_serial queue
+                    write_serial.addMessage(message)
+                    print(f"Send to write_serial queue: {message_content}")
 
             elif mode == "auto":
                 # TODO: Add auto mode logic here
@@ -107,8 +127,10 @@ def main():
         print("Stopping threads...")
         write_serial.stop()
         read_serial.stop()
+        hand_detect_handler.stop()  # Stop the hand_detect thread
         write_serial.join()
         read_serial.join()
+        hand_detect_handler.join()
         gamepad_handler.join()
         print("All threads stopped.")
 
