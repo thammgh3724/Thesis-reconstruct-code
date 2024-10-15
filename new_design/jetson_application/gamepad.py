@@ -34,10 +34,10 @@ class GamepadHandler(threading.Thread):
     def handle_dpad_x(self, value):
         global debounce
         if value == 1.0:
-            self.slide_signal[0] = 1
+            self.slide_signal[0] = 2
             print("D-pad right pressed")
         elif value == -1.0:
-            self.slide_signal[0] = 2
+            self.slide_signal[0] = 1
             print("D-pad left pressed")
         else:
             self.slide_signal[0] = 0
