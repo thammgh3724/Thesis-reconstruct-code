@@ -53,9 +53,21 @@ void System::arm_fsm(){
         break;
     case MANUAL_MOVING:
         if(this->nextArmAction == ARM_MANUAL_MOVE_DISTANCE_ACTION){
-            this->arm->setState(MANUAL_MOVING);
-            if(this->timer_arm[0]->checkTimeoutAction()) {
-                this->arm->manualMove(this->gamepad_data);
+            if(this->arm->isManualMoveDone()) {
+                this->arm->updateCurrentPosition();
+                this->nextArmAction == ARM_STOP_ACTION;
+                this->arm->setState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!GO STATE STOP");
+                #endif
+            }
+            else {
+                this->arm->setState(MANUAL_MOVING);
+                for(int i = 0; i < 6; i++){
+                    if(this->timer_arm[i]->checkTimeoutAction()) {
+                        this->arm->manualMove(i, this->gamepad_data, this->timer_arm[i]->timeout);
+                    }
+                }
             }
         }
         else if(this->nextArmAction == ARM_STOP_ACTION){
@@ -214,7 +226,10 @@ void System::arm_fsm(){
         }
         else if (this->nextArmAction == ARM_MANUAL_MOVE_DISTANCE_ACTION){
             this->arm->setState(MANUAL_MOVING);
-            this->timer_arm[0]->setLoopAction(200, micros()); //int delValue = 4000
+            this->arm->initManualMove();
+            for(int i = 0; i < 6; i++){
+                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+            }
             #ifdef DEBUG
             this->sender->sendData("!GO MANUAL");
             #endif

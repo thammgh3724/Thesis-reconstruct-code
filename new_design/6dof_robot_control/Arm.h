@@ -12,8 +12,11 @@ class Arm {
         double position[6]; // current {x, y, z, ZYZ Euler angles}
         double nextJoint[6]; // next joints angle
         double nextPosition[6]; // next {x, y, z, ZYZ Euler angles}
+        double numberStepDoneAccelerate_manual[6];
+        double numberStepDoneDecelerate_manual[6];
         double numberStepToGo[6];
         double numberStepDone[6];
+        bool jointManualMoveDone[6];
         bool jointAutoMoveDone[6];
         Sender* sender;
 
@@ -43,7 +46,9 @@ class Arm {
         void printCurrentPos();
 
         int validateNextJoint();
-        void manualMove(double* input);
+        void initManualMove();
+        bool isManualMoveDone();
+        void manualMove(int i, double* input, unsigned long &timeout, double incValue = 300);
         void calculateNextJoint();
         void calculateTotalSteps();
         void initjointAutoMoveDone();

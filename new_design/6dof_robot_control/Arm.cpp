@@ -6,6 +6,9 @@
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
+#define NUMBER_MANUAL_STEP_ACCELERATE 10
+#define NUMBER_MANUAL_STEP_DECELERATE 10
+
 
 Arm::Arm(){
   this->state = INIT;
@@ -14,8 +17,12 @@ Arm::Arm(){
     this->position[i] = 0.0;
     this->nextJoint[i] = 0.0;
     this->nextPosition[i] = 0.0;
+    this->numberStepDoneAccelerate_manual[i] = 0.0;
+    this->numberStepDoneDecelerate_manual[i] = 0.0;
     this->numberStepToGo[i] = 0.0;
     this->numberStepDone[i] = 0.0;
+    this->jointManualMoveDone[i] = false;
+    this->jointAutoMoveDone[i] = false;
   }
   this->sender = new Sender();
 };
@@ -217,12 +224,73 @@ void Arm::singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN,
   }
 }
 
-void Arm::manualMove(double* input) // int delValue = 4000
+bool Arm::isManualMoveDone(){
+  for(int i = 0; i < 6; i++) {
+    if (this->jointManualMoveDone[i] == false) return false;
+  }
+  return true;
+}
+
+void Arm::initManualMove(){
+  for(int i = 0; i < 6; i++) {
+    this->jointManualMoveDone[i] = false;
+    this->numberStepDoneAccelerate_manual[i] = 0.0;
+    this->numberStepDoneDecelerate_manual[i] = 0.0;
+  }
+}
+
+void Arm::manualMove(int i, double* input, unsigned long &timeout, double incValue = 300)
 {
   // input = data from gamepad
-  for (int i = 0; i < 6; ++i) {
-    if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) ) {
-      //Rotate positive direction
+  if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) ) {
+    this->jointManualMoveDone[i] = false;
+    // set new timeout
+    if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
+      // acceleration
+      if(timeout - incValue > 100.0) timeout = timeout - incValue;
+      this->numberStepDoneAccelerate_manual[i] = this->numberStepDoneAccelerate_manual[i] + 0.5;
+      this->numberStepDoneDecelerate_manual[i] = 0.0;
+    }
+    //Rotate positive direction
+    digitalWrite(this->DIR_PINS[i], HIGH);
+    if (PULstat[i] == 0) {
+      digitalWrite(this->PUL_PINS[i], HIGH);
+      PULstat[i] = 1;
+    } else {
+      digitalWrite(this->PUL_PINS[i], LOW);
+      PULstat[i] = 0;
+    }
+    this->joint[i] = this->joint[i] + this->DL[i]/2.0;
+  } 
+  else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
+    this->jointManualMoveDone[i] = false;
+    // set new timeout
+    if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
+      // acceleration
+      if(timeout - incValue > 100.0) timeout = timeout - incValue;
+      this->numberStepDoneAccelerate_manual[i] = this->numberStepDoneAccelerate_manual[i] + 0.5;
+      this->numberStepDoneDecelerate_manual[i] = 0.0;
+    }
+    //Rotate negative direction
+    digitalWrite(this->DIR_PINS[i], LOW);
+    if (PULstat[i] == 0) {
+      digitalWrite(this->PUL_PINS[i], HIGH);
+      PULstat[i] = 1;
+    } else {
+      digitalWrite(this->PUL_PINS[i], LOW);
+      PULstat[i] = 0;
+    }
+    this->joint[i] = this->joint[i] - this->DL[i]/2.0;
+  }
+  else if ((this->numberStepDoneAccelerate_manual[i] > 0.1) && (input[i] < 0.1) && (this->numberStepDoneDecelerate_manual[i] < NUMBER_MANUAL_STEP_DECELERATE) ) {
+    this->jointManualMoveDone[i] = false;
+    // deceleration
+    if(timeout + incValue < 4000.0) timeout = timeout + incValue;
+    this->numberStepDoneDecelerate_manual[i] = this->numberStepDoneDecelerate_manual[i] + 0.5;
+    this->numberStepDoneAccelerate_manual[i] = 0.0;
+    // move to deceleration
+    if ( (this->DIR_PINS[i] == HIGH) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) ) {
+      // Rotate positive direction
       digitalWrite(this->DIR_PINS[i], HIGH);
       if (PULstat[i] == 0) {
         digitalWrite(this->PUL_PINS[i], HIGH);
@@ -232,8 +300,8 @@ void Arm::manualMove(double* input) // int delValue = 4000
         PULstat[i] = 0;
       }
       this->joint[i] = this->joint[i] + this->DL[i]/2.0;
-    } 
-    else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
+    }
+    else if ( (this->DIR_PINS[i] == LOW) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
       //Rotate negative direction
       digitalWrite(this->DIR_PINS[i], LOW);
       if (PULstat[i] == 0) {
@@ -245,6 +313,9 @@ void Arm::manualMove(double* input) // int delValue = 4000
       }
       this->joint[i] = this->joint[i] - this->DL[i]/2.0;
     }
+  }
+  else {
+    this->jointManualMoveDone[i] = true;
   }
 }
 
@@ -292,10 +363,10 @@ void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, 
     if (double_abs(this->numberStepToGo[i]) > (2*accRate + 1)){
       if (this->numberStepDone[i] < accRate){
         //acceleration
-        if(timeout > 6.0) timeout = timeout - incValue;
+        if(timeout - incValue > 1.0) timeout = timeout - incValue;
       } else if (this->numberStepDone[i] > (double_abs(this->numberStepToGo[i]) - accRate)){
         //decceleration
-        if(timeout < 4000.0)  timeout =  timeout + incValue;
+        if(timeout + incValue < 4000.0)  timeout =  timeout + incValue;
       }
     } else {
       //no space for proper acceleration/decceleration
