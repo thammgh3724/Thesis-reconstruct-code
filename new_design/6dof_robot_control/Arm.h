@@ -67,8 +67,8 @@ class Arm {
 
     public:
         // variables for specific use case move
-        bool isHorizontalMove = true;
-        bool isLengthwiseMove = true;
+        bool isHorizontalMove = false;
+        bool isLengthwiseMove = false;
 
     private:
         // funtions for general move

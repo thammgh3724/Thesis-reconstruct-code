@@ -7,7 +7,7 @@
 #define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
 #define NUMBER_MANUAL_STEP_ACCELERATE 10
-#define NUMBER_MANUAL_STEP_DECELERATE 20
+#define NUMBER_MANUAL_STEP_DECELERATE 10
 
 
 Arm::Arm(){
@@ -285,7 +285,7 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
   else if ((this->numberStepDoneAccelerate_manual[i] > 0.1) && (input[i] < 0.1) && (this->numberStepDoneDecelerate_manual[i] < NUMBER_MANUAL_STEP_DECELERATE) ) {
     this->jointManualMoveDone[i] = false;
     // deceleration
-    if(timeout + incValue < 6000.0) timeout = timeout + incValue;
+    if(timeout + incValue < 4000.0) timeout = timeout + incValue;
     this->numberStepDoneDecelerate_manual[i] = this->numberStepDoneDecelerate_manual[i] + 0.5;
     this->numberStepDoneAccelerate_manual[i] = 0.0;
     // move to deceleration
