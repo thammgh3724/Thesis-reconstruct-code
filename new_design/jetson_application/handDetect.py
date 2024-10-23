@@ -22,6 +22,7 @@ class HandDetectHandler(threading.Thread):
             hand_pos = self.cam_proc()
             if hand_pos:
                 self.hand_position = hand_pos  # Update the hand position
+                print(f"Current pos: {hand_pos}")
             time.sleep(1)  # Adjust delay as needed
 
     def cam_proc(self):
