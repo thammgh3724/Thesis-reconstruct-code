@@ -36,7 +36,7 @@ def main():
     write_serial = WriteSerialObject(serial_obj, ack_event)
     read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
-    hand_detect_handler = HandDetectHandler()
+    # hand_detect_handler = HandDetectHandler()
 
     # Start all threads
     gamepad_handler.start()
