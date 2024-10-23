@@ -169,8 +169,12 @@ void Listener::readData() {
         this->isdataTransferring = false;  //Stop data transfer
         numCharRead = 0;
         this->isCommandReady = true;
+        #ifdef DEBUG
         data_print = "!Receive data : ";
-        data_print += this->command;
+        String temp_cmd = this->command;
+        data_print += temp_cmd;
+        Serial.println(data_print);
+        #endif
       }
     }
   }

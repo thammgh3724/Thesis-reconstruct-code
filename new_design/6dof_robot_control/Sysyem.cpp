@@ -55,7 +55,7 @@ void System::arm_fsm(){
         if(this->nextArmAction == ARM_MANUAL_MOVE_DISTANCE_ACTION){
             if(this->arm->isManualMoveDone()) {
                 this->arm->updateCurrentPosition();
-                this->nextArmAction == ARM_STOP_ACTION;
+                this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
                 this->sender->sendData("!GO STATE STOP");
@@ -85,7 +85,7 @@ void System::arm_fsm(){
         {
             if(this->arm->isAutoMoveDone()) {
                 this->arm->updateCurrentPosition();
-                this->nextArmAction == ARM_STOP_ACTION;
+                this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
                 this->sender->sendData("!GO STATE STOP");
@@ -115,7 +115,7 @@ void System::arm_fsm(){
         {
             if(this->arm->isAutoMoveDone()) {
                 this->arm->updateCurrentPosition();
-                this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION;
+                this->nextArmAction = ARM_AUTO_MOVE_DETECT_HAND_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
                 this->sender->sendData("!GO STATE STOP");
@@ -177,6 +177,9 @@ void System::arm_fsm(){
         }
         else if (this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION){
             if(this->arm->isHorizontalMove) {
+                #ifdef DEBUG
+                this->sender->sendData("!HM");
+                #endif
                 // set up horizontal move
                 this->arm->calculateHorizontalNextPosition_detectHand(this->model_data);
                 this->arm->calculateHorizontalNextJoint_detectHand();
@@ -189,13 +192,16 @@ void System::arm_fsm(){
                     this->arm->setState(DETECT_HAND_AUTO_MOVING);
                     for(int i = 0; i < 6; i++){
                         this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
-                            #ifdef DEBUG
-                        this->sender->sendData("!GO DETECT HAND - HORIZONTAL");
-                        #endif
                     }
+                    #ifdef DEBUG
+                    this->sender->sendData("!HMD");
+                    #endif
                 }
                 this->arm->isHorizontalMove = false;
             } else if(this->arm->isLengthwiseMove) {
+                #ifdef DEBUG
+                this->sender->sendData("!LM");
+                #endif
                 // set up lengthwise move
                 this->arm->calculateLengthwiseNextPosition_detectHand(this->model_data);
                 this->arm->calculateLengthwiseNextJoint_detectHand();
@@ -208,16 +214,18 @@ void System::arm_fsm(){
                     this->arm->setState(DETECT_HAND_AUTO_MOVING);
                     for(int i = 0; i < 6; i++){
                         this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
-                        #ifdef DEBUG
-                        this->sender->sendData("!GO DETECT HAND - LENGTHWISE");
-                        #endif
                     }
+                    #ifdef DEBUG
+                    this->sender->sendData("!LMD");
+                    #endif
                 }
                 this->arm->isLengthwiseMove = false;
             }
             else {
+                this->arm->isHorizontalMove = true;
+                this->arm->isLengthwiseMove = true;
                 this->arm->updateCurrentPosition();
-                this->nextArmAction == ARM_STOP_ACTION;
+                this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
                 this->sender->sendData("!GO STATE STOP");
@@ -254,7 +262,7 @@ void System::slider_fsm(){
             #endif
             int tmp = this->slider1->onStart(); // cannot interrupt
             #ifdef DEBUG
-            String tmp_str = "!return count :" + String(tmp);
+            String tmp_str = "!return count :" + String(tmp); // may crash
             this->sender->sendData(tmp_str);
             #endif
             this->slider1->setState(HOME);
