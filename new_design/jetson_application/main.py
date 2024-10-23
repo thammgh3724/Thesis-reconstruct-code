@@ -47,6 +47,8 @@ def main():
     last_stop_time = 0
     STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
 
+    hand_detect_handler_started = False
+
     try:
         # Send !init# to initialize the robotic arm
         init_message = Message("!init#")
@@ -127,10 +129,10 @@ def main():
         print("Stopping threads...")
         write_serial.stop()
         read_serial.stop()
-        hand_detect_handler.stop()  # Stop the hand_detect thread
+        # hand_detect_handler.stop()  # Stop the hand_detect thread
         write_serial.join()
         read_serial.join()
-        hand_detect_handler.join()
+        # hand_detect_handler.join()
         gamepad_handler.join()
         print("All threads stopped.")
 

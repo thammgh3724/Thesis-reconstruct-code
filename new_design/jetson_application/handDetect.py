@@ -83,3 +83,11 @@ class HandDetectHandler(threading.Thread):
         cap.release()
         cv2.destroyAllWindows()
         return None  # Return None if the loop ends
+
+if __name__ == '__main__':
+    hand = HandDetectHandler()
+    try:
+        hand.start()
+    except KeyboardInterrupt:
+        hand.stop()
+        hand.join()
