@@ -276,9 +276,15 @@ void System::slider_fsm(){
         {
             if(this->slider1->validatePosition(this->output_slider_auto) == 0){
                 //can move
+                this->slider1->setNextPosition(this->output_slider_auto);
+                this->slider1->calculateTotalSteps();
+                this->slider1->initStepDone();
                 this->slider1->setState(GENERAL_AUTO_MOVING);
                 this->output_slider_auto = 0.0;
-                this->timer_slider->setLoopAction(400, micros()); 
+                this->timer_slider->setLoopAction(400, micros());
+                #ifdef DEBUG
+                this->sender->sendData("!GO AUTO SLIDER");
+                #endif
             }
         }
         else if (this->nextSliderAction ==  SLIDER_AUTO_MOVE_DETECT_HAND_ACTION){
@@ -310,13 +316,34 @@ void System::slider_fsm(){
         break;
     case GENERAL_AUTO_MOVING:
         if (this->nextSliderAction = SLIDER_AUTO_MOVE_FREE_ACTION){
-            this->slider1->setState(GENERAL_AUTO_MOVING);
-            if(this->timer_slider->checkTimeoutAction()) {
-                // this->slider1->generalAutoMove(i, this->output_arm6_auto_2, this->output_arm6_auto_3, this->timer_arm[i]->timeout);
+            if (this->slider1->isAutoMoveDone()){
+                this->slider1->updatePosition();
+                this->nextSliderAction = SLIDER_STOP_ACTION;
+                this->slider1->setState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!SLIDER GO STATE STOP");
+                #endif
+            }
+            else{
+                this->slider1->setState(GENERAL_AUTO_MOVING);
+                if(this->timer_slider->checkTimeoutAction()) {
+                    #ifdef DEBUG
+                    String tmpstr = "!SLIDER GO step to move" + String(this->slider1->getNumberStepToGo());
+                    this->sender->sendData(tmpstr);
+                    #endif
+                    this->slider1->generalAutoMove(this->timer_slider->timeout);
+                    #ifdef DEBUG
+                    this->sender->sendData("!SLIDER GO AUTO");
+                    #endif
+                }
             }
         }
         else if (this->nextSliderAction == SLIDER_STOP_ACTION){
+            this->slider1->updatePosition();
             this->slider1->setState(STOP);
+            #ifdef DEBUG
+            this->sender->sendData("!SLIDER GO STATE STOP");
+            #endif
         }
         else {
         }

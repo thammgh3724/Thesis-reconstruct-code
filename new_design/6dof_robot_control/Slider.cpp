@@ -7,6 +7,12 @@ Slider::Slider(){
 
 Slider::~Slider(){};
 
+double Slider::double_abs(double num) {
+  if ( num < 0.1 ) {
+    num = 0 - num;
+  }
+  return num;
+}
 int Slider::onStart(){
     // go home here
     this->position = 0;
@@ -90,33 +96,74 @@ int Slider::validatePosition(double input){
     if(input <0 || input > 28246) return 1;
     return 0; 
 }
-void Slider::generalAutoMove(uint8_t DIR, int totSteps, int delValue = 400, int incValue = 15, int accRate = 20){
-  digitalWrite(this->DIR_PINS, DIR);
-  for (int i = 0; i < totSteps; i++) // need to remove this for loop
-  {
-   if (totSteps > (2*accRate + 1)){
-      if (i < accRate){
+void Slider::setNextPosition(int newPosition){
+  this->nextPosition = newPosition;
+}
+void Slider::calculateTotalSteps(){
+  this->numberStepToGo = this->nextPosition - this->position;
+}
+void Slider::updatePosition(){
+  this->position = this->nextPosition;
+}
+void Slider::initStepDone(){
+  this->numberStepDone = 0.0;
+}
+bool Slider::isAutoMoveDone(){
+  if (this->numberStepDone == this->numberStepToGo) return true;
+  return false;
+}
+double Slider::getNumberStepToGo(){
+  return this->numberStepToGo;
+}
+void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int accRate = 20){
+  if((double_abs(this->numberStepToGo) > 0.2) && (double_abs(this->numberStepToGo) - this->numberStepDone) > 0.2){
+    if (double_abs(this->numberStepToGo) > (2*accRate + 1)){
+      if (this->numberStepDone < accRate){
         //acceleration
-        delValue = delValue - incValue;
-      } else if (i > (totSteps - accRate)){
+        if(delValue -incValue > 1.0) delValue = delValue - incValue;
+      } else if (this->numberStepDone > (double_abs(this->numberStepToGo) - accRate)){
         //decceleration
-        delValue = delValue + incValue;
+        if(delValue + incValue < 4000.0) delValue = delValue + incValue;
       }
     } else {
       //no space for proper acceleration/decceleration
-      if (i < ((totSteps - (totSteps % 2))/2)){
+      if (this->numberStepDone < (double_abs(this->numberStepToGo)/2)){
         //acceleration
-        delValue = delValue - incValue;
-      } else if (i > ((totSteps + (totSteps % 2))/2)){
+          if(delValue > 1.0) delValue =  delValue - incValue;
+      } else if (this->numberStepDone > (double_abs(this->numberStepToGo)/2)){
         //decceleration
-        delValue = delValue + incValue;
+          if(delValue < 4000.0) delValue =  delValue +  incValue;
       }
     }
-    for (int j=0; j < 100 ; j++){
-      digitalWrite(this->PUL_PINS, HIGH);
-      delayMicroseconds(delValue);
-      digitalWrite(this->PUL_PINS, LOW);
-      delayMicroseconds(delValue);
+    if ( this->numberStepToGo > 0.2 ) {
+      //Rotate positive direction
+      digitalWrite(this->DIR_PINS, HIGH);
+      if (this->PULstat == 0) {
+        digitalWrite(this->PUL_PINS, HIGH);
+        this->PULstat = 1;
+      } else {
+        digitalWrite(this->PUL_PINS, LOW);
+        this->PULstat = 0;
+      }
     }
+    else if (this->numberStepToGo < -0.2 ) {
+      //Rotate negative direction
+      digitalWrite(this->DIR_PINS, LOW);
+      if (PULstat == 0) {
+        digitalWrite(this->PUL_PINS, HIGH);
+        PULstat = 1;
+      } else {
+        digitalWrite(this->PUL_PINS, LOW);
+        PULstat = 0;
+      }
+    }
+    this->numberStepDone = this->numberStepDone + 0.5;
+  }
+  else if ( this->isAutoMoveDone()){
+    #ifdef DEBUG
+    String data_print = "!SLIDER ";
+    data_print += " move done";
+    // this->sender->sendData(data_print);
+    #endif
   }
 }
