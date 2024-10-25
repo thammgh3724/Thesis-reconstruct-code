@@ -77,7 +77,7 @@ class Arm {
 
     private:
         //robot geometry
-        const double MAX_JOINT_ANGLE[6] = {90.0, 87.0, 80.0, 180.0, 120.0, 180.0};
+        const double MAX_JOINT_ANGLE[6] = {90.0, 87.0, 80.0, 180.0, 120.0, 180.0}; // refind max min joint
         const double MIN_JOINT_ANGLE[6] = {-90.0, -60.0, -80.0, -180.0, -90.0, -180.0};
 
         const double r1 = 47.0;

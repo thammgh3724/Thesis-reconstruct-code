@@ -6,7 +6,7 @@
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
-#define NUMBER_MANUAL_STEP_ACCELERATE 10
+#define NUMBER_MANUAL_STEP_ACCELERATE 10 // define 6 number for 6 joint
 #define NUMBER_MANUAL_STEP_DECELERATE 20
 
 
@@ -168,28 +168,7 @@ void Arm::printCurrentPos(){
 
 int Arm::validateNextJoint(){
   for (int i = 0; i < 6; ++i){
-    switch (i){
-      case 0:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[0] || this->nextJoint[i] < MIN_JOINT_ANGLE[0] || !isfinite(this->nextJoint[0])) return 1;
-        break; 
-      case 1:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[1] || this->nextJoint[i] < MIN_JOINT_ANGLE[1] || !isfinite(this->nextJoint[1])) return 2;
-        break; 
-      case 2:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[2] || this->nextJoint[i] < MIN_JOINT_ANGLE[2] || !isfinite(this->nextJoint[2])) return 3;
-        break;
-      case 3:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[3] || this->nextJoint[i] < MIN_JOINT_ANGLE[3] || !isfinite(this->nextJoint[3])) return 4;
-        break;
-      case 4:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[4] || this->nextJoint[i] < MIN_JOINT_ANGLE[4] || !isfinite(this->nextJoint[4])) return 5;
-        break;
-      case 5:
-        if (this->nextJoint[i] > MAX_JOINT_ANGLE[5] || this->nextJoint[i] < MIN_JOINT_ANGLE[5] || !isfinite(this->nextJoint[5])) return 6;
-        break;
-      default:
-        break;
-    }
+    if (this->nextJoint[i] > MAX_JOINT_ANGLE[i] || this->nextJoint[i] < MIN_JOINT_ANGLE[i] || !isfinite(this->nextJoint[i])) return (i+1);
   }
   return 0;
 }
@@ -441,11 +420,11 @@ void Arm::calculateHorizontalNextPosition_detectHand(double* model_data){
 
 void Arm::calculateHorizontalNextJoint_detectHand(){
   InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
-  this->nextJoint[1] = this->position[1];
-  this->nextJoint[2] = this->position[2];
-  this->nextJoint[3] = this->position[3];
-  this->nextJoint[4] = this->position[4];
-  this->nextJoint[5] = this->position[5];
+  this->nextJoint[1] = this->joint[1];
+  this->nextJoint[2] = this->joint[2];
+  this->nextJoint[3] = this->joint[3];
+  this->nextJoint[4] = this->joint[4];
+  this->nextJoint[5] = this->joint[5];
   //Move only joint 1 in horizontal
 }
 
@@ -461,11 +440,11 @@ void Arm::calculateLengthwiseNextPosition_detectHand(double* model_data){
 void Arm::calculateLengthwiseNextJoint_detectHand(){
   InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
   // dont move joint 4
-  this->nextJoint[3] = this->position[3];
+  this->nextJoint[3] = this->joint[3];
   // self calculate for joint 5 move
-  int angleJ2Move = this->nextJoint[1] - this->position[1];
-  int angleJ3Move = this->nextJoint[2] - this->position[2];
-  this->nextJoint[4] = this->position[4] + angleJ2Move + angleJ3Move;
+  int angleJ2Move = this->nextJoint[1] - this->joint[1];
+  int angleJ3Move = this->nextJoint[2] - this->joint[2];
+  this->nextJoint[4] = this->joint[4] + angleJ2Move + angleJ3Move;
 }
 
 // void Arm::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin){

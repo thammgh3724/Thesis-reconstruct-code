@@ -197,6 +197,11 @@ void System::arm_fsm(){
                     this->sender->sendData("!HMD");
                     #endif
                 }
+                else {
+                    #ifdef DEBUG
+                    this->sender->sendData("!Out of range");
+                    #endif
+                }
                 this->arm->isHorizontalMove = false;
             } else if(this->arm->isLengthwiseMove) {
                 #ifdef DEBUG
@@ -217,6 +222,11 @@ void System::arm_fsm(){
                     }
                     #ifdef DEBUG
                     this->sender->sendData("!LMD");
+                    #endif
+                }
+                else {
+                    #ifdef DEBUG
+                    this->sender->sendData("!Out of range");
                     #endif
                 }
                 this->arm->isLengthwiseMove = false;
