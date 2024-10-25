@@ -57,6 +57,28 @@ ArmMoving::ArmMoving(){
   memset(this->buffer, 0, NUM_BYTES_BUFFER);
 }
 
+void ArmMoving::printCurJoint(){
+  String result = "Curr joint : ";
+  for (int i = 0; i < 6; ++i){
+    result += String(this->currJoint[i]);  
+    if (i < 5) {
+        result += ":"; 
+    }
+  }
+  Serial.println(result);
+}
+
+void ArmMoving::printCurPos(){
+  String result = "Curr pos : ";
+  for (int i = 0; i < 6; ++i){
+    result += String(getCurPos(i));  
+    if (i < 5) {
+        result += ":"; 
+    }
+  }
+  Serial.println(result);
+}
+
 void ArmMoving::wakeUp(){
   // enable all joints
   digitalWrite(EN321_PIN, LOW);
@@ -213,37 +235,54 @@ void ArmMoving::move(){
     case WAKEUP:
       this->wakeUp();
       Serial.println("ACK");
+      this->printCurJoint();
+      this->printCurPos();
+
       break;
     case GO_HOME:
       this->goHomeFromManual();
       Serial.println("ACK");
+      this->printCurJoint();
+      this->printCurPos();
       break;
     case GO_FOLD:
       this->goFoldFromManual();
       Serial.println("ACK");
+      this->printCurJoint();
+      this->printCurPos();
       break;
     case MANUAL_MOVE:
       this->manualControl(this->listener.getData(), 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
       Serial.println("ACK");
+      this->printCurJoint();
+      this->printCurPos();
       break;
     case AUTO_MOVE:
       float output[6];
       this->listener.getAxis(output);
       this->autoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
       Serial.println("ACK");
+      this->printCurJoint();
+      this->printCurPos();
       break;
     case TURN_ON_PUMP:
       digitalWrite(PUMP_PIN, HIGH);
       Serial.println("ACK");
+      this->printCurJoint();
+      this->printCurPos();
       break;
     case TURN_OFF_PUMP:
       digitalWrite(PUMP_PIN, LOW);
       Serial.println("ACK");
+      this->printCurJoint();
+      this->printCurPos();
       break;
     case STOP:
       goStrightLine(this->currJoint, this->buffer, 0.25e-4, 1.5*0.75e-10, 0.75 * velG, 0.25 * velG);
       memcpy(this->currJoint, this->buffer, NUM_BYTES_BUFFER);
       Serial.println("KCA");
+      this->printCurJoint();
+      this->printCurPos();
       break;
     default:
       break; 
