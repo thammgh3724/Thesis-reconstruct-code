@@ -1,6 +1,6 @@
 from serialObjectSingleton import SerialSingleton
 from gamepad import GamepadHandler
-from handDetect import HandDetectHandler
+from handDetectv2 import HandDetectHandler
 from writeSerial import WriteSerialObject, Message
 from readSerial import ReadSerialObject
 import serial
@@ -36,7 +36,8 @@ def main():
     write_serial = WriteSerialObject(serial_obj, ack_event)
     read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
-    # hand_detect_handler = HandDetectHandler()
+    slider_serial = WriteSerialObject(serial_obj, ack_event)
+    hand_detect_handler = HandDetectHandler()
 
     # Start all threads
     gamepad_handler.start()
@@ -45,6 +46,7 @@ def main():
 
     # Timer for STOP signal debounce
     last_stop_time = 0
+    slider_last_time = 0
     STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
@@ -92,18 +94,25 @@ def main():
                         write_serial.addMessage(message)
 
                     # Need to consider creating a separate thread for sliders.
-                    if slider_signal != [0] * len(slider_signal):
+                    if slider_signal == [0] * len(slider_signal):
+                        current_time = time.time()
+                        if current_time - slider_last_time > STOP_INTERVAL:
+                            slider_serial.addMessage(Message("!sstop#"))
+                            slider_last_time = current_time
+                    else: 
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
-                        write_serial.addMessage(slideMsg)
+                        slider_serial.addMessage(slideMsg)
                 else:
                     # If no new value, check if we need to send STOP
                     current_time = time.time()
                     if current_time - last_stop_time > STOP_INTERVAL:
                         write_serial.addMessage(Message("!0:0:0:0:0:0M#"))
+                        slider_serial.addMessage(Message("!sstop#"))
                         last_stop_time = current_time
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
+
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.start()  # Start the hand detect thread
@@ -127,6 +136,7 @@ def main():
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command
                 hand_detect_started = False
+                hand_detect_handler.stop()
                 print("Auto mode")
 
             time.sleep(0.1)
@@ -135,10 +145,8 @@ def main():
         print("Stopping threads...")
         write_serial.stop()
         read_serial.stop()
-        hand_detect_handler.stop()  # Stop the hand_detect thread
         write_serial.join()
         read_serial.join()
-        hand_detect_handler.join()
         gamepad_handler.join()
         print("All threads stopped.")
 
