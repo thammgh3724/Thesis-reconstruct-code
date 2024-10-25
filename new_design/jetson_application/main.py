@@ -46,9 +46,9 @@ def main():
     # Timer for STOP signal debounce
     last_stop_time = 0
     STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
-
-    hand_detect_handler_started = False
-
+    
+    # Check if hand detection thread started
+    hand_detect_started = False
     try:
         # Send !init# to initialize the robotic arm
         init_message = Message("!init#")
@@ -71,6 +71,7 @@ def main():
 
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
+                hand_detect_started = False
                 # Process gamepad inputs
                 if gamepad_handler.newValue: 
                     # Retrieve buffer and sliders signals
@@ -84,7 +85,7 @@ def main():
                     if buffer == [0] * len(buffer):
                         current_time = time.time()
                         if current_time - last_stop_time > STOP_INTERVAL:
-                            write_serial.addMessage(Message("!astop#"))
+                            write_serial.addMessage(Message("!0:0:0:0:0:0M#"))
                             last_stop_time = current_time
                     else:
                         message = Message(message_content)
@@ -98,29 +99,34 @@ def main():
                     # If no new value, check if we need to send STOP
                     current_time = time.time()
                     if current_time - last_stop_time > STOP_INTERVAL:
-                        write_serial.addMessage(Message("!astop#"))
+                        write_serial.addMessage(Message("!0:0:0:0:0:0M#"))
                         last_stop_time = current_time
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
-                if not hand_detect_handler_started:
+                if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.start()  # Start the hand detect thread
-                    hand_detect_handler_started = True
+                    time.sleep(10)
+                    hand_detect_started = True
 
                 # Check if hand_detect_handler has detected a hand position
                 if hand_detect_handler.hand_position:
-                    x_center, y_center = hand_detect_handler.hand_position[0]  # Get the hand position
-                    message_content = f"!{x_center}:{y_center}H#\0"  # Format message
+                    # Get the hand position
+                    x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
+                    y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
+                    
+                    message_content = f"!{round(x_center, 5)}:{round(y_center, 5)}H#\0"  # Format message
                     message = Message(message_content)
                     
                     # Add the message to the write_serial queue
                     write_serial.addMessage(message)
                     print(f"Send to write_serial queue: {message_content}")
-
+                hand_detect_handler.hand_position = None
             elif mode == "auto":
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command
+                hand_detect_started = False
                 print("Auto mode")
 
             time.sleep(0.1)
@@ -129,10 +135,10 @@ def main():
         print("Stopping threads...")
         write_serial.stop()
         read_serial.stop()
-        # hand_detect_handler.stop()  # Stop the hand_detect thread
+        hand_detect_handler.stop()  # Stop the hand_detect thread
         write_serial.join()
         read_serial.join()
-        # hand_detect_handler.join()
+        hand_detect_handler.join()
         gamepad_handler.join()
         print("All threads stopped.")
 

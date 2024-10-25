@@ -22,17 +22,17 @@ class HandDetectHandler(threading.Thread):
             hand_pos = self.cam_proc()
             if hand_pos:
                 self.hand_position = hand_pos  # Update the hand position
-                print(f"Current pos: {hand_pos}")
-            time.sleep(1)  # Adjust delay as needed
+                print(hand_pos)
+            time.sleep(0.3)  # Adjust delay as needed
 
     def cam_proc(self):
         """Camera processing to detect hand with position stabilization"""
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(cv2.CAP_V4L2)
         object_positions = []
         accumulate_count = 0
 
         while self.isRunning:
-            time.sleep(0.3)
+            time.sleep(0.2)
             ret, frame = cap.read()
 
             if not ret:
@@ -84,11 +84,8 @@ class HandDetectHandler(threading.Thread):
         cap.release()
         cv2.destroyAllWindows()
         return None  # Return None if the loop ends
+        
 
-if __name__ == '__main__':
-    hand = HandDetectHandler()
-    try:
-        hand.start()
-    except KeyboardInterrupt:
-        hand.stop()
-        hand.join()
+if __name__ == "__main__":
+    handdt = HandDetectHandler()
+    handdt.start()
