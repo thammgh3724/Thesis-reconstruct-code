@@ -1,11 +1,10 @@
 from serialObjectSingleton import SerialSingleton
 from gamepad import GamepadHandler
-from handDetectv2 import HandDetectHandler
+from handDetectv2 import HandDetectHandler, display_video
 from writeSerial import WriteSerialObject, Message
 from readSerial import ReadSerialObject
 import serial
 import time
-import queue
 import threading
 import serial.tools.list_ports
 
@@ -36,14 +35,16 @@ def main():
     write_serial = WriteSerialObject(serial_obj, ack_event)
     read_serial = ReadSerialObject(serial_obj, ack_event)
     gamepad_handler = GamepadHandler()
-    slider_serial = WriteSerialObject(serial_obj, ack_event)
-    hand_detect_handler = HandDetectHandler()
 
+    hand_detect_handler = HandDetectHandler()
+    display_thread = threading.Thread(target=display_video, args=(hand_detect_handler,))
+    
+    slider_serial = WriteSerialObject(serial_obj, ack_event)
     # Start all threads
     gamepad_handler.start()
     read_serial.start()
     write_serial.start()
-
+    slider_serial.start()
     # Timer for STOP signal debounce
     last_stop_time = 0
     slider_last_time = 0
@@ -70,7 +71,6 @@ def main():
         # Main control loop
         while True:
             mode = gamepad_handler.getMode()
-
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
                 hand_detect_started = False
@@ -112,10 +112,10 @@ def main():
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
-
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.start()  # Start the hand detect thread
+                    display_thread.start()
                     time.sleep(10)
                     hand_detect_started = True
 
@@ -135,8 +135,13 @@ def main():
             elif mode == "auto":
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command
-                hand_detect_started = False
-                hand_detect_handler.stop()
+                
+                if hand_detect_started:
+                    print("Switching to auto mode")
+                    hand_detect_handler.stop()  # Signal the display thread to stop
+                    display_thread.join()  # Wait for the display thread to finish
+                    hand_detect_started = False
+                # Proceed with auto mode logic here
                 print("Auto mode")
 
             time.sleep(0.1)
@@ -144,8 +149,10 @@ def main():
     except KeyboardInterrupt:
         print("Stopping threads...")
         write_serial.stop()
+        slider_serial.stop()
         read_serial.stop()
         write_serial.join()
+        slider_serial.join()
         read_serial.join()
         gamepad_handler.join()
         print("All threads stopped.")
