@@ -126,7 +126,7 @@ void Arm::getNumberStepDone(double* output){
 
 void Arm::setNumberStepDone(double* steps){
   for(int i = 0; i < 6; i++){
-      this->numberStepDone[i] = position[i];
+      this->numberStepDone[i] = steps[i];
   }
 }
 
@@ -138,7 +138,7 @@ void Arm::getNumberStepToGo(double* output){
 
 void Arm::setNumberStepToGo(double* steps){
   for(int i = 0; i < 6; i++){
-      this->numberStepToGo[i] = position[i];
+      this->numberStepToGo[i] = steps[i];
   }
 }
 
@@ -168,7 +168,14 @@ void Arm::printCurrentPos(){
 
 int Arm::validateNextJoint(){
   for (int i = 0; i < 6; ++i){
-    if (this->nextJoint[i] > MAX_JOINT_ANGLE[i] || this->nextJoint[i] < MIN_JOINT_ANGLE[i] || !isfinite(this->nextJoint[i])) return (i+1);
+    if (this->nextJoint[i] > MAX_JOINT_ANGLE[i] || this->nextJoint[i] < MIN_JOINT_ANGLE[i]){
+      #ifdef DEBUG
+      String data_print = "!Out of range joint ";
+      data_print += String(i+1);
+      this->sender->sendData(data_print);
+      #endif
+      return (i+1);
+    }
   }
   return 0;
 }

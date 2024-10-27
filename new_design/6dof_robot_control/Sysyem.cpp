@@ -177,13 +177,13 @@ void System::arm_fsm(){
         }
         else if (this->nextArmAction == ARM_AUTO_MOVE_DETECT_HAND_ACTION){
             if(this->arm->isHorizontalMove) {
-                #ifdef DEBUG
-                this->sender->sendData("!HM");
-                #endif
                 // set up horizontal move
                 this->arm->calculateHorizontalNextPosition_detectHand(this->model_data);
                 this->arm->calculateHorizontalNextJoint_detectHand();
                 if(this->arm->validateNextJoint() == 0){
+                    #ifdef DEBUG
+                    this->sender->sendData("!GO HORIZONTAL");
+                    #endif
                     //can move
                     this->arm->calculateTotalSteps();
                     double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -193,24 +193,16 @@ void System::arm_fsm(){
                     for(int i = 0; i < 6; i++){
                         this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
                     }
-                    #ifdef DEBUG
-                    this->sender->sendData("!HMD");
-                    #endif
-                }
-                else {
-                    #ifdef DEBUG
-                    this->sender->sendData("!Out of range");
-                    #endif
                 }
                 this->arm->isHorizontalMove = false;
             } else if(this->arm->isLengthwiseMove) {
-                #ifdef DEBUG
-                this->sender->sendData("!LM");
-                #endif
                 // set up lengthwise move
                 this->arm->calculateLengthwiseNextPosition_detectHand(this->model_data);
                 this->arm->calculateLengthwiseNextJoint_detectHand();
                 if(this->arm->validateNextJoint() == 0){
+                    #ifdef DEBUG
+                    this->sender->sendData("!GO LENGTHWISE");
+                    #endif
                     //can move
                     this->arm->calculateTotalSteps();
                     double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -220,14 +212,6 @@ void System::arm_fsm(){
                     for(int i = 0; i < 6; i++){
                         this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
                     }
-                    #ifdef DEBUG
-                    this->sender->sendData("!LMD");
-                    #endif
-                }
-                else {
-                    #ifdef DEBUG
-                    this->sender->sendData("!Out of range");
-                    #endif
                 }
                 this->arm->isLengthwiseMove = false;
             }
