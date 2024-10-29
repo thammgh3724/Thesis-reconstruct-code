@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import camera_var
 from ultralytics import YOLO
+from multiprocessing import Process, Queue
 
 
 
@@ -86,6 +87,7 @@ def display_video(handler):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             handler.stop()  # Stop the handler thread if 'q' is pressed
             break
+        time.sleep(0.05)
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":

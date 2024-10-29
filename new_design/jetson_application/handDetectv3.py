@@ -1,39 +1,32 @@
-import threading
 import time
 import cv2
 import numpy as np
 import camera_var
 from ultralytics import YOLO
+from multiprocessing import Process, Queue
 
-class HandDetectHandler(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
+
+class HandDetectHandler(Process):
+    def __init__(self, frame_queue):
+        super(HandDetectHandler, self).__init__()
         self.model = YOLO("best4.pt")
         self.isRunning = False
         self.hand_position = None  # Placeholder to store hand position
+        self.frame_queue = frame_queue  # Queue to pass frames to the display process
+        self.cap = cv2.VideoCapture(cv2.CAP_V4L2)
 
     def stop(self):
         self.isRunning = False
+        self.cap.release()
 
     def run(self):
         self.isRunning = True
-        while self.isRunning:
-            # Call the camera processing function to get hand position
-            hand_pos = self.cam_proc()
-            if hand_pos:
-                self.hand_position = hand_pos  # Update the hand position
-                print(hand_pos)
-            time.sleep(0.3)  # Adjust delay as needed
-
-    def cam_proc(self):
-        """Camera processing to detect hand with position stabilization"""
-        cap = cv2.VideoCapture(cv2.CAP_V4L2)
         object_positions = []
         accumulate_count = 0
 
         while self.isRunning:
-            time.sleep(0.2)
-            ret, frame = cap.read()
+            time.sleep(0.2)  # Adjust delay as needed
+            ret, frame = self.cap.read()
 
             if not ret:
                 break
@@ -69,25 +62,46 @@ class HandDetectHandler(threading.Thread):
                         object_positions = current_positions
                         accumulate_count = 1
 
-                # If the hand position has been stable for 3 consecutive frames, return the position
+                # If the hand position has been stable for 3 consecutive frames, update position
                 if accumulate_count >= 3:
-                    cap.release()
-                    # cv2.destroyAllWindows()
-                    accumulate_count = 0
+                    self.hand_position = object_positions  # Update the stabilized hand position
+                    print(self.hand_position)
+                    accumulate_count = 0  # Reset the count for next stabilization attempt
                     time.sleep(0.3)
-                    return object_positions  # Return stabilized hand position
 
-            # Display the frame with bounding boxes
-            cv2.imshow("YOLOv8 Real-Time", frame)
+            # Put the current frame into the queue for the display process
+            if self.frame_queue.full() is False:
+                self.frame_queue.put(frame)
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+        self.frame_queue.put(None)  # Signal display process to exit
+        self.cap.release()
 
-        cap.release()
-        cv2.destroyAllWindows()
-        return None  # Return None if the loop ends
-        
+
+def display_video(frame_queue):
+    """Display video in a separate process."""
+    while True:
+        frame = frame_queue.get()
+        if frame is None:  # Exit signal
+            break
+        cv2.imshow("YOLOv8 Real-Time", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        time.sleep(0.05)
+    cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
-    handdt = HandDetectHandler()
+    # Create a Queue for sharing frames between processes
+    frame_queue = Queue(maxsize=5)  # Limit max size to avoid memory overload
+
+    # Start the hand detection process
+    handdt = HandDetectHandler(frame_queue)
     handdt.start()
+
+    # Start the display process
+    display_process = Process(target=display_video, args=(frame_queue,))
+    display_process.start()
+
+    # Wait for both processes to finish
+    handdt.join()
+    display_process.join()

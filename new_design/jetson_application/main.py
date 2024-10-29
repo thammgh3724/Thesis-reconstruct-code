@@ -1,6 +1,6 @@
 from serialObjectSingleton import SerialSingleton
 from gamepad import GamepadHandler
-from handDetectv2 import HandDetectHandler, display_video
+from handDetect import HandDetectHandler
 from writeSerial import WriteSerialObject, Message
 from readSerial import ReadSerialObject
 import serial
@@ -37,7 +37,6 @@ def main():
     gamepad_handler = GamepadHandler()
 
     hand_detect_handler = HandDetectHandler()
-    display_thread = threading.Thread(target=display_video, args=(hand_detect_handler,))
     
     slider_serial = WriteSerialObject(serial_obj, ack_event)
     # Start all threads
@@ -115,8 +114,20 @@ def main():
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.start()  # Start the hand detect thread
-                    display_thread.start()
-                    time.sleep(10)
+                    time.sleep(10) # sao lai delay 10 s
+                    agohome_message = Message("!agohome#")
+                    write_serial.addMessage(agohome_message)
+                    print("Sent initialization message: !agohome#")
+
+                    # Wait for ACK I!# from Arduino
+                    while True:
+                        if ack_event.is_set():
+                            print("Initialization ACK received: I!#")
+                            ack_event.clear()  # Reset ACK event for next message
+                            break
+                        time.sleep(0.1)  # Short delay to avoid busy-waiting
+
+                    print("Start controlling") 
                     hand_detect_started = True
 
                 # Check if hand_detect_handler has detected a hand position
@@ -139,7 +150,6 @@ def main():
                 if hand_detect_started:
                     print("Switching to auto mode")
                     hand_detect_handler.stop()  # Signal the display thread to stop
-                    display_thread.join()  # Wait for the display thread to finish
                     hand_detect_started = False
                 # Proceed with auto mode logic here
                 print("Auto mode")
