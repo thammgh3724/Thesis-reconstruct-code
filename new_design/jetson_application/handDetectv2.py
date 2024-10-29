@@ -67,6 +67,8 @@ class HandDetectHandler(threading.Thread):
                 if accumulate_count >= 3:
                     self.hand_position = object_positions  # Update the stabilized hand position
                     print(self.hand_position)
+                    accumulate_count = 0  # Reset the count for next stabilization attempt
+                    time.sleep(0.3)
 
             # Update the current frame for display in a separate thread
             self.current_frame = frame
