@@ -2,7 +2,7 @@ import threading
 import time
 import cv2
 import numpy as np
-import camera_var
+import newCamVar
 from ultralytics import YOLO
 
 class HandDetectHandler(threading.Thread):
@@ -39,7 +39,7 @@ class HandDetectHandler(threading.Thread):
                 break
 
             # Undistort the frame using calibration values
-            frame = cv2.undistort(frame, camera_var.K_array, camera_var.Dis_array, None, camera_var.New_array)
+            frame = cv2.undistort(frame, newCamVar.K_array, newCamVar.Dis_array, None, newCamVar.New_array)
             results = self.model(frame, verbose=False)
 
             current_positions = []
