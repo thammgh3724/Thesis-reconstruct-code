@@ -3,7 +3,7 @@ import time
 import serial
 import threading
 
-serialPort = '/dev/ttyACM1'
+serialPort = '/dev/ttyACM0'
 serialBaudrate = 115200
 
 serialObject = serial.Serial(

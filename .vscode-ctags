@@ -1,0 +1,490 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_EXCMD	mixed	/number, pattern, mixed, or combineV2/
+!_TAG_OUTPUT_FILESEP	slash	/slash or backslash/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PATTERN_LENGTH_LIMIT	96	/0 for no limit/
+!_TAG_PROC_CWD	/home/thammgh37/Documents/SourceCode/Visual C++/BKU_Thesis-complete_dev/Thesis-reconstruct-code/	//
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	5.9.0	//
+ANGLE_PER_COMMAND	6dof_robot_control/moving.cpp	/^#define ANGLE_PER_COMMAND /;"	d	file:
+ANGLE_PER_COMMAND	hand_detect/6dof_robot_control/moving.cpp	/^#define ANGLE_PER_COMMAND /;"	d	file:
+ANGLE_PER_COMMAND	new_design/6dof_robot_control/Arm.cpp	/^#define ANGLE_PER_COMMAND /;"	d	file:
+ARM_AUTO_MOVE_DETECT_HAND_ACTION	new_design/6dof_robot_control/global.h	/^#define ARM_AUTO_MOVE_DETECT_HAND_ACTION /;"	d
+ARM_AUTO_MOVE_POSITION_ACTION	new_design/6dof_robot_control/global.h	/^#define ARM_AUTO_MOVE_POSITION_ACTION /;"	d
+ARM_GOHOME_ACTION	new_design/6dof_robot_control/global.h	/^#define ARM_GOHOME_ACTION /;"	d
+ARM_INIT_ACTION	new_design/6dof_robot_control/global.h	/^#define ARM_INIT_ACTION /;"	d
+ARM_MANUAL_MOVE_DISTANCE_ACTION	new_design/6dof_robot_control/global.h	/^#define ARM_MANUAL_MOVE_DISTANCE_ACTION /;"	d
+ARM_STOP_ACTION	new_design/6dof_robot_control/global.h	/^#define ARM_STOP_ACTION /;"	d
+AUTO	6dof_robot_control/communication.h	/^  AUTO,$/;"	e	enum:CONTROL_MODE
+AUTO_CMD	6dof_robot_control/communication.cpp	/^#define AUTO_CMD /;"	d	file:
+AUTO_CMD	hand_detect/6dof_robot_control/communication.cpp	/^#define AUTO_CMD /;"	d	file:
+AUTO_MOVE	6dof_robot_control/communication.h	/^  AUTO_MOVE,$/;"	e	enum:CONTROL_CMD
+Arm	new_design/6dof_robot_control/Arm.cpp	/^Arm::Arm(){$/;"	f	class:Arm
+Arm	new_design/6dof_robot_control/Arm.h	/^class Arm {$/;"	c
+ArmMoving	6dof_robot_control/moving.cpp	/^ArmMoving::ArmMoving(){$/;"	f	class:ArmMoving
+ArmMoving	6dof_robot_control/moving.h	/^class ArmMoving {$/;"	c
+ArmMoving	hand_detect/6dof_robot_control/moving.cpp	/^ArmMoving::ArmMoving(){$/;"	f	class:ArmMoving
+ArmMoving	hand_detect/6dof_robot_control/moving.h	/^class ArmMoving {$/;"	c
+CONTROL_CMD	6dof_robot_control/communication.h	/^enum CONTROL_CMD{$/;"	g
+CONTROL_MODE	6dof_robot_control/communication.h	/^enum CONTROL_MODE{$/;"	g
+DATA	6dof_robot_control/communication.h	/^    char DATA[MAX_DATA_SIZE];   \/\/Data received is stored here$/;"	m	class:SerialCommunication	typeref:typename:char[]
+DEBUG	6dof_robot_control/global.h	/^#define DEBUG$/;"	d
+DEBUG	hand_detect/6dof_robot_control/global.h	/^#define DEBUG$/;"	d
+DEBUG	new_design/6dof_robot_control/global.h	/^#define DEBUG$/;"	d
+DETECT_HAND_AUTO_MOVING	new_design/6dof_robot_control/global.h	/^#define DETECT_HAND_AUTO_MOVING /;"	d
+DH1line	6dof_robot_control/kinematics.cpp	/^void DH1line(float thetadh, float alfadh, float rdh, float ddh, float* Tdh)$/;"	f	typeref:typename:void
+DH1line	hand_detect/6dof_robot_control/kinematics.cpp	/^void DH1line(double thetadh, double alfadh, double rdh, double ddh, double* Tdh)$/;"	f	typeref:typename:void
+DH1line	new_design/6dof_robot_control/Arm.cpp	/^void Arm::DH1line(double thetadh, double alfadh, double rdh, double ddh, double* Tdh)$/;"	f	class:Arm	typeref:typename:void
+DIR1_PIN	6dof_robot_control/global.h	/^#define DIR1_PIN /;"	d
+DIR1_PIN	hand_detect/6dof_robot_control/global.h	/^#define DIR1_PIN /;"	d
+DIR1_PIN	new_design/6dof_robot_control/global.h	/^#define DIR1_PIN /;"	d
+DIR2_PIN	6dof_robot_control/global.h	/^#define DIR2_PIN /;"	d
+DIR2_PIN	hand_detect/6dof_robot_control/global.h	/^#define DIR2_PIN /;"	d
+DIR2_PIN	new_design/6dof_robot_control/global.h	/^#define DIR2_PIN /;"	d
+DIR3_PIN	6dof_robot_control/global.h	/^#define DIR3_PIN /;"	d
+DIR3_PIN	hand_detect/6dof_robot_control/global.h	/^#define DIR3_PIN /;"	d
+DIR3_PIN	new_design/6dof_robot_control/global.h	/^#define DIR3_PIN /;"	d
+DIR4_PIN	6dof_robot_control/global.h	/^#define DIR4_PIN /;"	d
+DIR4_PIN	hand_detect/6dof_robot_control/global.h	/^#define DIR4_PIN /;"	d
+DIR4_PIN	new_design/6dof_robot_control/global.h	/^#define DIR4_PIN /;"	d
+DIR5_PIN	6dof_robot_control/global.h	/^#define DIR5_PIN /;"	d
+DIR5_PIN	hand_detect/6dof_robot_control/global.h	/^#define DIR5_PIN /;"	d
+DIR5_PIN	new_design/6dof_robot_control/global.h	/^#define DIR5_PIN /;"	d
+DIR6_PIN	6dof_robot_control/global.h	/^#define DIR6_PIN /;"	d
+DIR6_PIN	hand_detect/6dof_robot_control/global.h	/^#define DIR6_PIN /;"	d
+DIR6_PIN	new_design/6dof_robot_control/global.h	/^#define DIR6_PIN /;"	d
+DIR_PINS	new_design/6dof_robot_control/Arm.h	/^        int DIR_PINS[6] = {DIR1_PIN, DIR2_PIN, DIR3_PIN, DIR4_PIN, DIR5_PIN, DIR6_PIN}; $/;"	m	class:Arm	typeref:typename:int[6]
+DIR_PINS	new_design/6dof_robot_control/Slider.h	/^        int DIR_PINS = SLIDER_DIR; $/;"	m	class:Slider	typeref:typename:int
+DL	6dof_robot_control/global.h	/^const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};$/;"	v	typeref:typename:const double[6]
+DL	hand_detect/6dof_robot_control/global.h	/^const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};$/;"	v	typeref:typename:const double[6]
+DL	new_design/6dof_robot_control/Arm.h	/^        const double DL[6] = {dl1, dl2, dl3, dl4, dl5, dl6};$/;"	m	class:Arm	typeref:typename:const double[6]
+EN321_PIN	6dof_robot_control/global.h	/^#define EN321_PIN /;"	d
+EN321_PIN	hand_detect/6dof_robot_control/global.h	/^#define EN321_PIN /;"	d
+EN321_PIN	new_design/6dof_robot_control/global.h	/^#define EN321_PIN /;"	d
+EN4_PIN	6dof_robot_control/global.h	/^#define EN4_PIN /;"	d
+EN4_PIN	hand_detect/6dof_robot_control/global.h	/^#define EN4_PIN /;"	d
+EN4_PIN	new_design/6dof_robot_control/global.h	/^#define EN4_PIN /;"	d
+EN5_PIN	6dof_robot_control/global.h	/^#define EN5_PIN /;"	d
+EN5_PIN	hand_detect/6dof_robot_control/global.h	/^#define EN5_PIN /;"	d
+EN5_PIN	new_design/6dof_robot_control/global.h	/^#define EN5_PIN /;"	d
+EN6_PIN	6dof_robot_control/global.h	/^#define EN6_PIN /;"	d
+EN6_PIN	hand_detect/6dof_robot_control/global.h	/^#define EN6_PIN /;"	d
+EN6_PIN	new_design/6dof_robot_control/global.h	/^#define EN6_PIN /;"	d
+ForwardK	6dof_robot_control/kinematics.cpp	/^void ForwardK(float* Jfk, float* Xfk)$/;"	f	typeref:typename:void
+ForwardK	hand_detect/6dof_robot_control/kinematics.cpp	/^void ForwardK(double* Jfk, double* Xfk)$/;"	f	typeref:typename:void
+ForwardK	new_design/6dof_robot_control/Arm.cpp	/^void Arm::ForwardK(double* Jfk, double* Xfk)$/;"	f	class:Arm	typeref:typename:void
+GENERAL_AUTO_MOVING	new_design/6dof_robot_control/global.h	/^#define GENERAL_AUTO_MOVING /;"	d
+GO_FOLD	6dof_robot_control/communication.h	/^  GO_FOLD,$/;"	e	enum:CONTROL_CMD
+GO_FOLD_CMD	6dof_robot_control/communication.cpp	/^#define GO_FOLD_CMD /;"	d	file:
+GO_FOLD_CMD	hand_detect/6dof_robot_control/communication.cpp	/^#define GO_FOLD_CMD /;"	d	file:
+GO_HOME	6dof_robot_control/communication.h	/^  GO_HOME,$/;"	e	enum:CONTROL_CMD
+GO_HOME_CMD	6dof_robot_control/communication.cpp	/^#define GO_HOME_CMD /;"	d	file:
+GO_HOME_CMD	hand_detect/6dof_robot_control/communication.cpp	/^#define GO_HOME_CMD /;"	d	file:
+HOME	new_design/6dof_robot_control/global.h	/^#define HOME /;"	d
+IDLE	6dof_robot_control/communication.h	/^  IDLE,$/;"	e	enum:CONTROL_CMD
+INDUCTIVE_SR	hand_detect/6dof_robot_control/global.h	/^#define INDUCTIVE_SR /;"	d
+INDUCTIVE_SR	new_design/6dof_robot_control/global.h	/^#define INDUCTIVE_SR /;"	d
+INIT	6dof_robot_control/communication.h	/^  INIT,$/;"	e	enum:CONTROL_MODE
+INIT	new_design/6dof_robot_control/global.h	/^#define INIT /;"	d
+INITIAL_CMD	6dof_robot_control/communication.cpp	/^#define INITIAL_CMD /;"	d	file:
+INITIAL_CMD	hand_detect/6dof_robot_control/communication.cpp	/^#define INITIAL_CMD /;"	d	file:
+INIT_ACTION	new_design/6dof_robot_control/global.h	/^#define INIT_ACTION /;"	d
+INVALID	6dof_robot_control/communication.h	/^  INVALID$/;"	e	enum:CONTROL_CMD
+InverseK	6dof_robot_control/kinematics.cpp	/^void InverseK(float* Xik, float* Jik)$/;"	f	typeref:typename:void
+InverseK	hand_detect/6dof_robot_control/kinematics.cpp	/^void InverseK(double* Xik, double* Jik)$/;"	f	typeref:typename:void
+InverseK	new_design/6dof_robot_control/Arm.cpp	/^void Arm::InverseK(double* Xik, double* Jik)$/;"	f	class:Arm	typeref:typename:void
+Listener	new_design/6dof_robot_control/Communication.cpp	/^Listener::Listener(){$/;"	f	class:Listener
+Listener	new_design/6dof_robot_control/Communication.h	/^class Listener {$/;"	c
+MANUAL	6dof_robot_control/communication.h	/^  MANUAL,$/;"	e	enum:CONTROL_MODE
+MANUAL_CMD	6dof_robot_control/communication.cpp	/^#define MANUAL_CMD /;"	d	file:
+MANUAL_CMD	hand_detect/6dof_robot_control/communication.cpp	/^#define MANUAL_CMD /;"	d	file:
+MANUAL_MOVE	6dof_robot_control/communication.h	/^  MANUAL_MOVE,$/;"	e	enum:CONTROL_CMD
+MANUAL_MOVING	new_design/6dof_robot_control/global.h	/^#define MANUAL_MOVING /;"	d
+MAX_DATA_SIZE	6dof_robot_control/communication.h	/^#define MAX_DATA_SIZE /;"	d
+MAX_DATA_SIZE	hand_detect/6dof_robot_control/communication.cpp	/^#define MAX_DATA_SIZE /;"	d	file:
+MAX_DATA_SIZE	new_design/6dof_robot_control/Communication.cpp	/^#define MAX_DATA_SIZE /;"	d	file:
+MAX_JOINT_ANGLE	6dof_robot_control/global.h	/^const float MAX_JOINT_ANGLE[5] = {80, 80, 60, 90, 90};$/;"	v	typeref:typename:const float[5]
+MAX_JOINT_ANGLE	hand_detect/6dof_robot_control/global.h	/^const double MAX_JOINT_ANGLE[6] = {90, 87, 80, 180, 120, 180};$/;"	v	typeref:typename:const double[6]
+MAX_JOINT_ANGLE	new_design/6dof_robot_control/Arm.h	/^        const double MAX_JOINT_ANGLE[6] = {90.0, 87.0, 80.0, 180.0, 120.0, 180.0}; \/\/ refind m/;"	m	class:Arm	typeref:typename:const double[6]
+MAX_POSITION	new_design/6dof_robot_control/Slider.h	/^        const double MAX_POSITION = 28246.0;$/;"	m	class:Slider	typeref:typename:const double
+MIN_JOINT_ANGLE	6dof_robot_control/global.h	/^const float MIN_JOINT_ANGLE[5] = {-80, -80, -80, -90, -90};$/;"	v	typeref:typename:const float[5]
+MIN_JOINT_ANGLE	hand_detect/6dof_robot_control/global.h	/^const double MIN_JOINT_ANGLE[6] = {-90, -60, -80, -180, -90, -180};$/;"	v	typeref:typename:const double[6]
+MIN_JOINT_ANGLE	new_design/6dof_robot_control/Arm.h	/^        const double MIN_JOINT_ANGLE[6] = {-90.0, -60.0, -80.0, -180.0, -90.0, -180.0};$/;"	m	class:Arm	typeref:typename:const double[6]
+MIN_POSITION	new_design/6dof_robot_control/Slider.h	/^        const double MIN_POSITION = 0.0;$/;"	m	class:Slider	typeref:typename:const double
+MatrixAdd	6dof_robot_control/kinematics.cpp	/^void MatrixAdd(float* A, float* B, int m, int n, float* C)$/;"	f	typeref:typename:void
+MatrixAdd	hand_detect/6dof_robot_control/kinematics.cpp	/^void MatrixAdd(double* A, double* B, int m, int n, double* C)$/;"	f	typeref:typename:void
+MatrixAdd	new_design/6dof_robot_control/Arm.cpp	/^void Arm::MatrixAdd(double* A, double* B, int m, int n, double* C)$/;"	f	class:Arm	typeref:typename:void
+MatrixCopy	6dof_robot_control/kinematics.cpp	/^void MatrixCopy(float* A, int n, int m, float* B)$/;"	f	typeref:typename:void
+MatrixCopy	hand_detect/6dof_robot_control/kinematics.cpp	/^void MatrixCopy(double* A, int n, int m, double* B)$/;"	f	typeref:typename:void
+MatrixCopy	new_design/6dof_robot_control/Arm.cpp	/^void Arm::MatrixCopy(double* A, int n, int m, double* B)$/;"	f	class:Arm	typeref:typename:void
+MatrixMultiply	6dof_robot_control/kinematics.cpp	/^void MatrixMultiply(float* A, float* B, int m, int p, int n, float* C)$/;"	f	typeref:typename:void
+MatrixMultiply	hand_detect/6dof_robot_control/kinematics.cpp	/^void MatrixMultiply(double* A, double* B, int m, int p, int n, double* C)$/;"	f	typeref:typename:void
+MatrixMultiply	new_design/6dof_robot_control/Arm.cpp	/^void Arm::MatrixMultiply(double* A, double* B, int m, int p, int n, double* C)$/;"	f	class:Arm	typeref:typename:void
+MatrixPrint	6dof_robot_control/kinematics.cpp	/^void MatrixPrint(float* A, int m, int n, String label)$/;"	f	typeref:typename:void
+MatrixPrint	hand_detect/6dof_robot_control/kinematics.cpp	/^void MatrixPrint(double* A, int m, int n, String label)$/;"	f	typeref:typename:void
+MatrixPrint	new_design/6dof_robot_control/Arm.cpp	/^void Arm::MatrixPrint(double* A, int m, int n, String label)$/;"	f	class:Arm	typeref:typename:void
+MatrixScale	6dof_robot_control/kinematics.cpp	/^void MatrixScale(float* A, int m, int n, float k)$/;"	f	typeref:typename:void
+MatrixScale	hand_detect/6dof_robot_control/kinematics.cpp	/^void MatrixScale(double* A, int m, int n, double k)$/;"	f	typeref:typename:void
+MatrixScale	new_design/6dof_robot_control/Arm.cpp	/^void Arm::MatrixScale(double* A, int m, int n, double k)$/;"	f	class:Arm	typeref:typename:void
+MatrixSubtract	6dof_robot_control/kinematics.cpp	/^void MatrixSubtract(float* A, float* B, int m, int n, float* C)$/;"	f	typeref:typename:void
+MatrixSubtract	hand_detect/6dof_robot_control/kinematics.cpp	/^void MatrixSubtract(double* A, double* B, int m, int n, double* C)$/;"	f	typeref:typename:void
+MatrixSubtract	new_design/6dof_robot_control/Arm.cpp	/^void Arm::MatrixSubtract(double* A, double* B, int m, int n, double* C)$/;"	f	class:Arm	typeref:typename:void
+MatrixTranspose	6dof_robot_control/kinematics.cpp	/^void MatrixTranspose(float* A, int m, int n, float* C)$/;"	f	typeref:typename:void
+MatrixTranspose	hand_detect/6dof_robot_control/kinematics.cpp	/^void MatrixTranspose(double* A, int m, int n, double* C)$/;"	f	typeref:typename:void
+MatrixTranspose	new_design/6dof_robot_control/Arm.cpp	/^void Arm::MatrixTranspose(double* A, int m, int n, double* C)$/;"	f	class:Arm	typeref:typename:void
+NEGATIVE_DIRECTION	6dof_robot_control/moving.cpp	/^#define NEGATIVE_DIRECTION /;"	d	file:
+NEGATIVE_DIRECTION	hand_detect/6dof_robot_control/moving.cpp	/^#define NEGATIVE_DIRECTION /;"	d	file:
+NEGATIVE_DIRECTION	new_design/6dof_robot_control/Arm.cpp	/^#define NEGATIVE_DIRECTION /;"	d	file:
+NO_ACTION	new_design/6dof_robot_control/global.h	/^#define NO_ACTION /;"	d
+NUMBER_MANUAL_STEP_ACCELERATE	new_design/6dof_robot_control/Arm.cpp	/^#define NUMBER_MANUAL_STEP_ACCELERATE /;"	d	file:
+NUMBER_MANUAL_STEP_DECELERATE	new_design/6dof_robot_control/Arm.cpp	/^#define NUMBER_MANUAL_STEP_DECELERATE /;"	d	file:
+NUM_BYTES_BUFFER	6dof_robot_control/moving.cpp	/^#define NUM_BYTES_BUFFER /;"	d	file:
+NUM_BYTES_BUFFER	hand_detect/6dof_robot_control/moving.cpp	/^#define NUM_BYTES_BUFFER /;"	d	file:
+NUM_BYTES_BUFFER	new_design/6dof_robot_control/Arm.cpp	/^#define NUM_BYTES_BUFFER /;"	d	file:
+PI	6dof_robot_control/global.h	/^#define PI /;"	d
+PI	hand_detect/6dof_robot_control/global.h	/^#define PI /;"	d
+PI	new_design/6dof_robot_control/global.h	/^#define PI /;"	d
+POSITIVE_DIRECTION	6dof_robot_control/moving.cpp	/^#define POSITIVE_DIRECTION /;"	d	file:
+POSITIVE_DIRECTION	hand_detect/6dof_robot_control/moving.cpp	/^#define POSITIVE_DIRECTION /;"	d	file:
+POSITIVE_DIRECTION	new_design/6dof_robot_control/Arm.cpp	/^#define POSITIVE_DIRECTION /;"	d	file:
+PUL1_PIN	6dof_robot_control/global.h	/^#define PUL1_PIN /;"	d
+PUL1_PIN	hand_detect/6dof_robot_control/global.h	/^#define PUL1_PIN /;"	d
+PUL1_PIN	new_design/6dof_robot_control/global.h	/^#define PUL1_PIN /;"	d
+PUL2_PIN	6dof_robot_control/global.h	/^#define PUL2_PIN /;"	d
+PUL2_PIN	hand_detect/6dof_robot_control/global.h	/^#define PUL2_PIN /;"	d
+PUL2_PIN	new_design/6dof_robot_control/global.h	/^#define PUL2_PIN /;"	d
+PUL3_PIN	6dof_robot_control/global.h	/^#define PUL3_PIN /;"	d
+PUL3_PIN	hand_detect/6dof_robot_control/global.h	/^#define PUL3_PIN /;"	d
+PUL3_PIN	new_design/6dof_robot_control/global.h	/^#define PUL3_PIN /;"	d
+PUL4_PIN	6dof_robot_control/global.h	/^#define PUL4_PIN /;"	d
+PUL4_PIN	hand_detect/6dof_robot_control/global.h	/^#define PUL4_PIN /;"	d
+PUL4_PIN	new_design/6dof_robot_control/global.h	/^#define PUL4_PIN /;"	d
+PUL5_PIN	6dof_robot_control/global.h	/^#define PUL5_PIN /;"	d
+PUL5_PIN	hand_detect/6dof_robot_control/global.h	/^#define PUL5_PIN /;"	d
+PUL5_PIN	new_design/6dof_robot_control/global.h	/^#define PUL5_PIN /;"	d
+PUL6_PIN	6dof_robot_control/global.h	/^#define PUL6_PIN /;"	d
+PUL6_PIN	hand_detect/6dof_robot_control/global.h	/^#define PUL6_PIN /;"	d
+PUL6_PIN	new_design/6dof_robot_control/global.h	/^#define PUL6_PIN /;"	d
+PUL_PINS	new_design/6dof_robot_control/Arm.h	/^        int PUL_PINS[6] = {PUL1_PIN, PUL2_PIN, PUL3_PIN, PUL4_PIN, PUL5_PIN, PUL6_PIN};$/;"	m	class:Arm	typeref:typename:int[6]
+PUL_PINS	new_design/6dof_robot_control/Slider.h	/^        int PUL_PINS = SLIDER_PUL;$/;"	m	class:Slider	typeref:typename:int
+PULstat	new_design/6dof_robot_control/Arm.h	/^        bool PULstat[6] = {0, 0, 0, 0, 0, 0};$/;"	m	class:Arm	typeref:typename:bool[6]
+PULstat	new_design/6dof_robot_control/Slider.h	/^        bool PULstat = 0;$/;"	m	class:Slider	typeref:typename:bool
+PULstat1	6dof_robot_control/kinematics.cpp	/^boolean PULstat1 = 0;$/;"	v	typeref:typename:boolean
+PULstat1	hand_detect/6dof_robot_control/kinematics.cpp	/^boolean PULstat1 = 0;$/;"	v	typeref:typename:boolean
+PULstat2	6dof_robot_control/kinematics.cpp	/^boolean PULstat2 = 0;$/;"	v	typeref:typename:boolean
+PULstat2	hand_detect/6dof_robot_control/kinematics.cpp	/^boolean PULstat2 = 0;$/;"	v	typeref:typename:boolean
+PULstat3	6dof_robot_control/kinematics.cpp	/^boolean PULstat3 = 0;$/;"	v	typeref:typename:boolean
+PULstat3	hand_detect/6dof_robot_control/kinematics.cpp	/^boolean PULstat3 = 0;$/;"	v	typeref:typename:boolean
+PULstat4	6dof_robot_control/kinematics.cpp	/^boolean PULstat4 = 0;$/;"	v	typeref:typename:boolean
+PULstat4	hand_detect/6dof_robot_control/kinematics.cpp	/^boolean PULstat4 = 0;$/;"	v	typeref:typename:boolean
+PULstat5	6dof_robot_control/kinematics.cpp	/^boolean PULstat5 = 0;$/;"	v	typeref:typename:boolean
+PULstat5	hand_detect/6dof_robot_control/kinematics.cpp	/^boolean PULstat5 = 0;$/;"	v	typeref:typename:boolean
+PULstat6	6dof_robot_control/kinematics.cpp	/^boolean PULstat6 = 0;$/;"	v	typeref:typename:boolean
+PULstat6	hand_detect/6dof_robot_control/kinematics.cpp	/^boolean PULstat6 = 0;$/;"	v	typeref:typename:boolean
+PUMP_OFF	6dof_robot_control/communication.cpp	/^#define PUMP_OFF /;"	d	file:
+PUMP_OFF	hand_detect/6dof_robot_control/communication.cpp	/^#define PUMP_OFF /;"	d	file:
+PUMP_ON	6dof_robot_control/communication.cpp	/^#define PUMP_ON /;"	d	file:
+PUMP_ON	hand_detect/6dof_robot_control/communication.cpp	/^#define PUMP_ON /;"	d	file:
+PUMP_PIN	6dof_robot_control/global.h	/^#define PUMP_PIN /;"	d
+PUMP_PIN	hand_detect/6dof_robot_control/global.h	/^#define PUMP_PIN /;"	d
+PUMP_PIN	new_design/6dof_robot_control/global.h	/^#define PUMP_PIN /;"	d
+SLEEP	6dof_robot_control/communication.h	/^  SLEEP,$/;"	e	enum:CONTROL_MODE
+SLIDER_AUTO_MOVE_DETECT_HAND_ACTION	new_design/6dof_robot_control/global.h	/^#define SLIDER_AUTO_MOVE_DETECT_HAND_ACTION /;"	d
+SLIDER_AUTO_MOVE_FREE_ACTION	new_design/6dof_robot_control/global.h	/^#define SLIDER_AUTO_MOVE_FREE_ACTION /;"	d
+SLIDER_AUTO_MOVE_POSITION_ACTION	new_design/6dof_robot_control/global.h	/^#define SLIDER_AUTO_MOVE_POSITION_ACTION /;"	d
+SLIDER_DIR	hand_detect/6dof_robot_control/global.h	/^#define SLIDER_DIR /;"	d
+SLIDER_DIR	new_design/6dof_robot_control/global.h	/^#define SLIDER_DIR /;"	d
+SLIDER_GOHOME_ACTION	new_design/6dof_robot_control/global.h	/^#define SLIDER_GOHOME_ACTION /;"	d
+SLIDER_INIT_ACTION	new_design/6dof_robot_control/global.h	/^#define SLIDER_INIT_ACTION /;"	d
+SLIDER_MANUAL_MOVE_DISTANCE_ACTION	new_design/6dof_robot_control/global.h	/^#define SLIDER_MANUAL_MOVE_DISTANCE_ACTION /;"	d
+SLIDER_NEG_DIR	hand_detect/6dof_robot_control/global.h	/^#define SLIDER_NEG_DIR /;"	d
+SLIDER_NEG_DIR	new_design/6dof_robot_control/global.h	/^#define SLIDER_NEG_DIR /;"	d
+SLIDER_PUL	hand_detect/6dof_robot_control/global.h	/^#define SLIDER_PUL /;"	d
+SLIDER_PUL	new_design/6dof_robot_control/global.h	/^#define SLIDER_PUL /;"	d
+SLIDER_STOP_ACTION	new_design/6dof_robot_control/global.h	/^#define SLIDER_STOP_ACTION /;"	d
+STOP	6dof_robot_control/communication.h	/^  STOP,$/;"	e	enum:CONTROL_CMD
+STOP	new_design/6dof_robot_control/global.h	/^#define STOP /;"	d
+STOP_CMD	6dof_robot_control/communication.cpp	/^#define STOP_CMD /;"	d	file:
+STOP_CMD	hand_detect/6dof_robot_control/communication.cpp	/^#define STOP_CMD /;"	d	file:
+Sender	new_design/6dof_robot_control/Communication.cpp	/^Sender::Sender(){};$/;"	f	class:Sender
+Sender	new_design/6dof_robot_control/Communication.h	/^class Sender {$/;"	c
+SerialCommunication	6dof_robot_control/communication.cpp	/^SerialCommunication::SerialCommunication(){$/;"	f	class:SerialCommunication
+SerialCommunication	6dof_robot_control/communication.h	/^class SerialCommunication {$/;"	c
+Slider	new_design/6dof_robot_control/Slider.cpp	/^Slider::Slider(){$/;"	f	class:Slider
+Slider	new_design/6dof_robot_control/Slider.h	/^class Slider {$/;"	c
+System	new_design/6dof_robot_control/System.h	/^class System {$/;"	c
+System	new_design/6dof_robot_control/Sysyem.cpp	/^System::System(){$/;"	f	class:System
+TURN_OFF_PUMP	6dof_robot_control/communication.h	/^  TURN_OFF_PUMP,$/;"	e	enum:CONTROL_CMD
+TURN_ON_PUMP	6dof_robot_control/communication.h	/^  TURN_ON_PUMP,$/;"	e	enum:CONTROL_CMD
+Timer	new_design/6dof_robot_control/Timer.cpp	/^Timer::Timer(){$/;"	f	class:Timer
+Timer	new_design/6dof_robot_control/Timer.h	/^class Timer {$/;"	c
+UNKNOW_ACTION	new_design/6dof_robot_control/global.h	/^#define UNKNOW_ACTION /;"	d
+WAKEUP	6dof_robot_control/communication.h	/^  WAKEUP,$/;"	e	enum:CONTROL_CMD
+Xhome	6dof_robot_control/global.h	/^const float Xhome[6] = { 164.5, 0.0, 241.0, 90.0, 180.0, -90.0 };$/;"	v	typeref:typename:const float[6]
+Xhome	hand_detect/6dof_robot_control/global.h	/^const float Xhome[6] = { 164.5, 0.0, 241.0, 90.0, 180.0, -90.0 };$/;"	v	typeref:typename:const float[6]
+__ARM__H	new_design/6dof_robot_control/Arm.h	/^#define __ARM__H$/;"	d
+__COMMUNICATION__H	6dof_robot_control/communication.h	/^#define __COMMUNICATION__H$/;"	d
+__COMMUNICATION__H	hand_detect/6dof_robot_control/communication.h	/^#define __COMMUNICATION__H$/;"	d
+__COMMUNICATION__H	new_design/6dof_robot_control/Communication.h	/^#define __COMMUNICATION__H$/;"	d
+__GLOBAL__H	6dof_robot_control/global.h	/^#define __GLOBAL__H$/;"	d
+__GLOBAL__H	hand_detect/6dof_robot_control/global.h	/^#define __GLOBAL__H$/;"	d
+__GLOBAL__H	new_design/6dof_robot_control/global.h	/^#define __GLOBAL__H$/;"	d
+__KINEMATICS__H	6dof_robot_control/kinematics.h	/^#define __KINEMATICS__H$/;"	d
+__KINEMATICS__H	hand_detect/6dof_robot_control/kinematics.h	/^#define __KINEMATICS__H$/;"	d
+__MOVING__H	6dof_robot_control/moving.h	/^#define __MOVING__H$/;"	d
+__MOVING__H	hand_detect/6dof_robot_control/moving.h	/^#define __MOVING__H$/;"	d
+__READ_SERIAL__H	6dof_robot_control/readSerial.h	/^#define __READ_SERIAL__H$/;"	d
+__SLIDER__H	new_design/6dof_robot_control/Slider.h	/^#define __SLIDER__H$/;"	d
+__SYSTEM__H	new_design/6dof_robot_control/System.h	/^#define __SYSTEM__H$/;"	d
+__TIMER__H	new_design/6dof_robot_control/Timer.h	/^#define __TIMER__H$/;"	d
+arm	new_design/6dof_robot_control/System.h	/^        Arm* arm;$/;"	m	class:System	typeref:typename:Arm *
+arm_fsm	new_design/6dof_robot_control/Sysyem.cpp	/^void System::arm_fsm(){$/;"	f	class:System	typeref:typename:void
+arrayToString	6dof_robot_control/moving.cpp	/^String arrayToString(float a[], int size) {$/;"	f	typeref:typename:String
+autoMove	6dof_robot_control/moving.cpp	/^void ArmMoving::autoMove(float* Xnext, float vel0, float acc0, float velini, float velfin){$/;"	f	class:ArmMoving	typeref:typename:void
+autoMove	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::autoMove(double* Xnext, double vel0, double acc0, double velini, double velfin){$/;"	f	class:ArmMoving	typeref:typename:void
+autoMove_detectHand	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, doub/;"	f	class:ArmMoving	typeref:typename:void
+buffer	6dof_robot_control/moving.h	/^  float buffer[6];$/;"	m	class:ArmMoving	typeref:typename:float[6]
+buffer	hand_detect/6dof_robot_control/moving.h	/^  double buffer[6];$/;"	m	class:ArmMoving	typeref:typename:double[6]
+calculateHorizontalNextJoint_detectHand	new_design/6dof_robot_control/Arm.cpp	/^void Arm::calculateHorizontalNextJoint_detectHand(){$/;"	f	class:Arm	typeref:typename:void
+calculateHorizontalNextPosition_detectHand	new_design/6dof_robot_control/Arm.cpp	/^void Arm::calculateHorizontalNextPosition_detectHand(double* model_data){$/;"	f	class:Arm	typeref:typename:void
+calculateLengthwiseNextJoint_detectHand	new_design/6dof_robot_control/Arm.cpp	/^void Arm::calculateLengthwiseNextJoint_detectHand(){$/;"	f	class:Arm	typeref:typename:void
+calculateLengthwiseNextPosition_detectHand	new_design/6dof_robot_control/Arm.cpp	/^void Arm::calculateLengthwiseNextPosition_detectHand(double* model_data){$/;"	f	class:Arm	typeref:typename:void
+calculateNextJoint	new_design/6dof_robot_control/Arm.cpp	/^void Arm::calculateNextJoint() {$/;"	f	class:Arm	typeref:typename:void
+calculateTotalSteps	new_design/6dof_robot_control/Arm.cpp	/^void Arm::calculateTotalSteps(){$/;"	f	class:Arm	typeref:typename:void
+calculateTotalSteps	new_design/6dof_robot_control/Slider.cpp	/^void Slider::calculateTotalSteps(){$/;"	f	class:Slider	typeref:typename:void
+checkTimeoutAction	new_design/6dof_robot_control/Timer.cpp	/^bool Timer::checkTimeoutAction(){$/;"	f	class:Timer	typeref:typename:bool
+cmd	6dof_robot_control/communication.h	/^    CONTROL_CMD  cmd;$/;"	m	class:SerialCommunication	typeref:typename:CONTROL_CMD
+cmd	6dof_robot_control/moving.h	/^  CONTROL_CMD cmd;$/;"	m	class:ArmMoving	typeref:typename:CONTROL_CMD
+cmd	hand_detect/6dof_robot_control/communication.cpp	/^int cmd = 0;$/;"	v	typeref:typename:int
+command	new_design/6dof_robot_control/Communication.h	/^        String command;$/;"	m	class:Listener	typeref:typename:String
+communicate	new_design/6dof_robot_control/Sysyem.cpp	/^void System::communicate(){$/;"	f	class:System	typeref:typename:void
+consumeCommand	new_design/6dof_robot_control/Communication.cpp	/^void Listener::consumeCommand(int action, double* output){$/;"	f	class:Listener	typeref:typename:void
+count	new_design/6dof_robot_control/Sysyem.cpp	/^int count = 1;$/;"	v	typeref:typename:int
+curJoint1	hand_detect/6dof_robot_control/kinematics.cpp	/^double curJoint1 = 0.0;$/;"	v	typeref:typename:double
+curJoint2	hand_detect/6dof_robot_control/kinematics.cpp	/^double curJoint2 = 0.0;$/;"	v	typeref:typename:double
+curJoint3	hand_detect/6dof_robot_control/kinematics.cpp	/^double curJoint3 = 0.0;$/;"	v	typeref:typename:double
+curJoint4	hand_detect/6dof_robot_control/kinematics.cpp	/^double curJoint4 = 0.0;$/;"	v	typeref:typename:double
+curJoint5	hand_detect/6dof_robot_control/kinematics.cpp	/^double curJoint5 = 0.0;$/;"	v	typeref:typename:double
+curJoint6	hand_detect/6dof_robot_control/kinematics.cpp	/^double curJoint6 = 0.0;$/;"	v	typeref:typename:double
+curPos1	6dof_robot_control/kinematics.cpp	/^double curPos1 = 0.0;$/;"	v	typeref:typename:double
+curPos2	6dof_robot_control/kinematics.cpp	/^double curPos2 = 0.0;$/;"	v	typeref:typename:double
+curPos3	6dof_robot_control/kinematics.cpp	/^double curPos3 = 0.0;$/;"	v	typeref:typename:double
+curPos4	6dof_robot_control/kinematics.cpp	/^double curPos4 = 0.0;$/;"	v	typeref:typename:double
+curPos5	6dof_robot_control/kinematics.cpp	/^double curPos5 = 0.0;$/;"	v	typeref:typename:double
+curPos6	6dof_robot_control/kinematics.cpp	/^double curPos6 = 0.0;$/;"	v	typeref:typename:double
+currJoint	6dof_robot_control/moving.h	/^  float currJoint[6]; \/\/ current joints angle$/;"	m	class:ArmMoving	typeref:typename:float[6]
+currJoint	hand_detect/6dof_robot_control/moving.h	/^  double currJoint[6]; \/\/ current joints angle$/;"	m	class:ArmMoving	typeref:typename:double[6]
+currX	hand_detect/6dof_robot_control/moving.h	/^  double currX[6]; \/\/ current {x, y, z, ZYZ Euler angles}$/;"	m	class:ArmMoving	typeref:typename:double[6]
+currentTime	new_design/6dof_robot_control/Timer.h	/^        unsigned long long currentTime;$/;"	m	class:Timer	typeref:typename:unsigned long long
+d1	6dof_robot_control/kinematics.cpp	/^const double d1 = 133.0;$/;"	v	typeref:typename:const double
+d1	hand_detect/6dof_robot_control/kinematics.cpp	/^const double d1 = 133.0;$/;"	v	typeref:typename:const double
+d1	new_design/6dof_robot_control/Arm.h	/^        const double d1 = 133.0;$/;"	m	class:Arm	typeref:typename:const double
+d3	6dof_robot_control/kinematics.cpp	/^const double d3 = 0.0;$/;"	v	typeref:typename:const double
+d3	hand_detect/6dof_robot_control/kinematics.cpp	/^const double d3 = 0.0;$/;"	v	typeref:typename:const double
+d3	new_design/6dof_robot_control/Arm.h	/^        const double d3 = 0.0;$/;"	m	class:Arm	typeref:typename:const double
+d4	6dof_robot_control/kinematics.cpp	/^const double d4 = 117.50;$/;"	v	typeref:typename:const double
+d4	hand_detect/6dof_robot_control/kinematics.cpp	/^const double d4 = 117.50;$/;"	v	typeref:typename:const double
+d4	new_design/6dof_robot_control/Arm.h	/^        const double d4 = 117.50;$/;"	m	class:Arm	typeref:typename:const double
+d6	6dof_robot_control/kinematics.cpp	/^const double d6 = 28.0;$/;"	v	typeref:typename:const double
+d6	hand_detect/6dof_robot_control/kinematics.cpp	/^const double d6 = 28.0;$/;"	v	typeref:typename:const double
+d6	new_design/6dof_robot_control/Arm.h	/^        const double d6 = 28.0;$/;"	m	class:Arm	typeref:typename:const double
+data_print	new_design/6dof_robot_control/Communication.cpp	/^String data_print = "";$/;"	v	typeref:typename:String
+distributeAction	new_design/6dof_robot_control/Sysyem.cpp	/^void System::distributeAction(){ \/\/ send ACK here$/;"	f	class:System	typeref:typename:void
+dl1	6dof_robot_control/global.h	/^const double dl1 = 360.0\/200.0\/32.0\/4.8;$/;"	v	typeref:typename:const double
+dl1	hand_detect/6dof_robot_control/global.h	/^const double dl1 = 360.0\/200.0\/32.0\/4.8;$/;"	v	typeref:typename:const double
+dl1	new_design/6dof_robot_control/Arm.h	/^        const double dl1 = 360.0\/200.0\/32.0\/4.8;$/;"	m	class:Arm	typeref:typename:const double
+dl2	6dof_robot_control/global.h	/^const double dl2 = 360.0\/200.0\/32.0\/4.0;$/;"	v	typeref:typename:const double
+dl2	hand_detect/6dof_robot_control/global.h	/^const double dl2 = 360.0\/200.0\/32.0\/4.0;$/;"	v	typeref:typename:const double
+dl2	new_design/6dof_robot_control/Arm.h	/^        const double dl2 = 360.0\/200.0\/32.0\/4.0;$/;"	m	class:Arm	typeref:typename:const double
+dl3	6dof_robot_control/global.h	/^const double dl3 = 360.0\/200.0\/32.0\/5.0;$/;"	v	typeref:typename:const double
+dl3	hand_detect/6dof_robot_control/global.h	/^const double dl3 = 360.0\/200.0\/32.0\/5.0;$/;"	v	typeref:typename:const double
+dl3	new_design/6dof_robot_control/Arm.h	/^        const double dl3 = 360.0\/200.0\/32.0\/5.0;$/;"	m	class:Arm	typeref:typename:const double
+dl4	6dof_robot_control/global.h	/^const double dl4 = 360.0\/200.0\/16.0\/2.8;$/;"	v	typeref:typename:const double
+dl4	hand_detect/6dof_robot_control/global.h	/^const double dl4 = 360.0\/200.0\/16.0\/2.9;$/;"	v	typeref:typename:const double
+dl4	new_design/6dof_robot_control/Arm.h	/^        const double dl4 = 360.0\/200.0\/16.0\/2.9;$/;"	m	class:Arm	typeref:typename:const double
+dl5	6dof_robot_control/global.h	/^const double dl5 = 360.0\/200.0\/16.0\/2.1;$/;"	v	typeref:typename:const double
+dl5	hand_detect/6dof_robot_control/global.h	/^const double dl5 = 360.0\/200.0\/16.0\/2.1;$/;"	v	typeref:typename:const double
+dl5	new_design/6dof_robot_control/Arm.h	/^        const double dl5 = 360.0\/200.0\/16.0\/2.1;$/;"	m	class:Arm	typeref:typename:const double
+dl6	6dof_robot_control/global.h	/^const double dl6 = 360.0\/200.0\/16.0\/1.0;$/;"	v	typeref:typename:const double
+dl6	hand_detect/6dof_robot_control/global.h	/^const double dl6 = 360.0\/200.0\/16.0\/1.0;$/;"	v	typeref:typename:const double
+dl6	new_design/6dof_robot_control/Arm.h	/^        const double dl6 = 360.0\/200.0\/16.0\/1.0;$/;"	m	class:Arm	typeref:typename:const double
+double_abs	new_design/6dof_robot_control/Arm.cpp	/^double Arm::double_abs(double num) {$/;"	f	class:Arm	typeref:typename:double
+double_abs	new_design/6dof_robot_control/Slider.cpp	/^double Slider::double_abs(double num) {$/;"	f	class:Slider	typeref:typename:double
+endChar	6dof_robot_control/communication.cpp	/^#define endChar /;"	d	file:
+endChar	hand_detect/6dof_robot_control/communication.cpp	/^#define endChar /;"	d	file:
+endChar	new_design/6dof_robot_control/Communication.cpp	/^#define endChar /;"	d	file:
+end_vel	6dof_robot_control/moving.cpp	/^float end_vel = 1 * velG;$/;"	v	typeref:typename:float
+end_vel	hand_detect/6dof_robot_control/moving.cpp	/^double end_vel = 1 * velG; $/;"	v	typeref:typename:double
+end_vel	new_design/6dof_robot_control/Arm.h	/^        double end_vel = 1 * velG; $/;"	m	class:Arm	typeref:typename:double
+gamepad_data	new_design/6dof_robot_control/System.h	/^        double gamepad_data[6];$/;"	m	class:System	typeref:typename:double[6]
+generalAutoMove	new_design/6dof_robot_control/Arm.cpp	/^void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, int accRate = 53/;"	f	class:Arm	typeref:typename:void
+generalAutoMove	new_design/6dof_robot_control/Slider.cpp	/^void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int accRate = 20){$/;"	f	class:Slider	typeref:typename:void
+getAxis	6dof_robot_control/communication.cpp	/^void SerialCommunication::getAxis(float* output){$/;"	f	class:SerialCommunication	typeref:typename:void
+getAxis	hand_detect/6dof_robot_control/moving.cpp	/^bool ArmMoving::getAxis(double* output){$/;"	f	class:ArmMoving	typeref:typename:bool
+getCommand	6dof_robot_control/communication.cpp	/^CONTROL_CMD SerialCommunication::getCommand(){$/;"	f	class:SerialCommunication	typeref:typename:CONTROL_CMD
+getCurPos	6dof_robot_control/kinematics.cpp	/^float getCurPos(uint8_t i){$/;"	f	typeref:typename:float
+getCurrentJoint	new_design/6dof_robot_control/Arm.cpp	/^void Arm::getCurrentJoint(double* output){$/;"	f	class:Arm	typeref:typename:void
+getCurrentPosition	new_design/6dof_robot_control/Arm.cpp	/^void Arm::getCurrentPosition(double* output){$/;"	f	class:Arm	typeref:typename:void
+getCurrentPosition	new_design/6dof_robot_control/Slider.cpp	/^double Slider::getCurrentPosition(){$/;"	f	class:Slider	typeref:typename:double
+getCurrentState	new_design/6dof_robot_control/Arm.cpp	/^int Arm::getCurrentState(){$/;"	f	class:Arm	typeref:typename:int
+getCurrentState	new_design/6dof_robot_control/Slider.cpp	/^int Slider::getCurrentState(){$/;"	f	class:Slider	typeref:typename:int
+getData	6dof_robot_control/communication.cpp	/^char* SerialCommunication::getData(){$/;"	f	class:SerialCommunication	typeref:typename:char *
+getDataManual	hand_detect/6dof_robot_control/moving.cpp	/^bool ArmMoving::getDataManual(double* output){$/;"	f	class:ArmMoving	typeref:typename:bool
+getDataModel	hand_detect/6dof_robot_control/moving.cpp	/^bool ArmMoving::getDataModel(double* output){$/;"	f	class:ArmMoving	typeref:typename:bool
+getDoubleArrayData	new_design/6dof_robot_control/Communication.cpp	/^void Listener::getDoubleArrayData(double* output, int numDataToGet, int commandLength, char char/;"	f	class:Listener	typeref:typename:void
+getNextJoint	new_design/6dof_robot_control/Arm.cpp	/^void Arm::getNextJoint(double* output){$/;"	f	class:Arm	typeref:typename:void
+getNextPosition	new_design/6dof_robot_control/Arm.cpp	/^void Arm::getNextPosition(double* output){$/;"	f	class:Arm	typeref:typename:void
+getNumberStepDone	new_design/6dof_robot_control/Arm.cpp	/^void Arm::getNumberStepDone(double* output){$/;"	f	class:Arm	typeref:typename:void
+getNumberStepToGo	new_design/6dof_robot_control/Arm.cpp	/^void Arm::getNumberStepToGo(double* output){$/;"	f	class:Arm	typeref:typename:void
+getNumberStepToGo	new_design/6dof_robot_control/Slider.cpp	/^double Slider::getNumberStepToGo(){$/;"	f	class:Slider	typeref:typename:double
+getcurJoint	hand_detect/6dof_robot_control/kinematics.cpp	/^double getcurJoint(uint8_t i){$/;"	f	typeref:typename:double
+goFoldFromManual	6dof_robot_control/moving.cpp	/^void ArmMoving::goFoldFromManual(){$/;"	f	class:ArmMoving	typeref:typename:void
+goHomeFromManual	6dof_robot_control/moving.cpp	/^void ArmMoving::goHomeFromManual(){$/;"	f	class:ArmMoving	typeref:typename:void
+goHomeFromManual	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::goHomeFromManual(){$/;"	f	class:ArmMoving	typeref:typename:void
+goStrightLine	6dof_robot_control/kinematics.cpp	/^void goStrightLine(float* xfi, float* xff, float vel0, float acc0, float velini, float velfin){$/;"	f	typeref:typename:void
+goStrightLine	hand_detect/6dof_robot_control/kinematics.cpp	/^void goStrightLine(double* xfi, double* xff, double vel0, double acc0, double velini, double vel/;"	f	typeref:typename:void
+goTrajectory	6dof_robot_control/kinematics.cpp	/^void goTrajectory(float* Jf){$/;"	f	typeref:typename:void
+goTrajectory	hand_detect/6dof_robot_control/kinematics.cpp	/^void goTrajectory(double* Jf){$/;"	f	typeref:typename:void
+home_joint	new_design/6dof_robot_control/Arm.h	/^        const double home_joint[6] = {0.0, 0.0, 0.0, 180.0, 0.0, 0.0};$/;"	m	class:Arm	typeref:typename:const double[6]
+home_position	new_design/6dof_robot_control/Arm.h	/^        const double home_position[6] = {192.5, 0.0, 269.0, 0.0, 90.0, 0.0};$/;"	m	class:Arm	typeref:typename:const double[6]
+inductiveSrDetect	hand_detect/6dof_robot_control/moving.cpp	/^int inductiveSrDetect() {$/;"	f	typeref:typename:int
+inductiveSrDetect	new_design/6dof_robot_control/Slider.cpp	/^int Slider::inductiveSrDetect() {$/;"	f	class:Slider	typeref:typename:int
+initManualMove	new_design/6dof_robot_control/Arm.cpp	/^void Arm::initManualMove(){$/;"	f	class:Arm	typeref:typename:void
+initStepDone	new_design/6dof_robot_control/Slider.cpp	/^void Slider::initStepDone(){$/;"	f	class:Slider	typeref:typename:void
+initjointAutoMoveDone	new_design/6dof_robot_control/Arm.cpp	/^void Arm::initjointAutoMoveDone(){$/;"	f	class:Arm	typeref:typename:void
+invtran	6dof_robot_control/kinematics.cpp	/^void invtran(float* Titi, float* Titf)$/;"	f	typeref:typename:void
+invtran	hand_detect/6dof_robot_control/kinematics.cpp	/^void invtran(double* Titi, double* Titf)$/;"	f	typeref:typename:void
+invtran	new_design/6dof_robot_control/Arm.cpp	/^void Arm::invtran(double* Titi, double* Titf)$/;"	f	class:Arm	typeref:typename:void
+isAutoMoveDone	new_design/6dof_robot_control/Arm.cpp	/^bool Arm::isAutoMoveDone(){$/;"	f	class:Arm	typeref:typename:bool
+isAutoMoveDone	new_design/6dof_robot_control/Slider.cpp	/^bool Slider::isAutoMoveDone(){$/;"	f	class:Slider	typeref:typename:bool
+isCommandReady	new_design/6dof_robot_control/Communication.h	/^        bool isCommandReady = false;$/;"	m	class:Listener	typeref:typename:bool
+isFirstmove	hand_detect/6dof_robot_control/moving.h	/^  bool isFirstmove; $/;"	m	class:ArmMoving	typeref:typename:bool
+isHorizontalMove	hand_detect/6dof_robot_control/moving.h	/^  bool isHorizontalMove;$/;"	m	class:ArmMoving	typeref:typename:bool
+isHorizontalMove	new_design/6dof_robot_control/Arm.h	/^        bool isHorizontalMove = true;$/;"	m	class:Arm	typeref:typename:bool
+isLengthwiseMove	hand_detect/6dof_robot_control/moving.h	/^  bool isLengthwiseMove;$/;"	m	class:ArmMoving	typeref:typename:bool
+isLengthwiseMove	new_design/6dof_robot_control/Arm.h	/^        bool isLengthwiseMove = true;$/;"	m	class:Arm	typeref:typename:bool
+isManualMoveDone	new_design/6dof_robot_control/Arm.cpp	/^bool Arm::isManualMoveDone(){$/;"	f	class:Arm	typeref:typename:bool
+isdataTransferring	new_design/6dof_robot_control/Communication.h	/^        bool isdataTransferring = false;$/;"	m	class:Listener	typeref:typename:bool
+joint	new_design/6dof_robot_control/Arm.h	/^        double joint[6]; \/\/ current joints angle$/;"	m	class:Arm	typeref:typename:double[6]
+jointAutoMoveDone	new_design/6dof_robot_control/Arm.h	/^        bool jointAutoMoveDone[6];$/;"	m	class:Arm	typeref:typename:bool[6]
+jointManualMoveDone	new_design/6dof_robot_control/Arm.h	/^        bool jointManualMoveDone[6];$/;"	m	class:Arm	typeref:typename:bool[6]
+listen	6dof_robot_control/moving.cpp	/^void ArmMoving::listen(){$/;"	f	class:ArmMoving	typeref:typename:void
+listen	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::listen(){$/;"	f	class:ArmMoving	typeref:typename:void
+listener	6dof_robot_control/moving.h	/^  SerialCommunication listener;$/;"	m	class:ArmMoving	typeref:typename:SerialCommunication
+listener	new_design/6dof_robot_control/System.h	/^        Listener* listener;$/;"	m	class:System	typeref:typename:Listener *
+manualControl	6dof_robot_control/moving.cpp	/^void ArmMoving::manualControl(char* DATA, float vel0, float acc0, float velini, float velfin){$/;"	f	class:ArmMoving	typeref:typename:void
+manualMove	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::manualMove(double* Jnext, double vel0, double acc0, double velini, double velfin/;"	f	class:ArmMoving	typeref:typename:void
+manualMove	new_design/6dof_robot_control/Arm.cpp	/^void Arm::manualMove(int i, double* input, unsigned long &timeout, double incValue = 300)$/;"	f	class:Arm	typeref:typename:void
+manualMove	new_design/6dof_robot_control/Slider.cpp	/^void Slider::manualMove(double input){$/;"	f	class:Slider	typeref:typename:void
+mode	6dof_robot_control/communication.h	/^    CONTROL_MODE mode;$/;"	m	class:SerialCommunication	typeref:typename:CONTROL_MODE
+model_data	new_design/6dof_robot_control/System.h	/^        double model_data[2];$/;"	m	class:System	typeref:typename:double[2]
+move	6dof_robot_control/moving.cpp	/^void ArmMoving::move(){$/;"	f	class:ArmMoving	typeref:typename:void
+move	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::move(){$/;"	f	class:ArmMoving	typeref:typename:void
+move_flag	hand_detect/6dof_robot_control/communication.cpp	/^int move_flag = 0;$/;"	v	typeref:typename:int
+newData	6dof_robot_control/communication.cpp	/^bool SerialCommunication::newData(){$/;"	f	class:SerialCommunication	typeref:typename:bool
+new_data	6dof_robot_control/communication.h	/^    bool new_data;              \/\/Verify new data$/;"	m	class:SerialCommunication	typeref:typename:bool
+nextAction	new_design/6dof_robot_control/System.h	/^        int nextAction;$/;"	m	class:System	typeref:typename:int
+nextArmAction	new_design/6dof_robot_control/System.h	/^        int nextArmAction;$/;"	m	class:System	typeref:typename:int
+nextJoint	new_design/6dof_robot_control/Arm.h	/^        double nextJoint[6]; \/\/ next joints angle$/;"	m	class:Arm	typeref:typename:double[6]
+nextPosition	new_design/6dof_robot_control/Arm.h	/^        double nextPosition[6]; \/\/ next {x, y, z, ZYZ Euler angles}$/;"	m	class:Arm	typeref:typename:double[6]
+nextPosition	new_design/6dof_robot_control/Slider.h	/^        double nextPosition;$/;"	m	class:Slider	typeref:typename:double
+nextPosition_data	new_design/6dof_robot_control/System.h	/^        double nextPosition_data[6];$/;"	m	class:System	typeref:typename:double[6]
+nextSliderAction	new_design/6dof_robot_control/System.h	/^        int nextSliderAction;$/;"	m	class:System	typeref:typename:int
+numCharRead	new_design/6dof_robot_control/Communication.cpp	/^int numCharRead = 0;$/;"	v	typeref:typename:int
+numberStepDone	new_design/6dof_robot_control/Arm.h	/^        double numberStepDone[6];$/;"	m	class:Arm	typeref:typename:double[6]
+numberStepDone	new_design/6dof_robot_control/Slider.h	/^        double numberStepDone;$/;"	m	class:Slider	typeref:typename:double
+numberStepDoneAccelerate_manual	new_design/6dof_robot_control/Arm.h	/^        double numberStepDoneAccelerate_manual[6];$/;"	m	class:Arm	typeref:typename:double[6]
+numberStepDoneDecelerate_manual	new_design/6dof_robot_control/Arm.h	/^        double numberStepDoneDecelerate_manual[6];$/;"	m	class:Arm	typeref:typename:double[6]
+numberStepToGo	new_design/6dof_robot_control/Arm.h	/^        double numberStepToGo[6];$/;"	m	class:Arm	typeref:typename:double[6]
+numberStepToGo	new_design/6dof_robot_control/Slider.h	/^        double numberStepToGo;$/;"	m	class:Slider	typeref:typename:double
+onStart	new_design/6dof_robot_control/Arm.cpp	/^void Arm::onStart(){$/;"	f	class:Arm	typeref:typename:void
+onStart	new_design/6dof_robot_control/Slider.cpp	/^int Slider::onStart(){$/;"	f	class:Slider	typeref:typename:int
+output_slider_auto	new_design/6dof_robot_control/System.h	/^        double output_slider_auto;$/;"	m	class:System	typeref:typename:double
+output_slider_manual	new_design/6dof_robot_control/System.h	/^        double output_slider_manual;$/;"	m	class:System	typeref:typename:double
+parseCommandToAction	new_design/6dof_robot_control/Communication.cpp	/^int Listener::parseCommandToAction(){ \/\/ need 1 command "STOP"$/;"	f	class:Listener	typeref:typename:int
+pos2tran	6dof_robot_control/kinematics.cpp	/^void pos2tran(float* Xpt, float* Tpt)$/;"	f	typeref:typename:void
+pos2tran	hand_detect/6dof_robot_control/kinematics.cpp	/^void pos2tran(double* Xpt, double* Tpt)$/;"	f	typeref:typename:void
+pos2tran	new_design/6dof_robot_control/Arm.cpp	/^void Arm::pos2tran(double* Xpt, double* Tpt)$/;"	f	class:Arm	typeref:typename:void
+position	hand_detect/6dof_robot_control/communication.cpp	/^String position = "";$/;"	v	typeref:typename:String
+position	new_design/6dof_robot_control/Arm.h	/^        double position[6]; \/\/ current {x, y, z, ZYZ Euler angles}$/;"	m	class:Arm	typeref:typename:double[6]
+position	new_design/6dof_robot_control/Slider.h	/^        double position;$/;"	m	class:Slider	typeref:typename:double
+previousTime	new_design/6dof_robot_control/Timer.h	/^        unsigned long long previousTime;$/;"	m	class:Timer	typeref:typename:unsigned long long
+printCurJoint	6dof_robot_control/moving.cpp	/^void ArmMoving::printCurJoint(){$/;"	f	class:ArmMoving	typeref:typename:void
+printCurJoint	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::printCurJoint(){$/;"	f	class:ArmMoving	typeref:typename:void
+printCurPos	6dof_robot_control/kinematics.cpp	/^void printCurPos(){$/;"	f	typeref:typename:void
+printCurPos	6dof_robot_control/moving.cpp	/^void ArmMoving::printCurPos(){$/;"	f	class:ArmMoving	typeref:typename:void
+printCurPos	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::printCurPos(){$/;"	f	class:ArmMoving	typeref:typename:void
+printCurrentJoint	new_design/6dof_robot_control/Arm.cpp	/^void Arm::printCurrentJoint(){$/;"	f	class:Arm	typeref:typename:void
+printCurrentPos	new_design/6dof_robot_control/Arm.cpp	/^void Arm::printCurrentPos(){$/;"	f	class:Arm	typeref:typename:void
+printcurJoint	hand_detect/6dof_robot_control/kinematics.cpp	/^void printcurJoint(){$/;"	f	typeref:typename:void
+r1	6dof_robot_control/kinematics.cpp	/^const double r1 = 47.0;$/;"	v	typeref:typename:const double
+r1	hand_detect/6dof_robot_control/kinematics.cpp	/^const double r1 = 47.0;$/;"	v	typeref:typename:const double
+r1	new_design/6dof_robot_control/Arm.h	/^        const double r1 = 47.0;$/;"	m	class:Arm	typeref:typename:const double
+r2	6dof_robot_control/kinematics.cpp	/^const double r2 = 110.0;$/;"	v	typeref:typename:const double
+r2	hand_detect/6dof_robot_control/kinematics.cpp	/^const double r2 = 110.0;$/;"	v	typeref:typename:const double
+r2	new_design/6dof_robot_control/Arm.h	/^        const double r2 = 110.0;$/;"	m	class:Arm	typeref:typename:const double
+r3	6dof_robot_control/kinematics.cpp	/^const double r3 = 26.0; $/;"	v	typeref:typename:const double
+r3	hand_detect/6dof_robot_control/kinematics.cpp	/^const double r3 = 26.0; $/;"	v	typeref:typename:const double
+r3	new_design/6dof_robot_control/Arm.h	/^        const double r3 = 26.0; $/;"	m	class:Arm	typeref:typename:const double
+rc	new_design/6dof_robot_control/Communication.cpp	/^char rc;                               \/\/Received character$/;"	v	typeref:typename:char
+read	6dof_robot_control/communication.cpp	/^void SerialCommunication::read() {$/;"	f	class:SerialCommunication	typeref:typename:void
+read	hand_detect/6dof_robot_control/communication.cpp	/^void read() {$/;"	f	typeref:typename:void
+readData	new_design/6dof_robot_control/Communication.cpp	/^void Listener::readData() {$/;"	f	class:Listener	typeref:typename:void
+sendACK	new_design/6dof_robot_control/Communication.cpp	/^void Sender::sendACK(String ack){$/;"	f	class:Sender	typeref:typename:void
+sendData	new_design/6dof_robot_control/Communication.cpp	/^void Sender::sendData(String data){$/;"	f	class:Sender	typeref:typename:void
+sender	new_design/6dof_robot_control/Arm.h	/^        Sender* sender;$/;"	m	class:Arm	typeref:typename:Sender *
+sender	new_design/6dof_robot_control/System.h	/^        Sender* sender;$/;"	m	class:System	typeref:typename:Sender *
+setCurPos	6dof_robot_control/kinematics.cpp	/^void setCurPos(double pos1, double pos2, double pos3, double pos4, double pos5, double pos6){$/;"	f	typeref:typename:void
+setJoint	new_design/6dof_robot_control/Arm.cpp	/^void Arm::setJoint(double* joint){$/;"	f	class:Arm	typeref:typename:void
+setLoopAction	new_design/6dof_robot_control/Timer.cpp	/^void Timer::setLoopAction(unsigned long timeout, unsigned long long currentTime){$/;"	f	class:Timer	typeref:typename:void
+setNextJoint	new_design/6dof_robot_control/Arm.cpp	/^void Arm::setNextJoint(double* joint){$/;"	f	class:Arm	typeref:typename:void
+setNextPosition	new_design/6dof_robot_control/Arm.cpp	/^void Arm::setNextPosition(double* position){$/;"	f	class:Arm	typeref:typename:void
+setNextPosition	new_design/6dof_robot_control/Slider.cpp	/^void Slider::setNextPosition(int newPosition){$/;"	f	class:Slider	typeref:typename:void
+setNumberStepDone	new_design/6dof_robot_control/Arm.cpp	/^void Arm::setNumberStepDone(double* steps){$/;"	f	class:Arm	typeref:typename:void
+setNumberStepToGo	new_design/6dof_robot_control/Arm.cpp	/^void Arm::setNumberStepToGo(double* steps){$/;"	f	class:Arm	typeref:typename:void
+setPosition	new_design/6dof_robot_control/Arm.cpp	/^void Arm::setPosition(double* position){$/;"	f	class:Arm	typeref:typename:void
+setPosition	new_design/6dof_robot_control/Slider.cpp	/^void Slider::setPosition(double position){$/;"	f	class:Slider	typeref:typename:void
+setState	new_design/6dof_robot_control/Arm.cpp	/^void Arm::setState(int state){$/;"	f	class:Arm	typeref:typename:void
+setState	new_design/6dof_robot_control/Slider.cpp	/^void Slider::setState(int state){$/;"	f	class:Slider	typeref:typename:void
+setcurJoint	hand_detect/6dof_robot_control/kinematics.cpp	/^void setcurJoint(double joint1, double joint2, double joint3, double joint4, double joint5, doub/;"	f	typeref:typename:void
+singleJointMove	6dof_robot_control/moving.cpp	/^void ArmMoving::singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int/;"	f	class:ArmMoving	typeref:typename:void
+singleJointMove	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::singleJointMove(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, int/;"	f	class:ArmMoving	typeref:typename:void
+singleJointMove_onStart	new_design/6dof_robot_control/Arm.cpp	/^void Arm::singleJointMove_onStart(uint8_t DIR_PIN, uint8_t DIR, uint8_t PUL_PIN, int totSteps, i/;"	f	class:Arm	typeref:typename:void
+slider1	new_design/6dof_robot_control/System.h	/^        Slider* slider1;$/;"	m	class:System	typeref:typename:Slider *
+slider_fsm	new_design/6dof_robot_control/Sysyem.cpp	/^void System::slider_fsm(){$/;"	f	class:System	typeref:typename:void
+startChar	6dof_robot_control/communication.cpp	/^#define startChar /;"	d	file:
+startChar	hand_detect/6dof_robot_control/communication.cpp	/^#define startChar /;"	d	file:
+startChar	new_design/6dof_robot_control/Communication.cpp	/^#define startChar /;"	d	file:
+start_vel	6dof_robot_control/moving.cpp	/^float start_vel = 1 * velG;$/;"	v	typeref:typename:float
+start_vel	hand_detect/6dof_robot_control/moving.cpp	/^double start_vel = 1 * velG;$/;"	v	typeref:typename:double
+start_vel	new_design/6dof_robot_control/Arm.h	/^        double start_vel = 1 * velG;$/;"	m	class:Arm	typeref:typename:double
+state	new_design/6dof_robot_control/Arm.h	/^        int state;$/;"	m	class:Arm	typeref:typename:int
+state	new_design/6dof_robot_control/Slider.h	/^        int state;$/;"	m	class:Slider	typeref:typename:int
+state	new_design/6dof_robot_control/System.h	/^        int state;$/;"	m	class:System	typeref:typename:int
+timeout	new_design/6dof_robot_control/Timer.h	/^        unsigned long timeout;$/;"	m	class:Timer	typeref:typename:unsigned long
+timer_arm	new_design/6dof_robot_control/System.h	/^        Timer* timer_arm[6]; \/\/ 6 timer for arm to take loop action for 6 joint$/;"	m	class:System	typeref:typename:Timer * [6]
+timer_slider	new_design/6dof_robot_control/System.h	/^        Timer* timer_slider;$/;"	m	class:System	typeref:typename:Timer *
+tran2pos	6dof_robot_control/kinematics.cpp	/^void tran2pos(float* Ttp, float* Xtp)$/;"	f	typeref:typename:void
+tran2pos	hand_detect/6dof_robot_control/kinematics.cpp	/^void tran2pos(double* Ttp, double* Xtp)$/;"	f	typeref:typename:void
+tran2pos	new_design/6dof_robot_control/Arm.cpp	/^void Arm::tran2pos(double* Ttp, double* Xtp)$/;"	f	class:Arm	typeref:typename:void
+updateCurrentPosition	new_design/6dof_robot_control/Arm.cpp	/^void Arm::updateCurrentPosition(){$/;"	f	class:Arm	typeref:typename:void
+updatePosition	new_design/6dof_robot_control/Slider.cpp	/^void Slider::updatePosition(){$/;"	f	class:Slider	typeref:typename:void
+validate	6dof_robot_control/communication.cpp	/^void SerialCommunication::validate(){$/;"	f	class:SerialCommunication	typeref:typename:void
+validateJoint	6dof_robot_control/moving.cpp	/^bool validateJoint(float* input){$/;"	f	typeref:typename:bool
+validateJoint	hand_detect/6dof_robot_control/moving.cpp	/^int ArmMoving::validateJoint(double* input){$/;"	f	class:ArmMoving	typeref:typename:int
+validateNextJoint	new_design/6dof_robot_control/Arm.cpp	/^int Arm::validateNextJoint(){$/;"	f	class:Arm	typeref:typename:int
+validatePosition	new_design/6dof_robot_control/Slider.cpp	/^int Slider::validatePosition(double input){$/;"	f	class:Slider	typeref:typename:int
+velG	6dof_robot_control/moving.cpp	/^const float velG = 0.25e-4;$/;"	v	typeref:typename:const float
+velG	hand_detect/6dof_robot_control/moving.cpp	/^const double velG = 0.25e-4;$/;"	v	typeref:typename:const double
+velG	new_design/6dof_robot_control/Arm.h	/^        const double velG = 0.25e-4;$/;"	m	class:Arm	typeref:typename:const double
+wakeUp	6dof_robot_control/moving.cpp	/^void ArmMoving::wakeUp(){$/;"	f	class:ArmMoving	typeref:typename:void
+wakeUp	hand_detect/6dof_robot_control/moving.cpp	/^void ArmMoving::wakeUp(){$/;"	f	class:ArmMoving	typeref:typename:void
+~Arm	new_design/6dof_robot_control/Arm.cpp	/^Arm::~Arm(){$/;"	f	class:Arm
+~Listener	new_design/6dof_robot_control/Communication.cpp	/^Listener::~Listener(){};$/;"	f	class:Listener
+~Sender	new_design/6dof_robot_control/Communication.cpp	/^Sender::~Sender(){};$/;"	f	class:Sender
+~Slider	new_design/6dof_robot_control/Slider.cpp	/^Slider::~Slider(){};$/;"	f	class:Slider
+~System	new_design/6dof_robot_control/Sysyem.cpp	/^System::~System(){$/;"	f	class:System
+~Timer	new_design/6dof_robot_control/Timer.cpp	/^Timer::~Timer(){};$/;"	f	class:Timer

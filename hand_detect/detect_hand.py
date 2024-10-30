@@ -21,7 +21,7 @@ serialObject = serial.Serial(
 ) 
 
 def cam_proc():
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(cv2.CAP_V4L2)
 
     object_positions = []
     accumulate_count = 0
