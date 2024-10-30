@@ -1,9 +1,17 @@
-import threading
 import time
 import cv2
 import numpy as np
 import camera_var
 from ultralytics import YOLO
+import threading
+
+pipeline = (
+    "v4l2src device=/dev/video0 ! "
+    "video/x-raw, width=640, height=480, framerate=30/1 ! "
+    "videoconvert ! "
+    "queue max-size-buffers=1 leaky=downstream ! "
+    "appsink"
+)
 
 class HandDetectHandler(threading.Thread):
     def __init__(self):
@@ -27,7 +35,7 @@ class HandDetectHandler(threading.Thread):
 
     def cam_proc(self):
         """Camera processing to detect hand with position stabilization"""
-        cap = cv2.VideoCapture(cv2.CAP_V4L2)
+        cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
         object_positions = []
         accumulate_count = 0
 
