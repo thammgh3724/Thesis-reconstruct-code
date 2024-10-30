@@ -48,6 +48,12 @@ def main():
     write_serial.start()
     slider_serial.start()
     hand_serial.start()
+
+    # Gohome event.
+    home_serial = WriteSerialObject(serial_obj, ack_event)
+    home_serial.start()
+    isHome = True
+
     # Timer for STOP signal debounce
     last_stop_time = 0
     slider_last_time = 0
@@ -69,14 +75,25 @@ def main():
                 break
             time.sleep(0.1)  # Short delay to avoid busy-waiting
 
-        print("Start controlling")
-
         # Main control loop
         while True:
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
                 # Process gamepad inputs
+                if not isHome:
+                    home_serial.addMessage(Message("!agohome#"))
+                    isHome = True
+                while True:
+                    if ack_event.is_set():
+                        print("GOHOME ACK received: AH!#")
+                        ack_event.clear()  # Reset ACK event for next message
+                        break
+                    time.sleep(0.1)  # Short delay to avoid busy-waiting
+                if not home_serial.messageQueue.empty():
+                    home_serial.messageQueue.get()
+                print("Start controlling") 
+
                 hand_detect_started = False
                 if gamepad_handler.newValue: 
                     # Retrieve buffer and sliders signals
@@ -115,22 +132,25 @@ def main():
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
+                isHome = False
+                if not isHome:
+                    home_serial.addMessage(Message("!agohome#"))
+                    isHome = True
+                while True:
+                    if ack_event.is_set():
+                        print("GOHOME ACK received: AH!#")
+                        ack_event.clear()  # Reset ACK event for next message
+                        break
+                    time.sleep(0.1)  # Short delay to avoid busy-waiting
+                if not home_serial.messageQueue.empty():
+                    home_serial.messageQueue.get()
+
+                print("Start controlling") 
+                
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.resume()  # Start the hand detect thread
-                    agohome_message = Message("!agohome#")
-                    hand_serial.addMessage(agohome_message)
-                    print("Sent initialization message: !agohome#")
-
-                    # Wait for ACK I!# from Arduino
-                    while True:
-                        if ack_event.is_set():
-                            print("GOHOME ACK received: AH!#")
-                            ack_event.clear()  # Reset ACK event for next message
-                            break
-                        time.sleep(0.1)  # Short delay to avoid busy-waiting
-
-                    print("Start controlling") 
+                    
                 hand_detect_started = True
                 # Check if hand_detect_handler has detected a hand position
                 if hand_detect_handler.hand_position:
@@ -148,7 +168,19 @@ def main():
             elif mode == "auto":
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command
-                
+                isHome = False
+                if not isHome:
+                    home_serial.addMessage(Message("!agohome#"))
+                    isHome = True
+                while True:
+                    if ack_event.is_set():
+                        print("GOHOME ACK received: AH!#")
+                        ack_event.clear()  # Reset ACK event for next message
+                        break
+                    time.sleep(0.1)  # Short delay to avoid busy-waiting
+                if not home_serial.messageQueue.empty():
+                    home_serial.messageQueue.get()
+
                 if hand_detect_started:
                     print("Switching to auto mode")
                     hand_detect_started = False
@@ -164,10 +196,14 @@ def main():
         slider_serial.stop()
         hand_serial.stop()
         read_serial.stop()
+        home_serial.stop()
+
         write_serial.join()
         slider_serial.join()
         hand_serial.join()
         read_serial.join()
+        home_serial.join()
+
         gamepad_handler.join()
         hand_detect_handler.stop()
         hand_detect_handler.join()
