@@ -37,6 +37,8 @@ def main():
     gamepad_handler = GamepadHandler()
 
     hand_detect_handler = HandDetectHandler()
+    hand_detect_handler.start()
+    hand_detect_handler.pause()
     
     slider_serial = WriteSerialObject(serial_obj, ack_event)
     hand_serial = WriteSerialObject(serial_obj, ack_event)
@@ -75,6 +77,7 @@ def main():
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
                 # Process gamepad inputs
+                hand_detect_started = False
                 if gamepad_handler.newValue: 
                     # Retrieve buffer and sliders signals
                     slider_signal = gamepad_handler.getSlidersSignal()
@@ -114,8 +117,7 @@ def main():
             elif mode == "hand_detect":
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
-                    hand_detect_handler.start()  # Start the hand detect thread
-                    #time.sleep(10) # sao lai delay 10 s
+                    hand_detect_handler.resume()  # Start the hand detect thread
                     agohome_message = Message("!agohome#")
                     hand_serial.addMessage(agohome_message)
                     print("Sent initialization message: !agohome#")
@@ -129,8 +131,6 @@ def main():
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
 
                     print("Start controlling") 
-                else:
-                    hand_detect_handler.resume()
                 hand_detect_started = True
                 # Check if hand_detect_handler has detected a hand position
                 if hand_detect_handler.hand_position:
@@ -151,6 +151,7 @@ def main():
                 
                 if hand_detect_started:
                     print("Switching to auto mode")
+                    hand_detect_started = False
                     hand_detect_handler.pause()
                 # Proceed with auto mode logic here
                 print("Auto mode")
