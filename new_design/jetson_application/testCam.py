@@ -1,26 +1,28 @@
 import cv2
-import time
 
-def capture_and_show():
-    cap = cv2.VideoCapture(cv2.CAP_V4L2)
+pipeline = (
+    "v4l2src device=/dev/video0 ! "
+    "video/x-raw, width=640, height=480, framerate=30/1 ! "
+    "videoconvert ! "
+    "queue max-size-buffers=1 leaky=downstream ! "
+    "appsink"
+)
 
-    if not cap.isOpened():
-        return
+cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
 
+if not cap.isOpened():
+    print("Can not open cam!")
+else:
     while True:
         ret, frame = cap.read()
         if not ret:
-            print("Không thể nhận khung hình từ camera.")
+            print("Can't read frame!")
             break
 
-        cv2.imshow("Camera", frame)
-        time.sleep(0.5)
+        cv2.imshow("Low Latency Camera Stream", frame)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # Giải phóng tài nguyên
-    cap.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    capture_and_show()
+cap.release()
+cv2.destroyAllWindows()
