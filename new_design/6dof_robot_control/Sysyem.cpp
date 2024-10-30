@@ -81,7 +81,7 @@ void System::arm_fsm(){
         }
         break;
     case GENERAL_AUTO_MOVING:
-        if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION)
+        if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION || this->nextArmAction == ARM_GOHOME_ACTION)
         {
             if(this->arm->isAutoMoveDone()) {
                 this->arm->updateCurrentPosition();
