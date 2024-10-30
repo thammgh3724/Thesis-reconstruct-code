@@ -10,6 +10,9 @@ pipeline = (
 
 cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
 
+while not cap.isOpened():
+    cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+
 if not cap.isOpened():
     print("Can not open cam!")
 else:
