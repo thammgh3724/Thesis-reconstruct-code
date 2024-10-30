@@ -197,13 +197,11 @@ def main():
         hand_serial.stop()
         read_serial.stop()
         home_serial.stop()
-
         write_serial.join()
         slider_serial.join()
         hand_serial.join()
         read_serial.join()
         home_serial.join()
-
         gamepad_handler.join()
         hand_detect_handler.stop()
         hand_detect_handler.join()
