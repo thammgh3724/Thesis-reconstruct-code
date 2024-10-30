@@ -1,9 +1,18 @@
 import cv2
 import time
 
-def capture_and_show():
-    cap = cv2.VideoCapture(cv2.CAP_V4L2)
 
+pipeline = (
+    "v4l2src device=/dev/video0 ! "
+    "video/x-raw, width=640, height=480, framerate=30/1 ! "
+    "videoconvert ! "
+    "appsink"
+)
+
+def capture_and_show():
+
+    cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+    cap.set(cv2.CAP_PROP_FPS, 30)
     if not cap.isOpened():
         return
 
