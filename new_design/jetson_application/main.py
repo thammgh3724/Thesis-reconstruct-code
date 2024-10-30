@@ -1,6 +1,6 @@
 from serialObjectSingleton import SerialSingleton
 from gamepad import GamepadHandler
-from handDetect import HandDetectHandler
+from handDetectv4 import HandDetectHandler
 from writeSerial import WriteSerialObject, Message
 from readSerial import ReadSerialObject
 import serial
@@ -39,11 +39,13 @@ def main():
     hand_detect_handler = HandDetectHandler()
     
     slider_serial = WriteSerialObject(serial_obj, ack_event)
+    hand_serial = WriteSerialObject(serial_obj, ack_event)
     # Start all threads
     gamepad_handler.start()
     read_serial.start()
     write_serial.start()
     slider_serial.start()
+    hand_serial.start()
     # Timer for STOP signal debounce
     last_stop_time = 0
     slider_last_time = 0
@@ -72,7 +74,6 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
-                hand_detect_started = False
                 # Process gamepad inputs
                 if gamepad_handler.newValue: 
                     # Retrieve buffer and sliders signals
@@ -114,22 +115,23 @@ def main():
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.start()  # Start the hand detect thread
-                    time.sleep(10) # sao lai delay 10 s
+                    #time.sleep(10) # sao lai delay 10 s
                     agohome_message = Message("!agohome#")
-                    write_serial.addMessage(agohome_message)
+                    hand_serial.addMessage(agohome_message)
                     print("Sent initialization message: !agohome#")
 
                     # Wait for ACK I!# from Arduino
                     while True:
                         if ack_event.is_set():
-                            print("Initialization ACK received: I!#")
+                            print("GOHOME ACK received: AH!#")
                             ack_event.clear()  # Reset ACK event for next message
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
 
                     print("Start controlling") 
-                    hand_detect_started = True
-
+                else:
+                    hand_detect_handler.resume()
+                hand_detect_started = True
                 # Check if hand_detect_handler has detected a hand position
                 if hand_detect_handler.hand_position:
                     # Get the hand position
@@ -140,7 +142,7 @@ def main():
                     message = Message(message_content)
                     
                     # Add the message to the write_serial queue
-                    write_serial.addMessage(message)
+                    hand_serial.addMessage(message)
                     print(f"Send to write_serial queue: {message_content}")
                 hand_detect_handler.hand_position = None
             elif mode == "auto":
@@ -149,8 +151,7 @@ def main():
                 
                 if hand_detect_started:
                     print("Switching to auto mode")
-                    hand_detect_handler.stop()  # Signal the display thread to stop
-                    hand_detect_started = False
+                    hand_detect_handler.pause()
                 # Proceed with auto mode logic here
                 print("Auto mode")
 
@@ -160,11 +161,15 @@ def main():
         print("Stopping threads...")
         write_serial.stop()
         slider_serial.stop()
+        hand_serial.stop()
         read_serial.stop()
         write_serial.join()
         slider_serial.join()
+        hand_serial.join()
         read_serial.join()
         gamepad_handler.join()
+        hand_detect_handler.stop()
+        hand_detect_handler.join()
         print("All threads stopped.")
 
     finally:
