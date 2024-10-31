@@ -38,7 +38,8 @@ class HandDetectHandler(threading.Thread):
         )
         cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
         while not cap.isOpened():
-            cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+            print("cap in normal")
+            cap = cv2.VideoCapture(cv2.CAP_V4L2)
             
         object_positions = []
         accumulate_count = 0
