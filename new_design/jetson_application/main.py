@@ -42,6 +42,7 @@ def main():
     
     slider_serial = WriteSerialObject(serial_obj, ack_event)
     hand_serial = WriteSerialObject(serial_obj, ack_event)
+    home_serial = WriteSerialObject(serial_obj, ack_event)
     # Start all threads
     gamepad_handler.start()
     read_serial.start()
@@ -50,9 +51,7 @@ def main():
     hand_serial.start()
 
     # Gohome event.
-    home_serial = WriteSerialObject(serial_obj, ack_event)
     home_serial.start()
-    isHome = True
 
     # Timer for STOP signal debounce
     last_stop_time = 0
@@ -81,18 +80,17 @@ def main():
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
                 # Process gamepad inputs
-                if not isHome:
+                if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
-                    isHome = True
-                while True:
-                    if ack_event.is_set():
-                        print("GOHOME ACK received: AH!#")
-                        ack_event.clear()  # Reset ACK event for next message
-                        break
-                    time.sleep(0.1)  # Short delay to avoid busy-waiting
-                if not home_serial.messageQueue.empty():
-                    home_serial.messageQueue.get()
-                print("Start controlling") 
+                    gamepad_handler.isGoHome = True
+                    while True:
+                        if ack_event.is_set():
+                            print("GOHOME ACK received: AH!#")
+                            ack_event.clear()  # Reset ACK event for next message
+                            break
+                        time.sleep(0.1)  # Short delay to avoid busy-waiting
+                    if not home_serial.messageQueue.empty():
+                        home_serial.messageQueue.get() 
 
                 hand_detect_started = False
                 if gamepad_handler.newValue: 
@@ -132,20 +130,17 @@ def main():
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
-                isHome = False
-                if not isHome:
+                if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
-                    isHome = True
-                while True:
-                    if ack_event.is_set():
-                        print("GOHOME ACK received: AH!#")
-                        ack_event.clear()  # Reset ACK event for next message
-                        break
-                    time.sleep(0.1)  # Short delay to avoid busy-waiting
-                if not home_serial.messageQueue.empty():
-                    home_serial.messageQueue.get()
-
-                print("Start controlling") 
+                    gamepad_handler.isGoHome = True
+                    while True:
+                        if ack_event.is_set():
+                            print("GOHOME ACK received: AH!#")
+                            ack_event.clear()  # Reset ACK event for next message
+                            break
+                        time.sleep(0.1)  # Short delay to avoid busy-waiting
+                    if not home_serial.messageQueue.empty():
+                        home_serial.messageQueue.get()
                 
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
@@ -168,18 +163,17 @@ def main():
             elif mode == "auto":
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command
-                isHome = False
-                if not isHome:
+                if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
-                    isHome = True
-                while True:
-                    if ack_event.is_set():
-                        print("GOHOME ACK received: AH!#")
-                        ack_event.clear()  # Reset ACK event for next message
-                        break
-                    time.sleep(0.1)  # Short delay to avoid busy-waiting
-                if not home_serial.messageQueue.empty():
-                    home_serial.messageQueue.get()
+                    gamepad_handler.isGoHome = True
+                    while True:
+                        if ack_event.is_set():
+                            print("GOHOME ACK received: AH!#")
+                            ack_event.clear()  # Reset ACK event for next message
+                            break
+                        time.sleep(0.1)  # Short delay to avoid busy-waiting
+                    if not home_serial.messageQueue.empty():
+                        home_serial.messageQueue.get()
 
                 if hand_detect_started:
                     print("Switching to auto mode")

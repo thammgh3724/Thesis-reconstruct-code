@@ -7,12 +7,13 @@ class GamepadHandler(threading.Thread):
         threading.Thread.__init__(self)
         pygame.init()
         self.joystick = None
-        self.buffer = [0] * 6  # Assuming there are 6 parameters to track
-        self.slide_signal = [0, 0]  # Control slide signal
+        self.buffer = [0] * 6      # Assuming there are 6 parameters to track
+        self.slide_signal = [0, 0] # Control slide signal
         self.newValue = False
-        self.mode = "gamepad"  # Default to gamepad mode
-        self.debounce_time = 0.5  # Time to wait before toggling mode again
+        self.mode = "gamepad"      # Default to gamepad mode
+        self.debounce_time = 0.5   # Time to wait before toggling mode again
         self.last_toggle_time = 0  # Last time the mode was toggled
+        self.isGoHome = True       # To check if after mode is switched, system is home yet.
 
     def getBuffer(self):
         return self.buffer
@@ -30,10 +31,13 @@ class GamepadHandler(threading.Thread):
             # Switch between gamepad, hand_detect, and auto
             if self.mode == "gamepad":
                 self.mode = "hand_detect"
+                self.isGoHome = False
             elif self.mode == "hand_detect":
                 self.mode = "auto"
+                self.isGoHome = False
             else:
                 self.mode = "gamepad"
+                self.isGoHome = False
             print(f"Switched mode to: {self.mode}")
             self.last_toggle_time = current_time
 
