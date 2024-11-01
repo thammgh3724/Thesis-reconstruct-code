@@ -28,7 +28,7 @@ System::~System(){
 }
 
 void System::gripper_setup() {
-    this-gripper->setupGripper(); 
+    this->gripper->setupGripper(); 
 }
 
 void System::communicate(){
@@ -376,7 +376,7 @@ void System::gripper_fsm() {
             #ifdef DEBUG
             this->sender->sendData("!GRIPPER INIT");
             #endif
-            int tmp = this->gripper->initGripper(); // cannot interrupt
+            this->gripper->initGripper(); // cannot interrupt
             this->gripper->setCurrentState(HOME);
         }
         break;
@@ -483,7 +483,6 @@ void System::distributeAction(){ // send ACK here
         this->sender->sendACK("!GM#"); 
         this->nextAction = NO_ACTION; 
         break; 
-    case 
     default:
         break;
     }
