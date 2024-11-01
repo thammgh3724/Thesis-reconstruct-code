@@ -20,7 +20,8 @@ class Gripper {
   public:
     Gripper();  
     void setupGripper();     
-    void initGripper();        
+    void initGripper();  
+    float getCurrentAngle();      
     void moveGripper(double* input); 
     int getCurrentState(); 
     void setCurrentState(int state); 

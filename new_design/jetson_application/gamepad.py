@@ -84,10 +84,10 @@ class GamepadHandler(threading.Thread):
             self.buffer[5] = 2
         elif button == 6:                  # Gripper control
             print("Left bumper pressed")
-            self.gripper_signal[1] = -1
+            self.gripper_signal[1] = 1
         elif button == 7:
             print("Right bumper pressed")
-            self.gripper_signal[1] = 1
+            self.gripper_signal[1] = 2
             # buffer[5] = 1
         elif button == 10:
             print("Back button pressed")

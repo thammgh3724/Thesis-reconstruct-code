@@ -393,6 +393,10 @@ void System::gripper_fsm() {
     case MANUAL_MOVING: 
         if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
             this->gripper->moveGripper(this->output_gripper); 
+            #ifdef DEBUG
+            String tmp = "!GRIPPER MOVE: " + String(this->gripper->getCurrentAngle()); 
+            this->sender->sendData(tmp);
+            #endif
         }
         break;
     case STOP: 

@@ -104,6 +104,8 @@ void Listener::consumeCommand(int action, double* output){
     break;
   case SLIDER_STOP_ACTION:
     break;
+  case GRIPPER_STOP_ACTION:
+    break; 
   case UNKNOW_ACTION:
     break;
   default:
@@ -157,7 +159,7 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
     else if (this->command == "gstop") {
       return GRIPPER_STOP_ACTION; 
     } 
-    /* !0:1G# (open), !0:-1G# (close) 
+    /* !0:1G# (open), !0:0G# (close) 
      * !1:<angle>G# (open with defined angle)
      */  
     else if (this->command.endsWith("G")) {
