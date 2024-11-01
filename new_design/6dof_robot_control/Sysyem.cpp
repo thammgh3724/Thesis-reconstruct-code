@@ -367,7 +367,7 @@ void System::slider_fsm(){
     }
 }
 
-/** GRIPPER FSM */
+/**==================GRIPPER FSM=================================*/
 void System::gripper_fsm() {
     switch(this->gripper->getCurrentState()) 
     {
@@ -391,8 +391,15 @@ void System::gripper_fsm() {
         break; 
     //TODO: manual move
     case MANUAL_MOVING: 
+        if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
+            this->gripper->moveGripper(this->output_gripper); 
+        }
         break;
     case STOP: 
+        if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
+            this->gripper->setCurrentState(MANUAL_MOVING);
+            this->timer_gripper->setLoopAction(100, micros()); 
+        } 
         break; 
     default: 
         break; 
@@ -479,7 +486,7 @@ void System::distributeAction(){ // send ACK here
     /** GRIPPER CONTROLLER */
     case GRIPPER_MANUAL_MOVE_ACTION: 
         this->nextGripperAction = GRIPPER_MANUAL_MOVE_ACTION; 
-        this->listener->consumeCommand(GRIPPER_MANUAL_MOVE_ACTION, &this->output_gripper); 
+        this->listener->consumeCommand(GRIPPER_MANUAL_MOVE_ACTION, this->output_gripper); 
         this->sender->sendACK("!GM#"); 
         this->nextAction = NO_ACTION; 
         break; 

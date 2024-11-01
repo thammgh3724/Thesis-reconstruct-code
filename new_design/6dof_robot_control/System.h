@@ -44,7 +44,7 @@ class System {
         double output_slider_auto;
 
         // Gripper data 
-        double output_gripper; 
+        double output_gripper[2]; 
 
     private:
         void distributeAction();

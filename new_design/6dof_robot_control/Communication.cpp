@@ -85,7 +85,7 @@ void Listener::consumeCommand(int action, double* output){
     getDoubleArrayData(output, 1, commandLength, 'S');
     break;
   case GRIPPER_MANUAL_MOVE_ACTION: 
-    for (int i = 0; i < 1; i++) 
+    for (int i = 0; i < 2; i++) 
     {
         output[i] = 0.0; 
     }

@@ -13,7 +13,7 @@ class Gripper {
     float currentAngle;       
     float nextAngle;        
 
-    const int servoPin = 9;   
+    const int servoPin = 11;   
     const float MAX_ANGLE = 180.0;
     const float MIN_ANGLE = 90.0;
 
