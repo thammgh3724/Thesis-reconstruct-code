@@ -64,7 +64,7 @@ class HandDetectHandler(threading.Thread):
                     x_center = (x_min + x_max) / 2
                     y_center = (y_min + y_max) / 2
                     current_positions.append((x_center, y_center))
-                    cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max))), (255, 0, 0), 2)
+                    cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (255, 0, 0), 2)
                     cv2.circle(frame, (int(x_center), int(y_center)), 5, (0, 255, 0), -1)
 
             if len(current_positions) == 1:
