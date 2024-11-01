@@ -6,8 +6,10 @@ System::System(){
     this->nextAction = NO_ACTION;
     this->nextArmAction = NO_ACTION;
     this->nextSliderAction = NO_ACTION;
+    this->nextGripperAction = NO_ACTION; 
     this->slider1 = new Slider();
     this->arm = new Arm();
+    this->gripper = new Gripper(); 
     this->listener = new Listener();
     this->sender = new Sender();
     for (int i = 0; i < 6; ++i){
