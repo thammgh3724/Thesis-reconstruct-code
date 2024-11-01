@@ -389,7 +389,7 @@ void System::gripper_fsm() {
             this->timer_gripper->setLoopAction(100, micros()); 
         }
         break; 
-    //TODO
+    //TODO: manual move
     case MANUAL_MOVING: 
         break;
     case STOP: 
