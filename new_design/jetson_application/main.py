@@ -41,6 +41,7 @@ def main():
     hand_detect_handler.pause()
     
     slider_serial = WriteSerialObject(serial_obj, ack_event)
+    gripper_serial = WriteSerialObject(serial_obj, ack_event)
     hand_serial = WriteSerialObject(serial_obj, ack_event)
     home_serial = WriteSerialObject(serial_obj, ack_event)
     # Start all threads
@@ -48,6 +49,7 @@ def main():
     read_serial.start()
     write_serial.start()
     slider_serial.start()
+    gripper_serial.start()
     hand_serial.start()
 
     # Gohome event.
@@ -56,6 +58,7 @@ def main():
     # Timer for STOP signal debounce
     last_stop_time = 0
     slider_last_time = 0
+    gripper_last_time = 0
     STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
@@ -96,7 +99,7 @@ def main():
                     # Retrieve buffer and sliders signals
                     slider_signal = gamepad_handler.getSlidersSignal()
                     buffer = gamepad_handler.getBuffer()
-
+                    gripper_signal = gamepad_handler.getGripperSignal()
                     # Format the message based on mode
                     message_content = format_gamepad_message(buffer, "M")
 
@@ -119,6 +122,16 @@ def main():
                     else: 
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
                         slider_serial.addMessage(slideMsg)
+
+                    if gripper_signal == [0] * len(gripper_signal):
+                        current_time = time.time()
+                        if current_time - gripper_last_time > STOP_INTERVAL:
+                            gripper_serial.addMessage(Message("!gstop#"))
+                            gripper_last_time = current_time
+                    else: 
+                        gripperMsg = Message(format_gamepad_message(gripper_signal, "G"))
+                        gripper_serial.addMessage(gripperMsg)
+
                 else:
                     # If no new value, check if we need to send STOP
                     current_time = time.time()
@@ -188,8 +201,10 @@ def main():
         hand_serial.stop()
         read_serial.stop()
         home_serial.stop()
+        gripper_serial.stop()
         write_serial.join()
         slider_serial.join()
+        gripper_serial.join()
         hand_serial.join()
         read_serial.join()
         home_serial.join()

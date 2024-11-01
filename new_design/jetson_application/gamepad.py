@@ -7,13 +7,14 @@ class GamepadHandler(threading.Thread):
         threading.Thread.__init__(self)
         pygame.init()
         self.joystick = None
-        self.buffer = [0] * 6      # Assuming there are 6 parameters to track
-        self.slide_signal = [0, 0] # Control slide signal
+        self.buffer = [0] * 6        # Assuming there are 6 parameters to track
+        self.slide_signal = [0, 0]   # Control slide signal
+        self.gripper_signal = [0, 0] # Control gripper signal
         self.newValue = False
-        self.mode = "gamepad"      # Default to gamepad mode
-        self.debounce_time = 0.5   # Time to wait before toggling mode again
-        self.last_toggle_time = 0  # Last time the mode was toggled
-        self.isGoHome = True       # To check if after mode is switched, system is home yet.
+        self.mode = "gamepad"        # Default to gamepad mode
+        self.debounce_time = 0.5     # Time to wait before toggling mode again
+        self.last_toggle_time = 0    # Last time the mode was toggled
+        self.isGoHome = True         # To check if after mode is switched, system is home yet.
 
     def getBuffer(self):
         return self.buffer
@@ -23,6 +24,9 @@ class GamepadHandler(threading.Thread):
     
     def getSlidersSignal(self):
         return self.slide_signal
+    
+    def getGripperSignal(self):
+        return self.gripper_signal
 
     def toggle_mode(self):
         """Toggle between 'gamepad', 'hand_detect', and 'auto' modes."""
@@ -78,10 +82,12 @@ class GamepadHandler(threading.Thread):
         elif button == 4:
             print("Button Y pressed")
             self.buffer[5] = 2
-        elif button == 6:
+        elif button == 6:                  # Gripper control
             print("Left bumper pressed")
+            self.gripper_signal[1] = -1
         elif button == 7:
             print("Right bumper pressed")
+            self.gripper_signal[1] = 1
             # buffer[5] = 1
         elif button == 10:
             print("Back button pressed")
@@ -117,8 +123,10 @@ class GamepadHandler(threading.Thread):
             self.buffer[5] = 0
         elif button == 6:
             print("Left bumper released")
+            self.gripper_signal[1] = 0
         elif button == 7:
             print("Right bumper released")
+            self.gripper_signal[1] = 0
         elif button == 10:
             print("Back button released")
         elif button == 11:
