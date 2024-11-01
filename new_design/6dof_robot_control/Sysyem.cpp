@@ -23,6 +23,7 @@ System::~System(){
     delete(this->arm);
     delete(this->listener);
     delete(this->sender);
+    delete(this->gripper); 
     for (int i = 0; i < 6; ++i) {
         delete this->timer_arm[i];  
     }
@@ -394,11 +395,13 @@ void System::gripper_fsm() {
     //TODO: manual move
     case MANUAL_MOVING: 
         if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
-            this->gripper->moveGripper(this->output_gripper); 
-            #ifdef DEBUG
-            String tmp = "!GRIPPER MOVE: " + String(this->gripper->getCurrentAngle()); 
-            this->sender->sendData(tmp);
-            #endif
+            if (this->timer_gripper->checkTimeoutAction()) {
+                this->gripper->moveGripper(this->output_gripper); 
+                #ifdef DEBUG
+                String tmp = "!GRIPPER MOVE: " + String(this->gripper->getCurrentAngle()); 
+                this->sender->sendData(tmp);
+                #endif
+            }   
         }
         break;
     case STOP: 
@@ -421,7 +424,7 @@ void System::distributeAction(){ // send ACK here
         this->nextGripperAction = GRIPPER_INIT_ACTION; 
         this->listener->consumeCommand(ARM_INIT_ACTION, nullptr);
         this->listener->consumeCommand(SLIDER_INIT_ACTION,nullptr);
-        this->listener->consumeCommand(GRIPPER_GOHOME_ACTION, nullptr); 
+        this->listener->consumeCommand(GRIPPER_INIT_ACTION, nullptr); 
         this->sender->sendACK("!I#");
         this->nextAction = NO_ACTION;
         break;
