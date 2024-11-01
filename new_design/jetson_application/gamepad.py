@@ -31,14 +31,12 @@ class GamepadHandler(threading.Thread):
             # Switch between gamepad, hand_detect, and auto
             if self.mode == "gamepad":
                 self.mode = "hand_detect"
-                self.isGoHome = False
             elif self.mode == "hand_detect":
                 self.mode = "auto"
-                self.isGoHome = False
             else:
                 self.mode = "gamepad"
-                self.isGoHome = False
             print(f"Switched mode to: {self.mode}")
+            self.isGoHome = False
             self.last_toggle_time = current_time
 
 
