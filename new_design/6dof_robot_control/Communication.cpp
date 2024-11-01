@@ -44,6 +44,8 @@ void Listener::consumeCommand(int action, double* output){
     break;
   case SLIDER_INIT_ACTION:
     break;
+  case GRIPPER_INIT_ACTION:
+    break; 
   case ARM_GOHOME_ACTION:
     break;
   case ARM_MANUAL_MOVE_DISTANCE_ACTION:
@@ -81,6 +83,14 @@ void Listener::consumeCommand(int action, double* output){
     }
     commandLength = this->command.length(); 
     getDoubleArrayData(output, 1, commandLength, 'S');
+    break;
+  case GRIPPER_MANUAL_MOVE_ACTION: 
+    for (int i = 0; i < 1; i++) 
+    {
+        output[i] = 0.0; 
+    }
+    commandLength = this->command.length(); 
+    getDoubleArrayData(output, 2, commandLength, 'G');
     break;
   case SLIDER_AUTO_MOVE_FREE_ACTION:
     for (int i = 0; i < 1; i++) 
@@ -139,6 +149,19 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
     }
     else if (this->command.endsWith("X")) {
       return SLIDER_AUTO_MOVE_FREE_ACTION;  
+    }
+    // Gripper command
+    else if (this->command == "ggohome") {
+      return GRIPPER_GOHOME_ACTION; 
+    }
+    else if (this->command == "gstop") {
+      return GRIPPER_STOP_ACTION; 
+    } 
+    /* !0:1G# (open), !0:-1G# (close) 
+     * !1:<angle>G# (open with defined angle)
+     */  
+    else if (this->command.endsWith("G")) {
+      return GRIPPER_MANUAL_MOVE_ACTION; 
     }
     else {
       return UNKNOW_ACTION;

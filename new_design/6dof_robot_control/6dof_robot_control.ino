@@ -3,6 +3,8 @@ Script to move my tiny 6dof robotic arm
 */
 #include "System.h"
 
+System mySystem;
+
 void setup() {
   // Define pin in and output
   pinMode(PUL1_PIN, OUTPUT);
@@ -59,10 +61,12 @@ void setup() {
   pinMode(SLIDER_NEG_DIR, OUTPUT); 
   digitalWrite(SLIDER_NEG_DIR, LOW);
 
+  // Setup for Gripper
+  mySystem.gripper_setup(); 
+
   Serial.begin(115200);
 }
 
-System mySystem;
 // Main function go here
 void loop() {
 

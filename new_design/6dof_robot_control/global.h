@@ -2,7 +2,11 @@
 #define __GLOBAL__H
 
 #include "Arduino.h"
+#include "Servo.h"
 #define PI 3.1415926535897932384626433832795
+
+// Gripper pin
+#define GRIPPER_PIN     11
 
 // inductive sensor for sliders
 #define INDUCTIVE_SR    33
@@ -66,6 +70,11 @@
 #define SLIDER_STOP_ACTION                      16
 #define SLIDER_GOHOME_ACTION                    17
 
+#define GRIPPER_INIT_ACTION                     100
+#define GRIPPER_STOP_ACTION                     101 
+#define GRIPPER_GOHOME_ACTION                   102
+#define GRIPPER_MANUAL_MOVE_ACTION              103
+#define GRIPPER_AUTO_MOVE_ACTION                104
 //Debug flag
 #define DEBUG
 

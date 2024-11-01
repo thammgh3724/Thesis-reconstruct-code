@@ -1,25 +1,29 @@
-#ifndef __GRIPPER__H
-#define __GRIPPER__H
+// Gripper.h
+#ifndef GRIPPER_H
+#define GRIPPER_H
 
 #include "Arduino.h"
 #include "global.h"
 #include "Communication.h"
 
-/*************************************************************
- ** Class Gripper
- * Implementing controlling driver for gripper using for robot
- * arm application.
- *************************************************************/
 class Gripper {
+  private:
+    Servo gripperServo;       
+    int currentState;       
+    float currentAngle;       
+    float nextAngle;        
 
-/* Private attributes and methods */
-private:
-    int gripperPin; 
-    float currentAngle; 
-/* Public methods*/
-public:
+    const int servoPin = 9;   
+    const float MAX_ANGLE = 180.0;
+    const float MIN_ANGLE = 90.0;
 
+  public:
+    Gripper();  
+    void setupGripper();     
+    void initGripper();        
+    void moveGripper(double* input); 
+    int getCurrentState(); 
+    void setCurrentState(int state); 
+};
 
-
-}; 
 #endif
