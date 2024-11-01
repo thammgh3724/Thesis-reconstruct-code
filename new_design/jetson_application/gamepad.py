@@ -106,7 +106,6 @@ class GamepadHandler(threading.Thread):
             debounce = 2
         else: 
             print("Hello there!")
-        print("Buffer: ", self.buffer)
 
     def handle_button_release(self, button):
         if button == 0:

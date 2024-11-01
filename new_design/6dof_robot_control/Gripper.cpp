@@ -7,7 +7,7 @@ void Gripper::setupGripper() {
 }
 
 void Gripper::initGripper() {
-  currentAngle = 90.0;
+  this->currentAngle = 90.0;
   gripperServo.write(currentAngle);
 }
 
