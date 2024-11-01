@@ -89,9 +89,8 @@ def main():
                             ack_event.clear()  # Reset ACK event for next message
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
-                    if not home_serial.messageQueue.empty():
-                        home_serial.messageQueue.get() 
-
+                    home_serial.lastSentMessage = Message('!#')
+                    
                 hand_detect_started = False
                 if gamepad_handler.newValue: 
                     # Retrieve buffer and sliders signals
@@ -139,9 +138,8 @@ def main():
                             ack_event.clear()  # Reset ACK event for next message
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
-                    if not home_serial.messageQueue.empty():
-                        home_serial.messageQueue.get()
-                
+                    home_serial.lastSentMessage = Message('!#')
+
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.resume()  # Start the hand detect thread
@@ -172,8 +170,7 @@ def main():
                             ack_event.clear()  # Reset ACK event for next message
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
-                    if not home_serial.messageQueue.empty():
-                        home_serial.messageQueue.get()
+                    home_serial.lastSentMessage = Message('!#')
 
                 if hand_detect_started:
                     print("Switching to auto mode")
