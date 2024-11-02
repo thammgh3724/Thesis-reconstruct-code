@@ -398,7 +398,8 @@ void System::gripper_fsm() {
     case MANUAL_MOVING: 
         if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
             if (this->timer_gripper->checkTimeoutAction()) {
-                this->gripper->moveGripper(this->output_gripper); 
+                this->gripper->moveGripper(this->output_gripper);
+                this->gripper->setCurrentState(STOP); 
                 #ifdef DEBUG
                 String tmp = "!GRIPPER MOVE: " + String(this->gripper->getCurrentAngle()); 
                 this->sender->sendData(tmp);
@@ -408,22 +409,26 @@ void System::gripper_fsm() {
         else if (this->nextGripperAction == GRIPPER_OPEN) {
             if (this->timer_gripper->checkTimeoutAction()) {
                 this->gripper->gripperOpen(); 
+                this->gripper->setCurrentState(STOP);
             }
         }
         else if (this->nextGripperAction == GRIPPER_CLOSE) {
             if (this->timer_gripper->checkTimeoutAction()) {
-                this->gripper->gripperClose(); 
+                this->gripper->gripperClose();
+                this->gripper->setCurrentState(STOP); 
             }
         }
         else if (this->nextGripperAction == GRIPPER_STOP_ACTION) {
             this->gripper->setCurrentState(STOP); 
-            #ifndef DEBUG
-            this->sender->sendData("!GRIPPER STATE STOP")
+            #ifdef DEBUG
+            this->sender->sendData("!GRIPPER GO STATE STOP");
             #endif
         }
         break;
     case STOP: 
-        if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
+        if ((this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION)
+            || (this->nextGripperAction == GRIPPER_OPEN)
+            || (this->nextGripperAction == GRIPPER_CLOSE)) {
             this->gripper->setCurrentState(MANUAL_MOVING);
             this->timer_gripper->setLoopAction(100, micros()); 
         } 
