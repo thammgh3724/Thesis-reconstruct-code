@@ -376,11 +376,11 @@ void System::gripper_fsm() {
     {
     case INIT: 
         if (this->nextGripperAction == GRIPPER_INIT_ACTION) {
+            this->gripper->initGripper(); // cannot interrupt
+            this->gripper->setCurrentState(HOME);
             #ifdef DEBUG
             this->sender->sendData("!GRIPPER INIT");
             #endif
-            this->gripper->initGripper(); // cannot interrupt
-            this->gripper->setCurrentState(HOME);
         }
         break;
     case HOME:

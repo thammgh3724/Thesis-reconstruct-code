@@ -73,7 +73,7 @@ void loop() {
   //--------------------------------------------------------GoGoGo-------------------
   mySystem.communicate(); // read data -> return action if have completed command -> distribute action to the rights object 
   mySystem.arm_fsm(); // do things due to next action need to do
-  mySystem.slider_fsm();
+  // mySystem.slider_fsm();
   // Gripper 
   mySystem.gripper_fsm(); 
 }

@@ -1,13 +1,13 @@
 #include "Gripper.h"
 
-Gripper::Gripper() : currentState(INIT), currentAngle(100.0), nextAngle(100.0) {}
+Gripper::Gripper() : currentState(INIT), currentAngle(120.0), nextAngle(120.0) {}
 
 void Gripper::setupGripper() {
   this->gripperServo.attach(servoPin);
 }
 
 void Gripper::initGripper() {
-  this->currentAngle = 100.0;
+  this->currentAngle = 120.0;
   this->gripperServo.write(static_cast<int>(this->currentAngle));
 }
 
@@ -37,7 +37,7 @@ void Gripper::moveGripper(double* input) {
 }
 
 void Gripper::gripperOpen() {
-  this->gripperServo.write(150); 
+  this->gripperServo.write(180); 
 }
 
 void Gripper::gripperClose() {
