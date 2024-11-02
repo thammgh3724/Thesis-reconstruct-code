@@ -374,66 +374,34 @@ void System::slider_fsm(){
 void System::gripper_fsm() {
     switch(this->gripper->getCurrentState()) 
     {
-    case INIT: 
+    case INIT:  // Init move
         if (this->nextGripperAction == GRIPPER_INIT_ACTION) {
-            this->gripper->initGripper(); // cannot interrupt
-            this->gripper->setCurrentState(HOME);
-            #ifdef DEBUG
-            this->sender->sendData("!GRIPPER INIT");
-            #endif
-        }
-        break;
-    case HOME:
-        if (this->nextGripperAction == GRIPPER_STOP_ACTION) {
-            this->gripper->setCurrentState(STOP); 
-        } 
-        else if ((this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION)
-                || (this->nextGripperAction == GRIPPER_OPEN)
-                || (this->nextGripperAction == GRIPPER_CLOSE)) {
-            this->gripper->setCurrentState(MANUAL_MOVING); 
-            this->timer_gripper->setLoopAction(100, micros()); 
-        }
-        break; 
-    //TODO: manual move
-    case MANUAL_MOVING: 
-        if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
-            if (this->timer_gripper->checkTimeoutAction()) {
-                this->gripper->moveGripper(this->output_gripper);
-                this->gripper->setCurrentState(STOP); 
-                #ifdef DEBUG
-                String tmp = "!GRIPPER MOVE: " + String(this->gripper->getCurrentAngle()); 
-                this->sender->sendData(tmp);
-                #endif
-            }   
-        }
-        else if (this->nextGripperAction == GRIPPER_OPEN) {
-            if (this->timer_gripper->checkTimeoutAction()) {
-                this->gripper->gripperOpen(); 
-                this->gripper->setCurrentState(STOP);
-            }
-        }
-        else if (this->nextGripperAction == GRIPPER_CLOSE) {
-            if (this->timer_gripper->checkTimeoutAction()) {
-                this->gripper->gripperClose();
-                this->gripper->setCurrentState(STOP); 
-            }
-        }
-        else if (this->nextGripperAction == GRIPPER_STOP_ACTION) {
+            this->gripper->initGripper(); 
+            this->nextGripperAction = GRIPPER_STOP_ACTION; 
             this->gripper->setCurrentState(STOP); 
             #ifdef DEBUG
-            this->sender->sendData("!GRIPPER GO STATE STOP");
+            this->sender->sendData("!GRIPPER INIT DONE");
             #endif
         }
-        break;
-    case STOP: 
-        if ((this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION)
-            || (this->nextGripperAction == GRIPPER_OPEN)
-            || (this->nextGripperAction == GRIPPER_CLOSE)) {
-            this->gripper->setCurrentState(MANUAL_MOVING);
-            this->timer_gripper->setLoopAction(100, micros()); 
-        } 
         break; 
-    default: 
+    case MANUAL_MOVING:
+        if (this->nextGripperAction == GRIPPER_OPEN) {
+            this->gripper->gripperOpen(); 
+            this->nextGripperAction = GRIPPER_STOP_ACTION; 
+            this->gripper->setCurrentState(STOP); 
+            #ifdef DEBUG
+            this->sender->sendData("!GRIPPER MOVE DONE");
+            #endif
+        } else if (this->nextGripperAction == GRIPPER_CLOSE) {
+            this->gripper->gripperClose(); 
+            this->nextGripperAction = GRIPPER_STOP_ACTION; 
+            this->gripper->setCurrentState(STOP); 
+            #ifdef DEBUG
+            this->sender->sendData("!GRIPPER MOVE DONE");
+            #endif
+        }
+        break; 
+    case STOP:
         break; 
     }
 }
@@ -480,6 +448,7 @@ void System::distributeAction(){ // send ACK here
         this->nextAction = NO_ACTION;
     case GRIPPER_STOP_ACTION:
         this->nextGripperAction = GRIPPER_STOP_ACTION;
+        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_STOP_ACTION,nullptr);
         this->sender->sendACK("!GS#");
         this->nextAction = NO_ACTION;
@@ -518,18 +487,21 @@ void System::distributeAction(){ // send ACK here
     /** GRIPPER CONTROLLER */
     case GRIPPER_MANUAL_MOVE_ACTION: 
         this->nextGripperAction = GRIPPER_MANUAL_MOVE_ACTION; 
+        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_MANUAL_MOVE_ACTION, this->output_gripper); 
         this->sender->sendACK("!GM#"); 
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_OPEN:
         this->nextGripperAction = GRIPPER_OPEN;
+        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_OPEN, nullptr); 
         this->sender->sendACK("!GO#"); 
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_CLOSE:
         this->nextGripperAction = GRIPPER_CLOSE;
+        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_CLOSE, nullptr); 
         this->sender->sendACK("!GCLS#"); 
         this->nextAction = NO_ACTION; 
