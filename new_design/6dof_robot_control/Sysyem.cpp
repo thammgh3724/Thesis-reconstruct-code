@@ -518,13 +518,13 @@ void System::distributeAction(){ // send ACK here
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_OPEN:
-        this->nextGripperAction = GRIPPER_OPEN
+        this->nextGripperAction = GRIPPER_OPEN;
         this->listener->consumeCommand(GRIPPER_OPEN, nullptr); 
         this->sender->sendACK("!GO#"); 
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_CLOSE:
-        this->nextGripperAction = GRIPPER_CLOSE
+        this->nextGripperAction = GRIPPER_CLOSE;
         this->listener->consumeCommand(GRIPPER_CLOSE, nullptr); 
         this->sender->sendACK("!GCLS#"); 
         this->nextAction = NO_ACTION; 
