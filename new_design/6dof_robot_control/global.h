@@ -75,6 +75,8 @@
 #define GRIPPER_GOHOME_ACTION                   102
 #define GRIPPER_MANUAL_MOVE_ACTION              103
 #define GRIPPER_AUTO_MOVE_ACTION                104
+#define GRIPPER_OPEN                            105
+#define GRIPPER_CLOSE                           106
 //Debug flag
 #define DEBUG
 

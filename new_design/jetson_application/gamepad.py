@@ -48,10 +48,8 @@ class GamepadHandler(threading.Thread):
         global debounce
         if value == 1.0:
             self.slide_signal[0] = 2
-            print("D-pad right pressed")
         elif value == -1.0:
             self.slide_signal[0] = 1
-            print("D-pad left pressed")
         else:
             self.slide_signal[0] = 0
             print("D-pad X-axis released")
@@ -60,10 +58,8 @@ class GamepadHandler(threading.Thread):
     def handle_dpad_y(self, value):
         if value == 1.0:
             self.slide_signal[1] = 1
-            print("D-pad down pressed")
         elif value == -1.0:
             self.slide_signal[1] = 2
-            print("D-pad up pressed")
         else:
             self.slide_signal[1] = 0
             print("D-pad Y-axis released")
@@ -71,16 +67,12 @@ class GamepadHandler(threading.Thread):
     def handle_button_press(self, button): # Chưa thêm nút chuyển đổi giữa auto và manual
         global debounce
         if button == 0:
-            print("Button A pressed")
             self.buffer[5] = 1
         elif button == 1:
-            print("Button B pressed")
             self.buffer[4] = 2
         elif button == 3:
-            print("Button X pressed")
             self.buffer[4] = 1
         elif button == 4:
-            print("Button Y pressed")
             self.buffer[5] = 2
         elif button == 6:                  # Gripper control
             print("Left bumper pressed")
@@ -88,7 +80,6 @@ class GamepadHandler(threading.Thread):
         elif button == 7:
             print("Right bumper pressed")
             self.gripper_signal[1] = 2
-            # buffer[5] = 1
         elif button == 10:
             print("Back button pressed")
         elif button == 11:
@@ -143,7 +134,6 @@ class GamepadHandler(threading.Thread):
 
     def handle_axis_motion(self, axis, value):
         if axis == 0:  # X-axis of the left stick
-            print(f"Left stick X-axis moved to {value}")
             if value >= -1.1 and value < -0.9:
                 self.buffer[0] = 1
             elif value > 0.9 and value <= 1.1:
@@ -151,7 +141,6 @@ class GamepadHandler(threading.Thread):
             elif value >= -0.2 and value <= 0.2: 
                 self.buffer[0] = 0
         elif axis == 1:  # Y-axis of the left stick
-            print(f"Left stick Y-axis moved to {value}")
             if value >= -1.1 and value < -0.9:
                 self.buffer[1] = 1
             elif value > 0.9 and value <= 1.1:
@@ -159,7 +148,6 @@ class GamepadHandler(threading.Thread):
             elif value >= -0.2 and value <= 0.2: 
                 self.buffer[1] = 0
         elif axis == 2:  # X-axis of the right stick
-            print(f"Right stick X-axis moved to {value}")
             if value >= -1.1 and value < -0.9:
                 self.buffer[3] = 1
             elif value > 0.9 and value <= 1.1:
@@ -167,7 +155,6 @@ class GamepadHandler(threading.Thread):
             elif value >= -0.2 and value <= 0.2: 
                 self.buffer[3] = 0
         elif axis == 3:  # Y-axis of the right stick
-            print(f"Right stick Y-axis moved to {value}")
             if value >= -1.1 and value < -0.9:
                 self.buffer[2] = 1
             elif value > 0.9 and value <= 1.1:

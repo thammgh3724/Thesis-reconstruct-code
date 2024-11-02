@@ -387,7 +387,9 @@ void System::gripper_fsm() {
         if (this->nextGripperAction == GRIPPER_STOP_ACTION) {
             this->gripper->setCurrentState(STOP); 
         } 
-        else if (this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION) {
+        else if ((this->nextGripperAction == GRIPPER_MANUAL_MOVE_ACTION)
+                || (this->nextGripperAction == GRIPPER_OPEN)
+                || (this->nextGripperAction == GRIPPER_CLOSE)) {
             this->gripper->setCurrentState(MANUAL_MOVING); 
             this->timer_gripper->setLoopAction(100, micros()); 
         }
@@ -402,6 +404,22 @@ void System::gripper_fsm() {
                 this->sender->sendData(tmp);
                 #endif
             }   
+        }
+        else if (this->nextGripperAction == GRIPPER_OPEN) {
+            if (this->timer_gripper->checkTimeoutAction()) {
+                this->gripper->gripperOpen(); 
+            }
+        }
+        else if (this->nextGripperAction == GRIPPER_CLOSE) {
+            if (this->timer_gripper->checkTimeoutAction()) {
+                this->gripper->gripperClose(); 
+            }
+        }
+        else if (this->nextGripperAction == GRIPPER_STOP_ACTION) {
+            this->gripper->setCurrentState(STOP); 
+            #ifndef DEBUG
+            this->sender->sendData("!GRIPPER STATE STOP")
+            #endif
         }
         break;
     case STOP: 
@@ -499,6 +517,18 @@ void System::distributeAction(){ // send ACK here
         this->sender->sendACK("!GM#"); 
         this->nextAction = NO_ACTION; 
         break; 
+    case GRIPPER_OPEN:
+        this->nextGripperAction = GRIPPER_OPEN
+        this->listener->consumeCommand(GRIPPER_OPEN, nullptr); 
+        this->sender->sendACK("!GO#"); 
+        this->nextAction = NO_ACTION; 
+        break; 
+    case GRIPPER_CLOSE:
+        this->nextGripperAction = GRIPPER_CLOSE
+        this->listener->consumeCommand(GRIPPER_CLOSE, nullptr); 
+        this->sender->sendACK("!GCLS#"); 
+        this->nextAction = NO_ACTION; 
+        break;
     default:
         break;
     }

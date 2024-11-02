@@ -24,7 +24,9 @@ class Gripper {
     float getCurrentAngle();      
     void moveGripper(double* input); 
     int getCurrentState(); 
-    void setCurrentState(int state); 
+    void setCurrentState(int state);
+    void gripperOpen();
+    void gripperClose();  
 };
 
 #endif

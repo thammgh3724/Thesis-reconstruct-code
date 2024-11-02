@@ -129,8 +129,14 @@ def main():
                             gripper_serial.addMessage(Message("!gstop#"))
                             gripper_last_time = current_time
                     else: 
-                        gripperMsg = Message(format_gamepad_message(gripper_signal, "G"))
-                        gripper_serial.addMessage(gripperMsg)
+                        if gripper_signal[1] == 1: # !gclose# 
+                            gripperMsg = Message("!gclose#")
+                            print(f"SENT: {gripperMsg.getMessage()}")
+                            gripper_serial.addMessage(gripperMsg)
+                        else:
+                            gripperMsg = Message("!gopen#")
+                            print(f"SENT: {gripperMsg.getMessage()}")
+                            gripper_serial.addMessage(gripperMsg)
 
                 else:
                     # If no new value, check if we need to send STOP
