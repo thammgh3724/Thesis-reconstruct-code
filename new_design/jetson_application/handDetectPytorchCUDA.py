@@ -2,17 +2,23 @@ import time
 import cv2
 import numpy as np
 import newCamVar
-from ultralytics import YOLO
 import threading
-
+import torch
 
 
 class HandDetectHandler(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.model = YOLO("best.onnx")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.model = self.load_model("best4.pt")
         self.isRunning = False
         self.hand_position = None  # Placeholder to store hand position
+
+    def load_model(self, model_path):
+        # Load the PyTorch model and move it to the GPU if available
+        model = torch.load(model_path, map_location=self.device)
+        model.eval()
+        return model
 
     def stop(self):
         self.isRunning = False
@@ -26,6 +32,13 @@ class HandDetectHandler(threading.Thread):
                 self.hand_position = hand_pos  # Update the hand position
                 print(hand_pos)
                 time.sleep(0.3)  # Adjust delay as needed
+
+    def preprocess_frame(self, frame):
+        """Preprocess frame for PyTorch model input."""
+        img = cv2.resize(frame, (640, 640))
+        img = img.transpose((2, 0, 1))  # Change to CHW format
+        img = np.expand_dims(img, axis=0).astype(np.float32) / 255.0  # Normalize to [0, 1]
+        return torch.from_numpy(img).to(self.device)
 
     def cam_proc(self):
         """Camera processing to detect hand with position stabilization"""
@@ -53,19 +66,24 @@ class HandDetectHandler(threading.Thread):
 
             # Undistort the frame using calibration values
             frame = cv2.undistort(frame, newCamVar.K_array, newCamVar.Dis_array, None, newCamVar.New_array)
-            results = self.model(frame, verbose=False)
+            
+            # Preprocess the frame and perform inference
+            input_tensor = self.preprocess_frame(frame)
+            with torch.no_grad():
+                outputs = self.model(input_tensor)[0]  # Assuming YOLO model returns detections in first output
 
+            # Process model outputs
             current_positions = []
-            for result in results:
-                for box in result.boxes.xyxy:
-                    x_min, y_min, x_max, y_max = box
+            for box in outputs:
+                x_min, y_min, x_max, y_max, confidence = box[:5]  # Adjust based on output structure
+                if confidence > 0.5:  # Confidence threshold
                     x_center = (x_min + x_max) / 2
                     y_center = (y_min + y_max) / 2
                     current_positions.append((x_center, y_center))
                     cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (255, 0, 0), 2)
                     cv2.circle(frame, (int(x_center), int(y_center)), 5, (0, 255, 0), -1)
 
-            #Stabilize the detected position by accumulating over multiple frames
+            # Stabilize the detected position by accumulating over multiple frames
             if len(current_positions) == 1:
                 if len(object_positions) == 0:
                     object_positions = current_positions
@@ -85,13 +103,12 @@ class HandDetectHandler(threading.Thread):
                 # If the hand position has been stable for 3 consecutive frames, return the position
                 if accumulate_count >= 3:
                     cap.release()
-                    # cv2.destroyAllWindows()
                     accumulate_count = 0
                     time.sleep(0.3)
                     return object_positions  # Return stabilized hand position
 
             # Display the frame with bounding boxes
-            cv2.imshow("YOLOv8 Real-Time", frame)
+            cv2.imshow("YOLOv5 CUDA Real-Time", frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -99,7 +116,7 @@ class HandDetectHandler(threading.Thread):
         cap.release()
         cv2.destroyAllWindows()
         return None  # Return None if the loop ends
-        
+
 
 if __name__ == "__main__":
     handdt = HandDetectHandler()
