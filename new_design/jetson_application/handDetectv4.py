@@ -13,7 +13,7 @@ from ultralytics import YOLO
 class HandDetectHandler(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.model = YOLO("best.pt")
+        self.model = YOLO("best1.engine")
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
         self.hand_position = None
@@ -35,6 +35,10 @@ class HandDetectHandler(threading.Thread):
             self.cap = cv2.VideoCapture(cv2.CAP_V4L2)  # Reopen the camera if it's closed
 
     def run(self):
+        # check if CUDA available
+        if torch.cuda.is_available():
+            print("CONFIRM CUDA AVAILABLE")
+
         self.stop_event.clear()
         self.pause_event.set()
         self.cap = cv2.VideoCapture(cv2.CAP_V4L2)
