@@ -64,7 +64,7 @@ class HandDetectHandler(threading.Thread):
                 break
 
             frame = cv2.undistort(frame, camera_var.K_array, camera_var.Dis_array, None, camera_var.New_array)
-            results = self.model.predict(frame, imgsz=480, conf=0.2, device = 0, save = False)
+            results = self.model.predict(frame, imgsz=640, conf=0.2, device = 0, save = False)
 
             current_positions = []
             for result in results:
