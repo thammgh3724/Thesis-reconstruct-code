@@ -446,12 +446,14 @@ void System::distributeAction(){ // send ACK here
         this->listener->consumeCommand(SLIDER_STOP_ACTION,nullptr);
         this->sender->sendACK("!SS#");
         this->nextAction = NO_ACTION;
+        break;
     case GRIPPER_STOP_ACTION:
         this->nextGripperAction = GRIPPER_STOP_ACTION;
         this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_STOP_ACTION,nullptr);
         this->sender->sendACK("!GS#");
         this->nextAction = NO_ACTION;
+        break;
     case ARM_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextArmAction = ARM_MANUAL_MOVE_DISTANCE_ACTION;
         this->listener->consumeCommand(ARM_MANUAL_MOVE_DISTANCE_ACTION, this->gamepad_data);
