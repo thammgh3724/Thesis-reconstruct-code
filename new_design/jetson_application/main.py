@@ -191,7 +191,7 @@ def main():
                     print(f"Send to write_serial queue HAND DETECT: {message_content}")
                 hand_detect_handler.hand_position = None
             elif mode == "auto":
-                # TODO: Add auto mode logic here
+                # TODO: Add auto mode logic here: Detect fruit
                 # Placeholder for auto mode command
                 if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
