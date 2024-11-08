@@ -10,6 +10,7 @@ class GamepadHandler(threading.Thread):
         self.buffer = [0] * 6        # Assuming there are 6 parameters to track
         self.slide_signal = [0, 0]   # Control slide signal
         self.gripper_signal = [0, 0] # Control gripper signal
+        self.stop_signal = [0]       # Stop urgent signal
         self.newValue = False
         self.mode = "gamepad"        # Default to gamepad mode
         self.debounce_time = 0.5     # Time to wait before toggling mode again
@@ -27,6 +28,9 @@ class GamepadHandler(threading.Thread):
     
     def getGripperSignal(self):
         return self.gripper_signal
+    
+    def getStopSignal(self):
+        return self.stop_signal
 
     def toggle_mode(self):
         """Toggle between 'gamepad', 'hand_detect', and 'auto' modes."""
@@ -52,7 +56,7 @@ class GamepadHandler(threading.Thread):
             self.slide_signal[0] = 1
         else:
             self.slide_signal[0] = 0
-            print("D-pad X-axis released")
+            if __debug__: print("D-pad X-axis released")
             # debounce = 0
 
     def handle_dpad_y(self, value):
@@ -62,7 +66,7 @@ class GamepadHandler(threading.Thread):
             self.slide_signal[1] = 2
         else:
             self.slide_signal[1] = 0
-            print("D-pad Y-axis released")
+            if __debug__: print("D-pad Y-axis released")
 
     def handle_button_press(self, button): # Chưa thêm nút chuyển đổi giữa auto và manual
         global debounce
@@ -75,62 +79,63 @@ class GamepadHandler(threading.Thread):
         elif button == 4:
             self.buffer[5] = 2
         elif button == 6:                  # Gripper control
-            print("Left bumper pressed")
+            if __debug__: print("Left bumper pressed")
             self.gripper_signal[1] = 1
         elif button == 7:
-            print("Right bumper pressed")
+            if __debug__: print("Right bumper pressed")
             self.gripper_signal[1] = 2
         elif button == 10:
-            print("Back button pressed")
+            if __debug__: print("Back button pressed")
         elif button == 11:
-            print("Start button pressed")
+            if __debug__: print("Start button pressed")
         elif button == 13:
-            print("Left stick button pressed")
+            if __debug__: print("Left stick button pressed")
         elif button == 14:
-            print("Right stick button pressed")
-        elif button == 8:
-            print("Left trigger (L2) pressed")
-            debounce = 1
+            if __debug__: print("Right stick button pressed")
+        elif button == 8: # Button to stop urgent
+            if __debug__: print("Left trigger (L2) pressed")
+            self.stop_signal[0] = 1
+            debounce = 2
         elif button == 9: # Button to change mode, can modify
-            print("Right trigger (R2) pressed")
+            if __debug__: print("Right trigger (R2) pressed")
             self.toggle_mode()
             debounce = 2
         else: 
-            print("Hello there!")
+            if __debug__: print("Hello there!")
 
     def handle_button_release(self, button):
         if button == 0:
-            print("Button A released")
+            if __debug__: print("Button A released")
             self.buffer[5] = 0
         elif button == 1:
-            print("Button B released")
+            if __debug__: print("Button B released")
             self.buffer[4] = 0
         elif button == 3:
-            print("Button X released")
+            if __debug__: print("Button X released")
             self.buffer[4] = 0
         elif button == 4:
-            print("Button Y released")
+            if __debug__: print("Button Y released")
             self.buffer[5] = 0
         elif button == 6:
-            print("Left bumper released")
+            if __debug__: print("Left bumper released")
             self.gripper_signal[1] = 0
         elif button == 7:
-            print("Right bumper released")
+            if __debug__: print("Right bumper released")
             self.gripper_signal[1] = 0
         elif button == 10:
-            print("Back button released")
+            if __debug__: print("Back button released")
         elif button == 11:
-            print("Start button released")
+            if __debug__: print("Start button released")
         elif button == 13:
-            print("Left stick button released")
+            if __debug__: print("Left stick button released")
         elif button == 14:
-            print("Right stick button released")
+            if __debug__: print("Right stick button released")
         elif button == 8:
-            print("Left trigger (L2) released")
+            if __debug__: print("Left trigger (L2) released")
         elif button == 9:
-            print("Right trigger (R2) released")
+            if __debug__: print("Right trigger (R2) released")
         else: 
-            print("Hello there!")
+            if __debug__: print("Hello there!")
 
     def handle_axis_motion(self, axis, value):
         if axis == 0:  # X-axis of the left stick
@@ -162,9 +167,9 @@ class GamepadHandler(threading.Thread):
             elif value >= -0.2 and value <= 0.2: 
                 self.buffer[2] = 0
         elif axis == 5:  # Left trigger (L2)
-            print(f"Left trigger (L2) value: {value}")
+            if __debug__: print(f"Left trigger (L2) value: {value}")
         elif axis == 4:  # Right trigger (R2)
-            print(f"Right trigger (R2) value: {value}")
+            if __debug__: print(f"Right trigger (R2) value: {value}")
         elif axis == 6:  # D-pad X-axis
             self.handle_dpad_x(value)
         elif axis == 7:  # D-pad Y-axis
@@ -175,7 +180,7 @@ class GamepadHandler(threading.Thread):
         if pygame.joystick.get_count() > 0:
             self.joystick = pygame.joystick.Joystick(0)
             self.joystick.init()
-            print(f"Joystick found: {self.joystick.get_name()}")
+            if __debug__: print(f"Joystick found: {self.joystick.get_name()}")
 
             while True:
                 for event in pygame.event.get():

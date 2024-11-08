@@ -48,6 +48,7 @@ class HandDetectHandler(threading.Thread):
                 hand_pos = self.cam_proc()
                 if hand_pos:
                     self.hand_position = hand_pos
+                    time.sleep(0.3)
                     print(hand_pos)
 
         if self.cap and self.cap.isOpened():
