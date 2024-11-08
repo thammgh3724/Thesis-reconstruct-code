@@ -45,7 +45,7 @@ void Arm::onStart(){
 // // joint #4
   singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / this->dl4));
   // joint #5
-  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((90-10) / this->dl5)); // minus 10 in initial 
+  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((-10) / this->dl5)); // minus 10 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
   this->joint[3] = 180;

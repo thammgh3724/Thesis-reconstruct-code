@@ -59,6 +59,7 @@ def main():
     last_stop_time = 0
     slider_last_time = 0
     gripper_last_time = 0
+    stop_urgent_signal = 0
     STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
@@ -95,11 +96,12 @@ def main():
                     home_serial.lastSentMessage = Message('!#')
                     
                 hand_detect_started = False
-                if gamepad_handler.newValue: 
+                if gamepad_handler.newValue:
                     # Retrieve buffer and sliders signals
                     slider_signal = gamepad_handler.getSlidersSignal()
                     buffer = gamepad_handler.getBuffer()
                     gripper_signal = gamepad_handler.getGripperSignal()
+                    stop_urgent_signal = gamepad_handler.getStopSignal()
                     # Format the message based on mode
                     message_content = format_gamepad_message(buffer, "M")
 
@@ -123,6 +125,7 @@ def main():
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
                         slider_serial.addMessage(slideMsg)
 
+                    #griper
                     if gripper_signal == [0] * len(gripper_signal):
                         current_time = time.time()
                         if current_time - gripper_last_time > STOP_INTERVAL:
@@ -137,6 +140,15 @@ def main():
                             gripperMsg = Message("!gopen#")
                             print(f"SENT: {gripperMsg.getMessage()}")
                             gripper_serial.addMessage(gripperMsg)
+                    
+                    # Button stop in urgent context
+                    if stop_urgent_signal:
+                        print("Stop Urgent signal received")
+                        write_serial.addMessage(Message("!astop#"))
+                        slider_serial.addMessage(Message("!sstop#"))
+                        gripper_serial.addMessage(Message("!gstop#"))
+                        last_stop_time = time.time()
+                        stop_urgent_signal = 0
 
                 else:
                     # If no new value, check if we need to send STOP
@@ -176,7 +188,7 @@ def main():
                     
                     # Add the message to the write_serial queue
                     hand_serial.addMessage(message)
-                    print(f"Send to write_serial queue: {message_content}")
+                    print(f"Send to write_serial queue HAND DETECT: {message_content}")
                 hand_detect_handler.hand_position = None
             elif mode == "auto":
                 # TODO: Add auto mode logic here
