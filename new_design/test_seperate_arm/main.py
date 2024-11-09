@@ -1,5 +1,5 @@
 from serialObjectSingleton import SerialSingleton
-from gamepad2 import GamepadHandler
+from gamepad import GamepadHandler
 from handDetectv4 import HandDetectHandler
 from writeSerial import WriteSerialObject, Message
 from readSerial import ReadSerialObject

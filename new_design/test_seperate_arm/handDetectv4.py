@@ -13,7 +13,7 @@ from ultralytics import YOLO
 class HandDetectHandler(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.model = YOLO("best4.engine")
+        self.model = YOLO("best5_finetune.engine")
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
         self.hand_position = None
@@ -62,7 +62,7 @@ class HandDetectHandler(threading.Thread):
             frame = cv2.undistort(frame, camera_var.K_array, camera_var.Dis_array, None, camera_var.New_array)
             #frame = cv2.resize(frame, (480, 480))
             #results = self.model(frame, verbose=False)
-            results = self.model.track(frame, imgsz=640, conf=0.2, device = 0, save = False,verbose = False)  
+            results = self.model.track(frame, imgsz=640, conf=0.5, device = 0, save = False,verbose = False)  
             current_positions = []
             for result in results:
                 for box in result.boxes.xyxy:
