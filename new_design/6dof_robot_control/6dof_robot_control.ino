@@ -75,5 +75,5 @@ void loop() {
   mySystem.arm_fsm(); // do things due to next action need to do
   mySystem.slider_fsm();
   // Gripper 
-  mySystem.gripper_fsm(); 
+  mySystem.gripper_fsm();
 }
