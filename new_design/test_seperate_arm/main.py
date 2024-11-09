@@ -178,7 +178,7 @@ def main():
                     hand_serial.addMessage(message)
                     print(f"Send to write_serial queue: {message_content}")
                 hand_detect_handler.hand_position = None
-            elif mode == "auto":
+            elif mode == "auto": # Cannot go home after go to "AUTO" mode
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command
                 if not gamepad_handler.isGoHome:

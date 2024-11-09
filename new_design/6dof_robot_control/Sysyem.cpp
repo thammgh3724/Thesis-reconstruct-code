@@ -263,7 +263,7 @@ void System::slider_fsm(){
             #endif
             int tmp = this->slider1->onStart(); // cannot interrupt
             #ifdef DEBUG
-            String tmp_str = "!return count :" + String(tmp); // may crash
+            String tmp_str = "!RETURN COUNT :" + String(tmp); // may crash
             this->sender->sendData(tmp_str);
             #endif
             this->slider1->setState(HOME);
