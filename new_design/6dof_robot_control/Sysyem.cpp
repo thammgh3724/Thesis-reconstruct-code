@@ -65,6 +65,7 @@ void System::arm_fsm(){
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
+                this->arm->printCurrentJoint();
                 this->sender->sendData("!GO STATE STOP");
                 #endif
             }
@@ -190,6 +191,7 @@ void System::arm_fsm(){
                 if(this->arm->validateNextJoint() == 0){
                     #ifdef DEBUG
                     this->sender->sendData("!GO HORIZONTAL");
+                    this->arm->printNextJoint();
                     #endif
                     //can move
                     this->arm->calculateTotalSteps();
@@ -209,6 +211,7 @@ void System::arm_fsm(){
                 if(this->arm->validateNextJoint() == 0){
                     #ifdef DEBUG
                     this->sender->sendData("!GO LENGTHWISE");
+                    this->arm->printNextJoint();
                     #endif
                     //can move
                     this->arm->calculateTotalSteps();
@@ -229,6 +232,7 @@ void System::arm_fsm(){
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
+                this->arm->printCurrentPos();
                 this->sender->sendData("!GO STATE STOP");
                 #endif
             }

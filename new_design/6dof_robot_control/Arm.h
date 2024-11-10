@@ -44,6 +44,8 @@ class Arm {
         void setNumberStepDone(double* steps);
         void printCurrentJoint();
         void printCurrentPos();
+        void printNextJoint();
+        void printNextPos();
 
         int validateNextJoint();
         void initManualMove();

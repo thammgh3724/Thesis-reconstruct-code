@@ -39,21 +39,20 @@ void Arm::onStart(){
   digitalWrite(EN5_PIN, LOW);
   digitalWrite(EN6_PIN, LOW);
   // joint #2
-  singleJointMove_onStart(DIR2_PIN, HIGH, PUL2_PIN, 5582);
+  // singleJointMove_onStart(DIR2_PIN, HIGH, PUL2_PIN, 5582);
+  singleJointMove_onStart(DIR2_PIN, HIGH, PUL2_PIN, (int)((75) / this->dl2));
   // joint #3
-  singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, 6569);
+  // singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, 6569);
+  singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, (int)((80) / this->dl3));
 // // joint #4
   singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / this->dl4));
   // joint #5
-  singleJointMove_onStart(DIR5_PIN, HIGH, PUL5_PIN, (int)((-10) / this->dl5)); // minus 10 in initial 
+  // singleJointMove_onStart(DIR5_PIN, LOW, PUL5_PIN, (int)((20) / this->dl5)); // minus 20 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
   this->joint[3] = 180;
   this->joint[4] = 0;
   /*
-  // First move
-  double output[6] = { 190.0, -0.0, 260.0, 0.0, 90.0, 180.0 };
-  //this->generalAutoMove(output, 0.25e-4, 0.1 * 0.75e-10, start_vel, end_vel);
   */
   this->updateCurrentPosition();
   #ifdef DEBUG
@@ -164,11 +163,33 @@ void Arm::printCurrentPos(){
   this->sender->sendData(result);
 }
 
+void Arm::printNextJoint(){
+  String result = "!Next joint : ";
+  for (int i = 0; i < 6; ++i){
+    result += String(this->nextJoint[i]);  
+    if (i < 5) {
+        result += ":"; 
+    }
+  }
+  this->sender->sendData(result);
+}
+
+void Arm::printNextPos(){
+  String result = "!Next pos : ";
+  for (int i = 0; i < 6; ++i){
+    result += String(this->nextPosition[i]);  
+    if (i < 5) {
+        result += ":"; 
+    }
+  }
+  this->sender->sendData(result);
+}
+
 /************************************************/
 
 int Arm::validateNextJoint(){
   for (int i = 0; i < 6; ++i){
-    if (this->nextJoint[i] > MAX_JOINT_ANGLE[i] || this->nextJoint[i] < MIN_JOINT_ANGLE[i]){
+    if (this->nextJoint[i] > MAX_JOINT_ANGLE[i] || this->nextJoint[i] < MIN_JOINT_ANGLE[i] || isnan(this->nextJoint[i])){
       #ifdef DEBUG
       String data_print = "!Out of range joint ";
       data_print += String(i+1);
@@ -228,7 +249,7 @@ void Arm::initManualMove(){
 void Arm::manualMove(int i, double* input, unsigned long &timeout, double incValue = 300)
 {
   // input = data from gamepad
-  if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) ) {
+  if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
     this->jointManualMoveDone[i] = false;
     // set new timeout
     if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
@@ -238,7 +259,12 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
       this->numberStepDoneDecelerate_manual[i] = 0.0;
     }
     //Rotate positive direction
-    digitalWrite(this->DIR_PINS[i], HIGH);
+    if (i == 4 ){//joint 5 is inverted
+      digitalWrite(this->DIR_PINS[i], LOW);
+    }
+    else {
+      digitalWrite(this->DIR_PINS[i], HIGH);
+    }
     if (PULstat[i] == 0) {
       digitalWrite(this->PUL_PINS[i], HIGH);
       PULstat[i] = 1;
@@ -248,7 +274,7 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
     }
     this->joint[i] = this->joint[i] + this->DL[i]/2.0;
   } 
-  else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
+  else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
     this->jointManualMoveDone[i] = false;
     // set new timeout
     if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
@@ -258,7 +284,12 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
       this->numberStepDoneDecelerate_manual[i] = 0.0;
     }
     //Rotate negative direction
-    digitalWrite(this->DIR_PINS[i], LOW);
+    if (i == 4 ){//joint 5 is inverted
+      digitalWrite(this->DIR_PINS[i], HIGH);
+    }
+    else {
+      digitalWrite(this->DIR_PINS[i], LOW);
+    }
     if (PULstat[i] == 0) {
       digitalWrite(this->PUL_PINS[i], HIGH);
       PULstat[i] = 1;
@@ -352,7 +383,7 @@ void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, 
         if(timeout - incValue > 1.0) timeout = timeout - incValue;
       } else if (this->numberStepDone[i] > (double_abs(this->numberStepToGo[i]) - accRate)){
         //decceleration
-        if(timeout + incValue < 4000.0)  timeout =  timeout + incValue;
+        if(timeout + incValue < 3000.0)  timeout =  timeout + incValue;
       }
     } else {
       //no space for proper acceleration/decceleration
@@ -361,12 +392,17 @@ void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, 
           if(timeout > 6.0) timeout =  timeout - incValue;
       } else if (this->numberStepDone[i] > (double_abs(this->numberStepToGo[i])/2)){
         //decceleration
-          if(timeout < 4000.0) timeout =  timeout +  incValue;
+          if(timeout < 3000.0) timeout =  timeout +  incValue;
       }
     }
     if ( this->numberStepToGo[i] > 0.2 ) {
       //Rotate positive direction
-      digitalWrite(this->DIR_PINS[i], HIGH);
+      if (i == 4 ){//joint 5 is inverted
+        digitalWrite(this->DIR_PINS[i], LOW);
+      }
+      else {
+        digitalWrite(this->DIR_PINS[i], HIGH);
+      }
       if (PULstat[i] == 0) {
         digitalWrite(this->PUL_PINS[i], HIGH);
         PULstat[i] = 1;
@@ -378,7 +414,12 @@ void Arm::generalAutoMove(int i, unsigned long &timeout, double incValue = 3.5, 
     }
     else if ( this->numberStepToGo[i] < -0.2 ) {
       //Rotate negative direction
-      digitalWrite(this->DIR_PINS[i], LOW);
+      if (i == 4 ){//joint 5 is inverted
+        digitalWrite(this->DIR_PINS[i], HIGH);
+      }
+      else {
+        digitalWrite(this->DIR_PINS[i], LOW);
+      }
       if (PULstat[i] == 0) {
         digitalWrite(this->PUL_PINS[i], HIGH);
         PULstat[i] = 1;
@@ -422,7 +463,7 @@ void Arm::calculateHorizontalNextPosition_detectHand(double* model_data){
       this->nextPosition[i] = this->position[i]; 
   }
   // caculate new position
-  this->nextPosition[1] = this->nextPosition[1] + ( (-40.0/177.0)*(model_data[0]-320.0) );
+  this->nextPosition[1] = this->nextPosition[1] + ( (-81.0/212.0)*(model_data[0]-320.0) );
 }
 
 void Arm::calculateHorizontalNextJoint_detectHand(){
@@ -441,7 +482,7 @@ void Arm::calculateLengthwiseNextPosition_detectHand(double* model_data){
       this->nextPosition[i] = this->position[i]; 
   }
   // caculate new position
-  this->nextPosition[2] = this->nextPosition[2] + ( (-75.0/73.0)*(model_data[1]-240.0) );
+  this->nextPosition[2] = this->nextPosition[2] + ( (-75.0/75.0)*(model_data[1]-240.0) );
 }
 
 void Arm::calculateLengthwiseNextJoint_detectHand(){
@@ -449,8 +490,8 @@ void Arm::calculateLengthwiseNextJoint_detectHand(){
   // dont move joint 4
   this->nextJoint[3] = this->joint[3];
   // self calculate for joint 5 move
-  int angleJ2Move = this->nextJoint[1] - this->joint[1];
-  int angleJ3Move = this->nextJoint[2] - this->joint[2];
+  double angleJ2Move = this->nextJoint[1] - this->joint[1];
+  double angleJ3Move = this->nextJoint[2] - this->joint[2];
   this->nextJoint[4] = this->joint[4] + angleJ2Move + angleJ3Move;
 }
 
