@@ -2,12 +2,17 @@ import threading
 import time
 
 class ReadSerialObject(threading.Thread):
-    def __init__(self, serialObj, ack_event, messageHandler=None):
+    def __init__(self, serialObj, ack_event, ack_data, ack_lock, robot_status_event, robot_status, robot_status_lock, messageHandler=None):
         threading.Thread.__init__(self)
         self.serialObj = serialObj
         self.isReading = False
         self.messageHandler = messageHandler
         self.ack_event = ack_event
+        self.ack_data = ack_data
+        self.ack_lock = ack_lock
+        self.robot_status_event = robot_status_event
+        self.robot_status = robot_status
+        self.robot_status_lock = robot_status_lock
 
     def stop(self):
         self.isReading = False
@@ -24,12 +29,30 @@ class ReadSerialObject(threading.Thread):
 
     def processIncomingData(self, data):
         # Define the list of valid ACK messages
-        #ack_messages = ["!I#", "!AH#", "!AS#", "!SS#", "!M#", "!A#", "!HA#", "!S#", "!X#"]
+        # ack_messages = ["!I#", "!AH#", "!AS#", "!SS#", "!M#", "!A#", "!HA#", "!S#", "!X#"]
         
         if data.startswith("!"):
-            print(f"ACK received: {data}")
-            # Signal ACK received by setting the event
-            self.ack_event.set()
+            print(f"Data received: {data}")
+        elif data.startswith("@"):
+            with self.ack_lock:
+                if self.ack_data[0] == "":
+                    # Signal ACK received by setting the event
+                    self.ack_event.set()
+                    self.ack_data[0] = data
+                    print(f"ack received: {self.ack_data[0]}")
+                else:
+                    # already have an ack signal need to be consumed
+                    print(f"passby ack received: {data}")
+        elif data.startswith("$"):
+            with self.robot_status_lock:
+                if self.robot_status[0] == "":
+                    # Signal ACK received by setting the event
+                    self.robot_status_event.set()
+                    self.robot_status[0] = data
+                    print(f"status received: {self.robot_status[0]}")
+                else:
+                    # already have an status signal need to be consumed
+                    print(f"passby status received: {data}")
         else:
             print(f"Unknown message received: {data}")
 

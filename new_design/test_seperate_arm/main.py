@@ -28,22 +28,29 @@ def main():
     # Wait for the creation of the serial object to stabilize the connection
     time.sleep(10)
     
-    # Use ack_event to share ACK status between read and write threads
+    # Use ack_event to share ACK status between read and write threads / ack_data to share ACK data / ack_lock to avoid race condition
     ack_event = threading.Event()
+    ack_data = [""]
+    ack_lock = threading.Lock()
+
+    # use robot_status to know when robot move done
+    robot_status_event = threading.Event()
+    robot_status = [""]
+    robot_status_lock = threading.Lock()
     
     # Initialize all objects
-    write_serial = WriteSerialObject(serial_obj, ack_event)
-    read_serial = ReadSerialObject(serial_obj, ack_event)
+    write_serial = WriteSerialObject(serial_obj, ack_event, ack_data, ack_lock)
+    read_serial = ReadSerialObject(serial_obj, ack_event, ack_data, ack_lock, robot_status_event, robot_status, robot_status_lock)
     gamepad_handler = GamepadHandler()
 
     hand_detect_handler = HandDetectHandler()
     hand_detect_handler.start()
     hand_detect_handler.pause()
     
-    slider_serial = WriteSerialObject(serial_obj, ack_event)
-    gripper_serial = WriteSerialObject(serial_obj, ack_event)
-    hand_serial = WriteSerialObject(serial_obj, ack_event)
-    home_serial = WriteSerialObject(serial_obj, ack_event)
+    slider_serial = WriteSerialObject(serial_obj, ack_event, ack_data, ack_lock)
+    gripper_serial = WriteSerialObject(serial_obj, ack_event, ack_data, ack_lock)
+    hand_serial = WriteSerialObject(serial_obj, ack_event, ack_data, ack_lock)
+    home_serial = WriteSerialObject(serial_obj, ack_event, ack_data, ack_lock)
     # Start all threads
     gamepad_handler.start()
     read_serial.start()
@@ -69,14 +76,19 @@ def main():
         write_serial.addMessage(init_message)
         print("Sent initialization message: !init#")
 
-        # Wait for ACK I!# from Arduino
+        # Wait for robot move done from Arduino
         while True:
-            if ack_event.is_set():
-                print("Initialization ACK received: I!#")
-                ack_event.clear()  # Reset ACK event for next message
-                break
-            time.sleep(0.1)  # Short delay to avoid busy-waiting
+            if robot_status_event.is_set():
+                with robot_status_lock:
+                    print("status come")
+                    if (robot_status[0] == "$MD#"):
+                        print("Robot move done")
+                        break
+                    robot_status[0] = ""
+                    robot_status_event.clear()  # Reset event for next message
 
+            time.sleep(0.1)  # Short delay to avoid busy-waiting
+        print("Start control")
         # Main control loop
         while True:
             mode = gamepad_handler.getMode()
@@ -152,12 +164,19 @@ def main():
                 if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
                     gamepad_handler.isGoHome = True
+                    # Wait for robot move done from Arduino
                     while True:
-                        if ack_event.is_set():
-                            print("GOHOME ACK received: AH!#")
-                            ack_event.clear()  # Reset ACK event for next message
-                            break
+                        if robot_status_event.is_set():
+                            with robot_status_lock:
+                                print("status come")
+                                if (robot_status[0] == "$MD#"):
+                                    print("Robot move done")
+                                    break
+                                robot_status[0] = ""
+                                robot_status_event.clear()  # Reset event for next message
+
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
+                    print("Start detect")
                     home_serial.lastSentMessage = Message('!#')
 
                 if not hand_detect_started:
@@ -177,6 +196,18 @@ def main():
                     # Add the message to the write_serial queue
                     hand_serial.addMessage(message)
                     print(f"Send to write_serial queue: {message_content}")
+                    # Wait for robot move done from Arduino
+                    while True:
+                        if robot_status_event.is_set():
+                            with robot_status_lock:
+                                print("status come")
+                                if (robot_status[0] == "$MD#"):
+                                    print("Robot move done")
+                                    break
+                                robot_status[0] = ""
+                                robot_status_event.clear()  # Reset event for next message
+
+                        time.sleep(0.1)  # Short delay to avoid busy-waiting
                 hand_detect_handler.hand_position = None
             elif mode == "auto": # Cannot go home after go to "AUTO" mode
                 # TODO: Add auto mode logic here

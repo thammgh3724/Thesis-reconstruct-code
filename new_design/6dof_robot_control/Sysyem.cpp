@@ -51,6 +51,7 @@ void System::arm_fsm(){
             this->nextArmAction == ARM_STOP_ACTION;
             this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
+            this->sender->sendData("$MD#"); // send when move done. TODO : create a queue and implement stop and wait 
             #ifdef DEBUG
             this->sender->sendData("!GO STATE STOP");
             #endif
@@ -95,6 +96,7 @@ void System::arm_fsm(){
                 this->arm->updateCurrentPosition();
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
+                this->sender->sendData("$MD#"); // send when move done. TODO : create a queue and implement stop and wait 
                 #ifdef DEBUG
                 this->sender->sendData("!GO STATE STOP");
                 #endif
@@ -231,6 +233,7 @@ void System::arm_fsm(){
                 this->arm->updateCurrentPosition();
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
+                this->sender->sendData("$MD#"); // send when move done. TODO : create a queue and implement stop and wait 
                 #ifdef DEBUG
                 this->arm->printCurrentPos();
                 this->sender->sendData("!GO STATE STOP");
@@ -420,13 +423,13 @@ void System::distributeAction(){ // send ACK here
         this->listener->consumeCommand(ARM_INIT_ACTION, nullptr);
         this->listener->consumeCommand(SLIDER_INIT_ACTION,nullptr);
         this->listener->consumeCommand(GRIPPER_INIT_ACTION, nullptr); 
-        this->sender->sendACK("!I#");
+        this->sender->sendACK("@I#");
         this->nextAction = NO_ACTION;
         break;
     case ARM_GOHOME_ACTION:
         this->nextArmAction = ARM_GOHOME_ACTION;
         this->listener->consumeCommand(ARM_GOHOME_ACTION, nullptr);
-        this->sender->sendACK("!AH#");
+        this->sender->sendACK("@AH#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_GOHOME_ACTION:
@@ -442,32 +445,32 @@ void System::distributeAction(){ // send ACK here
     case ARM_STOP_ACTION:
         this->nextArmAction = ARM_STOP_ACTION;
         this->listener->consumeCommand(ARM_STOP_ACTION, nullptr);
-        this->sender->sendACK("!AS#");
+        this->sender->sendACK("@AS#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_STOP_ACTION:
         this->nextSliderAction = SLIDER_STOP_ACTION;
         this->listener->consumeCommand(SLIDER_STOP_ACTION,nullptr);
-        this->sender->sendACK("!SS#");
+        this->sender->sendACK("@SS#");
         this->nextAction = NO_ACTION;
         break;
     case GRIPPER_STOP_ACTION:
         this->nextGripperAction = GRIPPER_STOP_ACTION;
         this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_STOP_ACTION,nullptr);
-        this->sender->sendACK("!GS#");
+        this->sender->sendACK("@GS#");
         this->nextAction = NO_ACTION;
         break;
     case ARM_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextArmAction = ARM_MANUAL_MOVE_DISTANCE_ACTION;
         this->listener->consumeCommand(ARM_MANUAL_MOVE_DISTANCE_ACTION, this->gamepad_data);
-        this->sender->sendACK("!M#");
+        this->sender->sendACK("@M#");
         this->nextAction = NO_ACTION;
         break;
     case ARM_AUTO_MOVE_POSITION_ACTION:
         this->nextArmAction = ARM_AUTO_MOVE_POSITION_ACTION;
         this->listener->consumeCommand(ARM_AUTO_MOVE_POSITION_ACTION, this->nextPosition_data);
-        this->sender->sendACK("!A#");
+        this->sender->sendACK("@A#");
         this->nextAction = NO_ACTION;
         break;
     case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
@@ -475,19 +478,19 @@ void System::distributeAction(){ // send ACK here
         this->listener->consumeCommand(ARM_AUTO_MOVE_DETECT_HAND_ACTION, this->model_data);
         this->arm->isHorizontalMove = true;
         this->arm->isLengthwiseMove = true;
-        this->sender->sendACK("!HA#");
+        this->sender->sendACK("@HA#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextSliderAction = SLIDER_MANUAL_MOVE_DISTANCE_ACTION;
         this->listener->consumeCommand(SLIDER_MANUAL_MOVE_DISTANCE_ACTION,&this->output_slider_manual);
-        this->sender->sendACK("!S#");
+        this->sender->sendACK("@S#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_AUTO_MOVE_FREE_ACTION:
         this->nextSliderAction = SLIDER_AUTO_MOVE_FREE_ACTION;
         this->listener->consumeCommand(SLIDER_AUTO_MOVE_FREE_ACTION,&this->output_slider_auto);
-        this->sender->sendACK("!X#");
+        this->sender->sendACK("@X#");
         this->nextAction = NO_ACTION;
         break;
     /** GRIPPER CONTROLLER */
@@ -495,21 +498,21 @@ void System::distributeAction(){ // send ACK here
         this->nextGripperAction = GRIPPER_MANUAL_MOVE_ACTION; 
         this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_MANUAL_MOVE_ACTION, this->output_gripper); 
-        this->sender->sendACK("!GM#"); 
+        this->sender->sendACK("@GM#"); 
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_OPEN:
         this->nextGripperAction = GRIPPER_OPEN;
         this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_OPEN, nullptr); 
-        this->sender->sendACK("!GO#"); 
+        this->sender->sendACK("@GO#"); 
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_CLOSE:
         this->nextGripperAction = GRIPPER_CLOSE;
         this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_CLOSE, nullptr); 
-        this->sender->sendACK("!GCLS#"); 
+        this->sender->sendACK("@GCLS#"); 
         this->nextAction = NO_ACTION; 
         break;
     default:
