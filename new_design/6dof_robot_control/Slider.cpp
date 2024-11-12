@@ -15,8 +15,8 @@ double Slider::double_abs(double num) {
 }
 int Slider::onStart(){
     // go home here
-    this->position = this->MAX_POSITION;
-    digitalWrite(SLIDER_DIR,LOW);
+    this->position = this->MIN_POSITION;
+    digitalWrite(SLIDER_DIR,HIGH);
     if(inductiveSrDetect() == LOW) return 0;
     while (inductiveSrDetect() != LOW){
       digitalWrite(this->PUL_PINS,HIGH);
@@ -67,7 +67,7 @@ int Slider::inductiveSrDetect() {
 }
 
 void Slider::manualMove(double input){
-    if ( (input >= 0.9) && (input <= 1.1) && (this->position - 0.5 >= MIN_POSITION) && (this->inductiveSrDetect() != LOW) ) {
+    if ( (input >= 0.9) && (input <= 1.1) && (this->position - 0.5 >= MIN_POSITION)) {
       //Rotate positive direction
       digitalWrite(this->DIR_PINS, HIGH);
       if (PULstat == 0) {
@@ -79,7 +79,7 @@ void Slider::manualMove(double input){
       }
       this->position = this->position - 0.5;
     } 
-    else if ( (input >= 1.9) && (input <= 2.1) && (this->position + 0.5 <= MAX_POSITION ) && (this->inductiveSrDetect() !=LOW)) {
+    else if ( (input >= 1.9) && (input <= 2.1) && (this->position + 0.5 <= MAX_POSITION )) {
       //Rotate negative direction
       digitalWrite(this->DIR_PINS, LOW);
       if (PULstat == 0) {
