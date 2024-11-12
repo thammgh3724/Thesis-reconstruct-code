@@ -20,6 +20,11 @@ def getPort():
 def format_gamepad_message(buffer, mode_char):
     return f"!{':'.join(map(str, buffer))}{mode_char}#"
 
+# Function to calculate time elapsed for ACK reception
+def log_ack_time(start_time, action):
+    elapsed_time = time.time() - start_time
+    print(f"{action} - ACK received in {elapsed_time:.4f} seconds")
+
 def main():
     serial_port = '/dev/ttyACM0'
     baud_rate = 115200
@@ -113,9 +118,12 @@ def main():
                             last_stop_time = current_time
                     else:
                         message = Message(message_content)
+                        start_time = time.time()  # Start the timer when sending message
                         write_serial.addMessage(message)
+                        # Log time after receiving ACK
+                        log_ack_time(start_time, "Gamepad message")
 
-                    # Need to consider creating a separate thread for sliders.
+                    # sliders.
                     if slider_signal == [0] * len(slider_signal):
                         current_time = time.time()
                         if current_time - slider_last_time > STOP_INTERVAL:
@@ -141,14 +149,14 @@ def main():
                             print(f"SENT: {gripperMsg.getMessage()}")
                             gripper_serial.addMessage(gripperMsg)
                     
-                    # Button stop in urgent context
-                    if stop_urgent_signal:
-                        print("Stop Urgent signal received")
-                        write_serial.addMessage(Message("!astop#"))
-                        slider_serial.addMessage(Message("!sstop#"))
-                        gripper_serial.addMessage(Message("!gstop#"))
-                        last_stop_time = time.time()
-                        stop_urgent_signal = 0
+                    # TODO: Add stop button (still modifying)
+                    # if stop_urgent_signal:
+                    #     print("Stop Urgent signal received")
+                    #     write_serial.addMessage(Message("!astop#"))
+                    #     slider_serial.addMessage(Message("!sstop#"))
+                    #     gripper_serial.addMessage(Message("!gstop#"))
+                    #     last_stop_time = time.time()
+                    #     stop_urgent_signal = 0
 
                 else:
                     # If no new value, check if we need to send STOP
