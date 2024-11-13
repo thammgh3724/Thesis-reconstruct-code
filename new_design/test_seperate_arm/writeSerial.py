@@ -37,6 +37,7 @@ class WriteSerialObject(threading.Thread):
         self.serialObj = serialObj
         self.messageQueue = queue.Queue(maxsize=QUEUE_MAX_SIZE)
         self.lastSentMessage = Message("!#")  # Placeholder for last sent message
+        self.lastSentHandPos = [0, 0]         # To compare with latest returned hand pos
         self.isRunning = False
         self.ack_event = ack_event
         self.ack_data = ack_data
@@ -54,6 +55,13 @@ class WriteSerialObject(threading.Thread):
 
     def getQueueSize(self):
         return self.messageQueue.qsize()
+    
+    def processNewHandPos(self, new_x, new_y):
+        self.lastSentHandPos[0] = new_x
+        self.lastSentHandPos[1] = new_y
+        if (new_x - 320 > 20) or (new_y - 240 > 20): 
+            return True
+        return False
 
     def addMessage(self, message: 'Message'):
         # Only add message to the queue if it's not full and is different from the last sent message

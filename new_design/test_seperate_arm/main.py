@@ -161,8 +161,13 @@ def main():
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
+                # Clear write_serial queue message after switching mode.
+                if not write_serial.messageQueue.empty():
+                    while (write_serial.getQueueSize != 0):
+                        write_serial.messageQueue.get()
+
                 if not gamepad_handler.isGoHome:
-                    home_serial.addMessage(Message("!agohome#"))
+                    write_serial.addMessage(Message("!agohome#"))
                     gamepad_handler.isGoHome = True
                     # Wait for robot move done from Arduino
                     while True:
@@ -177,7 +182,7 @@ def main():
 
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
                     print("Start detect")
-                    home_serial.lastSentMessage = Message('!#')
+                    write_serial.lastSentMessage = Message('!#')
 
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
@@ -189,13 +194,14 @@ def main():
                     # Get the hand position
                     x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
                     y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
+
+                    if write_serial.processNewHandPos(x_center, y_center):
+                        message_content = f"!{round(x_center, 5)}:{round(y_center, 5)}H#\0"  # Format message
+                        message = Message(message_content)
                     
-                    message_content = f"!{round(x_center, 5)}:{round(y_center, 5)}H#\0"  # Format message
-                    message = Message(message_content)
-                    
-                    # Add the message to the write_serial queue
-                    hand_serial.addMessage(message)
-                    print(f"Send to write_serial queue: {message_content}")
+                        # Add the message to the write_serial queue
+                        hand_serial.addMessage(message)
+                        print(f"Send to write_serial queue: {message_content}")
                     # Wait for robot move done from Arduino
                     while True:
                         if robot_status_event.is_set():
