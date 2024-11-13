@@ -165,6 +165,7 @@ def main():
                 if not write_serial.messageQueue.empty():
                     while (write_serial.getQueueSize != 0):
                         write_serial.messageQueue.get()
+                    print("***DONE CLEARING WRITE SERIAL MESSAGE QUEUE***")
 
                 if not gamepad_handler.isGoHome:
                     write_serial.addMessage(Message("!agohome#"))
@@ -200,7 +201,7 @@ def main():
                         message = Message(message_content)
                     
                         # Add the message to the write_serial queue
-                        hand_serial.addMessage(message)
+                        write_serial.addMessage(message)
                         print(f"Send to write_serial queue: {message_content}")
                     # Wait for robot move done from Arduino
                     while True:
