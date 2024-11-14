@@ -59,7 +59,7 @@ class WriteSerialObject(threading.Thread):
     def processNewHandPos(self, new_x, new_y):
         self.lastSentHandPos[0] = new_x
         self.lastSentHandPos[1] = new_y
-        if (new_x - 320 > 20) or (new_y - 240 > 20): 
+        if (float(new_x - 320) > 20) or (float(new_y - 240) > 20): 
             print("DEBUG: NEW POS TO MOVE")
             return True
         return False
