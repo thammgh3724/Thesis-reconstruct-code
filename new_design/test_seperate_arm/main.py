@@ -170,7 +170,7 @@ def main():
                     while (write_serial.getQueueSize != 0):
                         write_serial.messageQueue.get()
                     print("***DONE CLEARING WRITE SERIAL MESSAGE QUEUE***")
-
+                # AGOHOME REQUEST
                 if not gamepad_handler.isGoHome:
                     write_serial.addMessage(Message("!agohome#"))
                     gamepad_handler.isGoHome = True
@@ -196,7 +196,7 @@ def main():
                 hand_detect_started = True
                 # Check if hand_detect_handler has detected a hand position
                 if hand_detect_handler.hand_position:
-                    # Get the hand position
+                    # DEBUG CHECKPOINT 1: Get the hand position
                     print(f"CURRENT MESSAGE QUEUE SIZE: {write_serial.getQueueSize()}")
                     x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
                     y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
@@ -223,6 +223,8 @@ def main():
 
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
                 hand_detect_handler.hand_position = None
+                # DEBUG CHECKPOINT 2: 
+                print("WAIT FOR NEW HAND POSITION")
             elif mode == "auto": # Cannot go home after go to "AUTO" mode
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command

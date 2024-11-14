@@ -37,7 +37,7 @@ class WriteSerialObject(threading.Thread):
         self.serialObj = serialObj
         self.messageQueue = queue.Queue(maxsize=QUEUE_MAX_SIZE)
         self.lastSentMessage = Message("!#")  # Placeholder for last sent message
-        self.lastSentHandPos = [0, 0]         # To compare with latest returned hand pos
+        self.lastSentHandPos = [0.0, 0.0]         # To compare with latest returned hand pos
         self.isRunning = False
         self.ack_event = ack_event
         self.ack_data = ack_data
@@ -59,8 +59,9 @@ class WriteSerialObject(threading.Thread):
     def processNewHandPos(self, new_x, new_y):
         self.lastSentHandPos[0] = new_x
         self.lastSentHandPos[1] = new_y
-        if (float(new_x - 320) > 20) or (float(new_y - 240) > 20): 
-            print("DEBUG: NEW POS TO MOVE")
+        if (float(new_x - 320.0) > 20.0) or (float(new_y - 240) > 20.0):
+            # DEBUG CHECKPOINT 3: 
+            print("NEW VALUE CAN BE CONSUMED")
             return True
         return False
 
@@ -69,6 +70,7 @@ class WriteSerialObject(threading.Thread):
         if not self.messageQueue.full():
             if not self.lastSentMessage.compareMessage(message):
                 self.messageQueue.put(message)
+                self.lastSentMessage = copy.deepcopy(message)
         else:
             print("Queue is full, unable to add message")
 
@@ -93,7 +95,6 @@ class WriteSerialObject(threading.Thread):
                 
                 # Send the message
                 self.serialObj.write(currentMessage.encodeMessage())
-                self.lastSentMessage = copy.deepcopy(currentMessage)
                 
                 # Wait for ACK within TIMEOUT_MS
                 ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1.0)
