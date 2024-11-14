@@ -197,6 +197,7 @@ def main():
                 # Check if hand_detect_handler has detected a hand position
                 if hand_detect_handler.hand_position:
                     # Get the hand position
+                    print(f"CURRENT MESSAGE QUEUE SIZE: {write_serial.messageQueue.qsize}")
                     x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
                     y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
 
