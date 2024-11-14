@@ -94,10 +94,10 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
-                if not write_serial.messageQueue.empty():
-                    while (write_serial.getQueueSize != 0):
-                        write_serial.messageQueue.get()
-                    print("***DONE CLEARING WRITE SERIAL MESSAGE QUEUE***")
+                # if not write_serial.messageQueue.empty():
+                #     while (write_serial.getQueueSize != 0):
+                #         write_serial.messageQueue.get()
+                #     print("***DONE CLEARING WRITE SERIAL MESSAGE QUEUE***")
                 # Process gamepad inputs
                 if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
