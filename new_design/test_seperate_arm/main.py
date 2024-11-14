@@ -94,6 +94,10 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
+                if not write_serial.messageQueue.empty():
+                    while (write_serial.getQueueSize != 0):
+                        write_serial.messageQueue.get()
+                    print("***DONE CLEARING WRITE SERIAL MESSAGE QUEUE***")
                 # Process gamepad inputs
                 if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
@@ -197,6 +201,8 @@ def main():
                     y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
 
                     if write_serial.processNewHandPos(x_center, y_center):
+                        print("LAST HAND POSITION: " + str(write_serial.lastSentHandPos))
+
                         message_content = f"!{round(x_center, 5)}:{round(y_center, 5)}H#\0"  # Format message
                         message = Message(message_content)
                     
