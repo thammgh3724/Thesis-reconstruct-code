@@ -60,6 +60,7 @@ class WriteSerialObject(threading.Thread):
         self.lastSentHandPos[0] = new_x
         self.lastSentHandPos[1] = new_y
         if (new_x - 320 > 20) or (new_y - 240 > 20): 
+            print("DEBUG: NEW POS TO MOVE")
             return True
         return False
 
