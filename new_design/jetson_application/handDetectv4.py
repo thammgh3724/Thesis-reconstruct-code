@@ -13,11 +13,12 @@ from ultralytics import YOLO
 class HandDetectHandler(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.model = YOLO("best4.engine")
+        self.model = YOLO("best5_finetune.engine")
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
         self.hand_position = None
         self.cap = None
+        self.threshold = 40  # Threshold for position change in pixels
 
     def stop(self):
         self.stop_event.set()
@@ -35,7 +36,7 @@ class HandDetectHandler(threading.Thread):
             self.cap = cv2.VideoCapture(cv2.CAP_V4L2)  # Reopen the camera if it's closed
 
     def run(self):
-        # check if CUDA available
+        # Check if CUDA is available
         if torch.cuda.is_available():
             print("CONFIRM CUDA AVAILABLE")
 
@@ -47,9 +48,11 @@ class HandDetectHandler(threading.Thread):
             if self.pause_event.is_set():
                 hand_pos = self.cam_proc()
                 if hand_pos:
-                    self.hand_position = hand_pos
-                    time.sleep(0.3)
-                    print(hand_pos)
+                    # Update hand position only if the change exceeds the threshold
+                    if not self.hand_position or self.is_position_changed(hand_pos[0]):
+                        self.hand_position = hand_pos
+                        time.sleep(0.3)  # Avoid overwhelming the system with updates
+                        print(hand_pos)
 
         if self.cap and self.cap.isOpened():
             self.cap.release()
@@ -65,7 +68,7 @@ class HandDetectHandler(threading.Thread):
                 break
 
             frame = cv2.undistort(frame, camera_var.K_array, camera_var.Dis_array, None, camera_var.New_array)
-            results = self.model.track(frame, imgsz=640, conf=0.2, device = 0, save = False, verbose = False)
+            results = self.model.track(frame, imgsz=640, conf=0.2, device=0, save=False, verbose=False)
 
             current_positions = []
             for result in results:
@@ -73,8 +76,7 @@ class HandDetectHandler(threading.Thread):
                     x_min, y_min, x_max, y_max = box
                     x_center = (x_min + x_max) / 2
                     y_center = (y_min + y_max) / 2
-                    if (x_center - 320 > 10) or (y_center - 240 > 10):
-                        current_positions.append((x_center, y_center))
+                    current_positions.append((x_center, y_center))
                     cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (255, 0, 0), 2)
                     cv2.circle(frame, (int(x_center), int(y_center)), 5, (0, 255, 0), -1)
 
@@ -83,7 +85,7 @@ class HandDetectHandler(threading.Thread):
                     object_positions = current_positions
                     accumulate_count = 1
                 else:
-                    stable = all(abs(old_pos[0] - new_pos[0]) <= 5 and abs(old_pos[1] - new_pos[1]) <= 5 
+                    stable = all(abs(old_pos[0] - new_pos[0]) <= 5 and abs(old_pos[1] - new_pos[1]) <= 5
                                  for old_pos, new_pos in zip(object_positions, current_positions))
                     if stable:
                         accumulate_count += 1
@@ -99,18 +101,24 @@ class HandDetectHandler(threading.Thread):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        return None
+        return None  # Return None if no valid hand position detected
+
+    def is_position_changed(self, new_position):
+        """
+        Check if the position change exceeds the threshold.
+        """
+        old_x, old_y = self.hand_position[0]
+        new_x, new_y = new_position
+        return abs(new_x - old_x) > self.threshold or abs(new_y - old_y) > self.threshold
 
 
 if __name__ == "__main__":
+
+    if torch.cuda.is_available():
+      print("Confirm CUDA recognized")
+
+    from ultralytics import YOLO
+    print("here")
+    
     handdt = HandDetectHandler()
     handdt.start()
-
-    time.sleep(3)
-    handdt.pause() 
-    time.sleep(5)
-    handdt.resume()  
-
-    time.sleep(5)
-    handdt.stop()
-    handdt.join()  
