@@ -37,7 +37,7 @@ class WriteSerialObject(threading.Thread):
         self.serialObj = serialObj
         self.messageQueue = queue.Queue(maxsize=QUEUE_MAX_SIZE)
         self.lastSentMessage = Message("!#")  # Placeholder for last sent message
-        self.lastSentHandPos = [0.0, 0.0]         # To compare with latest returned hand pos
+        self.lastSentHandPos = [None, None]   # To compare with latest returned hand pos
         self.isRunning = False
         self.ack_event = ack_event
         self.ack_data = ack_data
@@ -57,13 +57,27 @@ class WriteSerialObject(threading.Thread):
         return self.messageQueue.qsize()
     
     def processNewHandPos(self, new_x, new_y):
-        self.lastSentHandPos[0] = new_x
-        self.lastSentHandPos[1] = new_y
-        if (float(new_x - 320.0) > 20.0) or (float(new_y - 240) > 20.0):
-            # DEBUG CHECKPOINT 3: 
-            print("NEW VALUE CAN BE CONSUMED")
+        """
+        Check if the new hand position exceeds the threshold distance 
+        compared to the last sent position.
+        """
+        # If there's no last position, send the first one directly
+        if self.lastSentHandPos == [None, None]:
+            self.lastSentHandPos = [new_x, new_y]
             return True
-        return False
+        
+        # Calculate the change in x and y coordinates
+        dx = abs(new_x - self.lastSentHandPos[0])
+        dy = abs(new_y - self.lastSentHandPos[1])
+        
+        # Define the threshold for movement in pixels
+        THRESHOLD = 20  # Change threshold as needed (pixels)
+
+        # Check if the change exceeds the threshold for both x and y
+        if dx > THRESHOLD or dy > THRESHOLD:
+            self.lastSentHandPos = [new_x, new_y]  # Update the last position
+            return True  # Allow sending the new position
+        return False  # Do not send if change is below the threshold
 
     def addMessage(self, message: 'Message'):
         # Only add message to the queue if it's not full and is different from the last sent message
