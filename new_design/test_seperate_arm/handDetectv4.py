@@ -51,7 +51,7 @@ class HandDetectHandler(threading.Thread):
                     # Update hand position only if the change exceeds the threshold
                     if not self.hand_position or self.is_position_changed(hand_pos[0]):
                         self.hand_position = hand_pos
-                        time.sleep(0.1)  # Avoid overwhelming the system with updates
+                        time.sleep(0.3)  # Avoid overwhelming the system with updates
                         print(hand_pos)
 
         if self.cap and self.cap.isOpened():
