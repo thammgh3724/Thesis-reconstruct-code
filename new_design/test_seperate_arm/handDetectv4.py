@@ -13,7 +13,7 @@ from ultralytics import YOLO
 class HandDetectHandler(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
-        self.model = YOLO("best4.engine")
+        self.model = YOLO("best5_finetune.engine")
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
         self.hand_position = None

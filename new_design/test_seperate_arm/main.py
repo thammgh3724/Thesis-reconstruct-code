@@ -200,16 +200,13 @@ def main():
                     print(f"CURRENT MESSAGE QUEUE SIZE: {write_serial.getQueueSize()}")
                     x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
                     y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
-
-                    if write_serial.processNewHandPos(x_center, y_center):
-                        print("LAST HAND POSITION: " + str(write_serial.lastSentHandPos))
-
-                        message_content = f"!{round(x_center, 5)}:{round(y_center, 5)}H#\0"  # Format message
-                        message = Message(message_content)
                     
-                        # Add the message to the write_serial queue
-                        write_serial.addMessage(message)
-                        print(f"Send to write_serial queue: {message_content}")
+                    message_content = f"!{round(x_center, 5)}:{round(y_center, 5)}H#\0"  # Format message
+                    message = Message(message_content)
+                
+                    # Add the message to the write_serial queue
+                    write_serial.addMessage(message)
+                    print(f"Send to write_serial queue: {message_content}")
                     # Wait for robot move done from Arduino
                     while True:
                         if robot_status_event.is_set():
