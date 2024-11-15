@@ -99,18 +99,16 @@ class HandDetectHandler(threading.Thread):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        return None
+        return None# Return None if no valid hand position detected
 
 
 if __name__ == "__main__":
+
+    if torch.cuda.is_available():
+      print("Confirm CUDA recognized")
+
+    from ultralytics import YOLO
+    print("here")
+    
     handdt = HandDetectHandler()
     handdt.start()
-
-    time.sleep(3)
-    handdt.pause() 
-    time.sleep(5)
-    handdt.resume()  
-
-    time.sleep(5)
-    handdt.stop()
-    handdt.join()  
