@@ -116,6 +116,9 @@ def main():
                     buffer = gamepad_handler.getBuffer()
                     gripper_signal = gamepad_handler.getGripperSignal()
                     # stop_urgent_signal = gamepad_handler.getStopSignal()
+                    write_serial.resetStopCounter("!astop#")
+                    write_serial.resetStopCounter("!sstop#")
+                    write_serial.resetStopCounter("!gstop#")
                     # Format the message based on mode
 
                     # If the buffer contains all zeros, send a STOP signal
@@ -126,8 +129,6 @@ def main():
                             last_stop_time = current_time
                     else:
                         write_serial.resetStopCounter("!0:0:0:0:0:0M#")
-                        write_serial.lockStopSignal("!sstop#")
-                        write_serial.lockStopSignal("!gstop#")
                         message = Message(format_gamepad_message(buffer, "M"))
                         start_time = time.time()  # Start the timer when sending message
                         write_serial.addMessage(message)
@@ -142,7 +143,6 @@ def main():
                             write_serial.addMessage(Message("!sstop#"))
                             slider_last_time = current_time
                     else: 
-                        write_serial.resetStopCounter("!sstop#")
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
                         # slider_serial.addMessage(slideMsg)
                         write_serial.addMessage(slideMsg)
@@ -158,13 +158,11 @@ def main():
                             gripperMsg = Message("!gclose#")
                             print(f"SENT: {gripperMsg.getMessage()}")
                             # gripper_serial.addMessage(gripperMsg)
-                            write_serial.resetStopCounter("!gstop#")
                             write_serial.addMessage(gripperMsg)
                         else:
                             gripperMsg = Message("!gopen#")
                             print(f"SENT: {gripperMsg.getMessage()}")
                             # gripper_serial.addMessage(gripperMsg)
-                            write_serial.resetStopCounter("!gstop#")
                             write_serial.addMessage(gripperMsg)
                     
                     # TODO: Add stop button (still modifying)
@@ -180,8 +178,6 @@ def main():
                     # If no new value, check if we need to send STOP
                     current_time = time.time()
                     if current_time - last_stop_time > STOP_INTERVAL:
-                        if (write_serial.lockStopSignal("!astop#")):
-                            write_serial.resetStopCounter("!astop#")
                         write_serial.addMessage(Message("!astop#"))
                         #slider_serial.addMessage(Message("!sstop#"))
                         #gripper_serial.addMessage(Message("!gstop#"))
