@@ -159,9 +159,15 @@ def main():
                     current_time = time.time()
                     if current_time - last_stop_time > STOP_INTERVAL:
                         write_serial.addMessage(Message("!astop#"))
-                        slider_serial.addMessage(Message("!sstop#"))
-                        gripper_serial.addMessage(Message("!gstop#"))
                         last_stop_time = current_time
+                    current_time = time.time()
+                    if current_time - slider_last_time > STOP_INTERVAL:
+                        write_serial.addMessage(Message("!sstop#"))
+                        slider_last_time = current_time
+                    current_time = time.time()
+                    if current_time - gripper_last_time > STOP_INTERVAL:
+                        write_serial.addMessage(Message("!gstop#"))
+                        gripper_last_time = current_time
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
