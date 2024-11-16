@@ -39,7 +39,7 @@ class ReadSerialObject(threading.Thread):
                     # Signal ACK received by setting the event
                     self.ack_event.set()
                     self.ack_data[0] = data
-                    print(f"ack received: {self.ack_data[0]}")
+                    print(f"ACK: {self.ack_data[0]}")
                 else:
                     # already have an ack signal need to be consumed
                     print(f"passby ack received: {data}")
@@ -49,10 +49,10 @@ class ReadSerialObject(threading.Thread):
                     # Signal ACK received by setting the event
                     self.robot_status_event.set()
                     self.robot_status[0] = data
-                    print(f"status received: {self.robot_status[0]}")
+                    print(f"ROBOT STATUS received: {self.robot_status[0]}")
                 else:
                     # already have an status signal need to be consumed
-                    print(f"passby status received: {data}")
+                    print(f"passby ROBOT STATUS received: {data}")
         else:
             print(f"Unknown message received: {data}")
 

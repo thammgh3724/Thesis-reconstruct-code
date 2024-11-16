@@ -219,8 +219,6 @@ def main():
                                 robot_status_event.clear()  # Reset event for next message
 
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
-                hand_detect_handler.hand_position = None
-                # DEBUG CHECKPOINT 2: 
             elif mode == "auto": # Cannot go home after go to "AUTO" mode
                 # TODO: Add auto mode logic here
                 # Placeholder for auto mode command
