@@ -54,6 +54,10 @@ class WriteSerialObject(threading.Thread):
     def stop(self):
         self.isRunning = False
 
+    def clearQueue(self):
+        while (self.getQueueSize() != 0):
+            self.messageQueue.get()
+
     def run(self):
         self.isRunning = True
         while self.isRunning:

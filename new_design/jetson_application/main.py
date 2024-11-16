@@ -88,9 +88,12 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
+                if (write_serial.getQueueSize() != 0):
+                    write_serial.clearQueue()
                 # Process gamepad inputs
                 if not gamepad_handler.isGoHome:
-                    home_serial.addMessage(Message("!agohome#"))
+                    # home_serial.addMessage(Message("!agohome#"))
+                    write_serial.addMessage(Message("!agohome#"))
                     gamepad_handler.isGoHome = True
                     while True:
                         if ack_event.is_set():
@@ -98,15 +101,15 @@ def main():
                             ack_event.clear()  # Reset ACK event for next message
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
-                    home_serial.lastSentMessage = Message('!#')
-                    
+                    #home_serial.lastSentMessage = Message('!#')
+                    write_serial.lastSentMessage = Message("!#")
                 hand_detect_started = False
                 if gamepad_handler.newValue:
                     # Retrieve buffer and sliders signals
                     slider_signal = gamepad_handler.getSlidersSignal()
                     buffer = gamepad_handler.getBuffer()
                     gripper_signal = gamepad_handler.getGripperSignal()
-                    stop_urgent_signal = gamepad_handler.getStopSignal()
+                    # stop_urgent_signal = gamepad_handler.getStopSignal()
                     # Format the message based on mode
                     message_content = format_gamepad_message(buffer, "M")
 
@@ -127,27 +130,32 @@ def main():
                     if slider_signal == [0] * len(slider_signal):
                         current_time = time.time()
                         if current_time - slider_last_time > STOP_INTERVAL:
-                            slider_serial.addMessage(Message("!sstop#"))
+                            #slider_serial.addMessage(Message("!sstop#"))
+                            write_serial.addMessage(Message("!sstop#"))
                             slider_last_time = current_time
                     else: 
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
-                        slider_serial.addMessage(slideMsg)
+                        # slider_serial.addMessage(slideMsg)
+                        write_serial.addMessage(slideMsg)
 
                     #griper
                     if gripper_signal == [0] * len(gripper_signal):
                         current_time = time.time()
                         if current_time - gripper_last_time > STOP_INTERVAL:
-                            gripper_serial.addMessage(Message("!gstop#"))
+                            # gripper_serial.addMessage(Message("!gstop#"))
+                            write_serial.addMessage(Message("!gstop#"))
                             gripper_last_time = current_time
                     else: 
                         if gripper_signal[1] == 1: # !gclose# 
                             gripperMsg = Message("!gclose#")
                             print(f"SENT: {gripperMsg.getMessage()}")
-                            gripper_serial.addMessage(gripperMsg)
+                            # gripper_serial.addMessage(gripperMsg)
+                            write_serial.addMessage(gripperMsg)
                         else:
                             gripperMsg = Message("!gopen#")
                             print(f"SENT: {gripperMsg.getMessage()}")
-                            gripper_serial.addMessage(gripperMsg)
+                            # gripper_serial.addMessage(gripperMsg)
+                            write_serial.addMessage(gripperMsg)
                     
                     # TODO: Add stop button (still modifying)
                     # if stop_urgent_signal:
@@ -163,14 +171,19 @@ def main():
                     current_time = time.time()
                     if current_time - last_stop_time > STOP_INTERVAL:
                         write_serial.addMessage(Message("!0:0:0:0:0:0M#"))
-                        slider_serial.addMessage(Message("!sstop#"))
-                        gripper_serial.addMessage(Message("!gstop#"))
+                        #slider_serial.addMessage(Message("!sstop#"))
+                        #gripper_serial.addMessage(Message("!gstop#"))
+                        write_serial.addMessage(Message("!sstop#"))
+                        write_serial.addMessage(Message("!gstop#"))
                         last_stop_time = current_time
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
+                if (write_serial.getQueueSize != 0):
+                    write_serial.clearQueue()
                 if not gamepad_handler.isGoHome:
-                    home_serial.addMessage(Message("!agohome#"))
+                    # home_serial.addMessage(Message("!agohome#"))
+                    write_serial.addMessage(Message("!agohome#"))
                     gamepad_handler.isGoHome = True
                     while True:
                         if ack_event.is_set():
@@ -178,8 +191,8 @@ def main():
                             ack_event.clear()  # Reset ACK event for next message
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
-                    home_serial.lastSentMessage = Message('!#')
-
+                    #home_serial.lastSentMessage = Message('!#')
+                    write_serial.lastSentMessage = Message("!#")
                 if not hand_detect_started:
                     print("Switching to hand_detect mode")
                     hand_detect_handler.resume()  # Start the hand detect thread
@@ -195,7 +208,8 @@ def main():
                     message = Message(message_content)
                     
                     # Add the message to the write_serial queue
-                    hand_serial.addMessage(message)
+                    #hand_serial.addMessage(message)
+                    write_serial.addMessage(message)
                     hand_detect_handler.isSending = False
                     print(f"Send to write_serial queue HAND DETECT: {message_content}")
             elif mode == "auto":

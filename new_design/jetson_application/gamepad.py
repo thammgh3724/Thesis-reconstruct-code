@@ -39,8 +39,8 @@ class GamepadHandler(threading.Thread):
             # Switch between gamepad, hand_detect, and auto
             if self.mode == "gamepad":
                 self.mode = "hand_detect"
-            elif self.mode == "hand_detect":
-                self.mode = "auto"
+            # elif self.mode == "hand_detect":
+            #     self.mode = "auto"
             else:
                 self.mode = "gamepad"
             print(f"Switched mode to: {self.mode}")
