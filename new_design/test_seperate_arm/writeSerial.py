@@ -5,7 +5,7 @@ import copy
 
 QUEUE_MAX_SIZE = 10
 MAX_RETRY = 3  # Maximum number of retries if no ACK is received
-TIMEOUT_MS = 3000  # Timeout for waiting for ACK (1000ms = 1 second)
+TIMEOUT_MS = 1000  # Timeout for waiting for ACK (1000ms = 1 second)
 
 class Message:
     def __init__(self, message, retryCount=0) -> None:

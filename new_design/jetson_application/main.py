@@ -186,7 +186,7 @@ def main():
                     
                 hand_detect_started = True
                 # Check if hand_detect_handler has detected a hand position
-                if hand_detect_handler.hand_position:
+                if hand_detect_handler.hand_position and hand_detect_handler.isSending:
                     # Get the hand position
                     x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
                     y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
@@ -196,6 +196,7 @@ def main():
                     
                     # Add the message to the write_serial queue
                     hand_serial.addMessage(message)
+                    hand_detect_handler.isSending = False
                     print(f"Send to write_serial queue HAND DETECT: {message_content}")
             elif mode == "auto":
                 # TODO: Add auto mode logic here: Detect fruit

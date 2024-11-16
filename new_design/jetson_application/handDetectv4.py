@@ -17,6 +17,7 @@ class HandDetectHandler(threading.Thread):
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
         self.hand_position = None
+        self.isSending = False
         self.cap = None
         self.threshold = 40  # Threshold for position change in pixels
 
@@ -49,10 +50,15 @@ class HandDetectHandler(threading.Thread):
                 hand_pos = self.cam_proc()
                 if hand_pos:
                     # Update hand position only if the change exceeds the threshold
-                    if not self.hand_position or self.is_position_changed(hand_pos[0]):
+                    if not self.hand_position:
                         self.hand_position = hand_pos
+                        self.isSending = True
                         time.sleep(0.3)  # Avoid overwhelming the system with updates
-                        print(hand_pos)
+                    elif self.is_position_changed(hand_pos[0]):
+                        self.hand_position = hand_pos
+                        self.isSending = True
+                        time.sleep(0.3)
+                    print(f"DETECTED HAND POS: {hand_pos}")
 
         if self.cap and self.cap.isOpened():
             self.cap.release()
