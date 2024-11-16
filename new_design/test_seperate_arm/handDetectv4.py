@@ -109,6 +109,8 @@ class HandDetectHandler(threading.Thread):
         """
         old_x, old_y = self.hand_position[0]
         new_x, new_y = new_position
+        print (f"OLD POS: {old_x}-{old_y}")
+        print (f"NEW POS: {new_x}-{new_y}")
         return abs(new_x - old_x) > self.threshold or abs(new_y - old_y) > self.threshold
 
 
