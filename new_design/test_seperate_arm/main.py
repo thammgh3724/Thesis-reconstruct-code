@@ -66,7 +66,7 @@ def main():
     last_stop_time = 0
     slider_last_time = 0
     gripper_last_time = 0
-    STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
+    STOP_INTERVAL = 2  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
     hand_detect_started = False
@@ -185,7 +185,6 @@ def main():
                                 robot_status[0] = ""
                                 robot_status_event.clear()  # Reset event for next message
 
-                        time.sleep(0.1)  # Short delay to avoid busy-waiting
                     print("Start detect")
                     write_serial.lastSentMessage = Message('!#')
 
