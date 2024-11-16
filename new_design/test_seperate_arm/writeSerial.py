@@ -110,7 +110,7 @@ class WriteSerialObject(threading.Thread):
                     # Wait for ACK within TIMEOUT_MS
                     ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1.0)
 
-                    if (not ack_received) or (self.checkACK() == False):
+                    if (not ack_received):
                         # If no ACK received or ACK wrong, increase retry count
                         currentMessage.increaseCall()
                         if currentMessage.excessCall(MAX_RETRY):
