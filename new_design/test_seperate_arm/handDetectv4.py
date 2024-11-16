@@ -81,12 +81,12 @@ class HandDetectHandler(threading.Thread):
                     cv2.circle(frame, (int(x_center), int(y_center)), 5, (0, 255, 0), -1)
 
             if len(current_positions) == 1:
-                if len(object_positions) == 0:
+                if not object_positions:
                     object_positions = current_positions
                     accumulate_count = 1
                 else:
                     stable = all(abs(old_pos[0] - new_pos[0]) <= 5 and abs(old_pos[1] - new_pos[1]) <= 5
-                                 for old_pos, new_pos in zip(object_positions, current_positions))
+                                for old_pos, new_pos in zip(object_positions, current_positions))
                     if stable:
                         accumulate_count += 1
                     else:
@@ -94,8 +94,13 @@ class HandDetectHandler(threading.Thread):
                         accumulate_count = 1
 
                 if accumulate_count >= 3:
-                    accumulate_count = 0
-                    return object_positions
+                    if self.hand_position:
+                        if self.is_position_changed(current_positions[0]):
+                            self.hand_position = current_positions
+                            return object_positions  # Only return if position changed significantly
+                    else:
+                        self.hand_position = current_positions
+                        return object_positions
 
             cv2.imshow("YOLOv8 Real-Time", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -103,10 +108,13 @@ class HandDetectHandler(threading.Thread):
 
         return None  # Return None if no valid hand position detected
 
+
     def is_position_changed(self, new_position):
         """
         Check if the position change exceeds the threshold.
         """
+        if not self.hand_position:
+            return True
         old_x, old_y = self.hand_position[0]
         new_x, new_y = new_position
         return abs(new_x - old_x) > self.threshold or abs(new_y - old_y) > self.threshold
