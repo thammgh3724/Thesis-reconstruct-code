@@ -39,6 +39,15 @@ class WriteSerialObject(threading.Thread):
         self.lastSentMessage = Message("!#")  # Placeholder for last sent message
         self.isRunning = False
         self.ack_event = ack_event
+        self.stop_signals = {
+            "!astop#": 0,
+            "!0:0:0:0:0:0M#": 0,
+            "!sstop#": 0,
+            "!gstop#": 0 
+        }
+
+    def resetStopCounter(self, message): 
+        self.stop_signals[message] = 0
 
     def getQueueSize(self):
         return self.messageQueue.qsize()
@@ -47,7 +56,13 @@ class WriteSerialObject(threading.Thread):
         # Only add message to the queue if it's not full and is different from the last sent message
         if not self.messageQueue.full():
             if not self.lastSentMessage.compareMessage(message):
-                self.messageQueue.put(message)
+                if (message.getMessage() in self.stop_signals):
+                    print("==============STOP SIGNAL CAUGHT=============")
+                    if self.stop_signals[message.getMessage()] == 0:
+                        self.stop_signals[message.getMessage()] += 1
+                        self.messageQueue.put(message)
+                else: 
+                    self.messageQueue.put(message)
         else:
             print("Queue is full, unable to add message")
 
