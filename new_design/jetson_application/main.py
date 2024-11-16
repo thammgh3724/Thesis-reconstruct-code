@@ -122,10 +122,14 @@ def main():
                     if buffer == [0] * len(buffer):
                         current_time = time.time()
                         if current_time - last_stop_time > STOP_INTERVAL:
+                            if (write_serial.isStopSignalLocked("!0:0:0:0:0:0M#")):
+                                write_serial.resetStopCounter("!0:0:0:0:0:0M#")
                             write_serial.addMessage(Message("!0:0:0:0:0:0M#"))
                             last_stop_time = current_time
                     else:
                         write_serial.resetStopCounter("!0:0:0:0:0:0M#")
+                        write_serial.lockStopSignal("!sstop#")
+                        write_serial.lockStopSignal("!gstop#")
                         message = Message(format_gamepad_message(buffer, "M"))
                         start_time = time.time()  # Start the timer when sending message
                         write_serial.addMessage(message)

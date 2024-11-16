@@ -46,8 +46,14 @@ class WriteSerialObject(threading.Thread):
             "!gstop#": 0 
         }
 
+    def isStopSignalLocked(self, message):
+        return self.stop_signals[message] == 0
+
     def resetStopCounter(self, message): 
         self.stop_signals[message] = 0
+
+    def lockStopSignal(self, message): 
+        self.stop_signals[message] = 1
 
     def getQueueSize(self):
         return self.messageQueue.qsize()
@@ -58,7 +64,7 @@ class WriteSerialObject(threading.Thread):
             if not self.lastSentMessage.compareMessage(message):
                 if (message.getMessage() in self.stop_signals):
                     if self.stop_signals[message.getMessage()] == 0:
-                        self.stop_signals[message.getMessage()] += 1
+                        self.stop_signals[message.getMessage()] = 1
                         self.messageQueue.put(message)
                 else: 
                     self.messageQueue.put(message)
