@@ -128,7 +128,6 @@ def main():
                     gripper_signal = gamepad_handler.getGripperSignal()
                     # stop_urgent_signal = gamepad_handler.getStopSignal()
                     # Format the message based on mode
-                    message_content = format_gamepad_message(buffer, "M")
 
                     # If the buffer contains all zeros, send a STOP signal
                     if buffer == [0] * len(buffer):
@@ -137,8 +136,9 @@ def main():
                             write_serial.addMessage(Message("!0:0:0:0:0:0M#"))
                             last_stop_time = current_time
                     else:
+                        write_serial.resetStopCounter("!astop#")
                         write_serial.resetStopCounter("!0:0:0:0:0:0M#")
-                        message = Message(message_content)
+                        message = Message(format_gamepad_message(buffer, "M"))
                         start_time = time.time()  # Start the timer when sending message
                         write_serial.addMessage(message)
                         # Log time after receiving ACK
@@ -164,17 +164,16 @@ def main():
                             write_serial.addMessage(Message("!gstop#"))
                             gripper_last_time = current_time
                     else: 
+                        write_serial.resetStopCounter("!gstop#")
                         if gripper_signal[1] == 1: # !gclose# 
                             gripperMsg = Message("!gclose#")
                             print(f"SENT: {gripperMsg.getMessage()}")
                             # gripper_serial.addMessage(gripperMsg)
-                            write_serial.resetStopCounter("!gstop#")
                             write_serial.addMessage(gripperMsg)
                         else:
                             gripperMsg = Message("!gopen#")
                             print(f"SENT: {gripperMsg.getMessage()}")
                             # gripper_serial.addMessage(gripperMsg)
-                            write_serial.resetStopCounter("!gstop#")
                             write_serial.addMessage(gripperMsg)
                     
                     # TODO: Add stop button (still modifying)

@@ -59,11 +59,17 @@ class WriteSerialObject(threading.Thread):
             "!astop#": "@AS#",
         }
 
-    def getQueueSize(self):
-        return self.messageQueue.qsize()
-    
+    def isStopSignalLocked(self, message):
+        return self.stop_signals[message] == 0
+
     def resetStopCounter(self, message): 
         self.stop_signals[message] = 0
+
+    def lockStopSignal(self, message): 
+        self.stop_signals[message] = 1
+
+    def getQueueSize(self):
+        return self.messageQueue.qsize()
 
     def addMessage(self, message: 'Message'):
         # Only add message to the queue if it's not full and is different from the last sent message
