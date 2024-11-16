@@ -16,12 +16,16 @@ class GamepadHandler(threading.Thread):
         self.debounce_time = 0.5     # Time to wait before toggling mode again
         self.last_toggle_time = 0    # Last time the mode was toggled
         self.isGoHome = True         # To check if after mode is switched, system is home yet.
+        self.modeChanged = False
 
     def getBuffer(self):
         return self.buffer
     
     def getMode(self):
         return self.mode
+    
+    def getModeChanged(self):
+        return self.modeChanged
     
     def getSlidersSignal(self):
         return self.slide_signal
@@ -45,6 +49,7 @@ class GamepadHandler(threading.Thread):
                 self.mode = "gamepad"
             print(f"Switched mode to: {self.mode}")
             self.isGoHome = False
+            self.modeChanged = True
             self.last_toggle_time = current_time
 
 

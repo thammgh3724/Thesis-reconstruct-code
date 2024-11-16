@@ -88,8 +88,10 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
-                if (write_serial.getQueueSize() != 0):
+                if (write_serial.getQueueSize() != 0 and gamepad_handler.getModeChanged()):
+                    gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
+
                 # Process gamepad inputs
                 if not gamepad_handler.isGoHome:
                     # home_serial.addMessage(Message("!agohome#"))
@@ -179,7 +181,8 @@ def main():
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
-                if (write_serial.getQueueSize != 0):
+                if (write_serial.getQueueSize != 0 and gamepad_handler.getModeChanged()):
+                    gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
                 if not gamepad_handler.isGoHome:
                     # home_serial.addMessage(Message("!agohome#"))
