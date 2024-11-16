@@ -94,10 +94,10 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
-                # if not write_serial.messageQueue.empty():
-                #     while (write_serial.getQueueSize != 0):
-                #         write_serial.messageQueue.get()
-                #     print("***DONE CLEARING WRITE SERIAL MESSAGE QUEUE***")
+                if not write_serial.messageQueue.empty():
+                    while (write_serial.getQueueSize != 0):
+                        write_serial.messageQueue.get()
+                    print("***DONE CLEARING WRITE SERIAL MESSAGE QUEUE***")
                 # Process gamepad inputs
                 if not gamepad_handler.isGoHome:
                     home_serial.addMessage(Message("!agohome#"))
@@ -133,26 +133,26 @@ def main():
                     if slider_signal == [0] * len(slider_signal):
                         current_time = time.time()
                         if current_time - slider_last_time > STOP_INTERVAL:
-                            slider_serial.addMessage(Message("!sstop#"))
+                            write_serial.addMessage(Message("!sstop#"))
                             slider_last_time = current_time
                     else: 
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
-                        slider_serial.addMessage(slideMsg)
+                        write_serial.addMessage(slideMsg)
 
                     if gripper_signal == [0] * len(gripper_signal):
                         current_time = time.time()
                         if current_time - gripper_last_time > STOP_INTERVAL:
-                            gripper_serial.addMessage(Message("!gstop#"))
+                            write_serial.addMessage(Message("!gstop#"))
                             gripper_last_time = current_time
                     else: 
                         if gripper_signal[1] == 1: # !gclose# 
                             gripperMsg = Message("!gclose#")
                             print(f"SENT: {gripperMsg.getMessage()}")
-                            gripper_serial.addMessage(gripperMsg)
+                            write_serial.addMessage(gripperMsg)
                         else:
                             gripperMsg = Message("!gopen#")
                             print(f"SENT: {gripperMsg.getMessage()}")
-                            gripper_serial.addMessage(gripperMsg)
+                            write_serial.addMessage(gripperMsg)
 
                 else:
                     # If no new value, check if we need to send STOP
@@ -160,14 +160,6 @@ def main():
                     if current_time - last_stop_time > STOP_INTERVAL:
                         write_serial.addMessage(Message("!astop#"))
                         last_stop_time = current_time
-                    current_time = time.time()
-                    if current_time - slider_last_time > STOP_INTERVAL:
-                        write_serial.addMessage(Message("!sstop#"))
-                        slider_last_time = current_time
-                    current_time = time.time()
-                    if current_time - gripper_last_time > STOP_INTERVAL:
-                        write_serial.addMessage(Message("!gstop#"))
-                        gripper_last_time = current_time
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
