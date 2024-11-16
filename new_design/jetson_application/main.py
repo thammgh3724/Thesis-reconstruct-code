@@ -117,7 +117,6 @@ def main():
                     gripper_signal = gamepad_handler.getGripperSignal()
                     # stop_urgent_signal = gamepad_handler.getStopSignal()
                     # Format the message based on mode
-                    message_content = format_gamepad_message(buffer, "M")
 
                     # If the buffer contains all zeros, send a STOP signal
                     if buffer == [0] * len(buffer):
@@ -127,7 +126,7 @@ def main():
                             last_stop_time = current_time
                     else:
                         write_serial.resetStopCounter("!0:0:0:0:0:0M#")
-                        message = Message(message_content)
+                        message = Message(format_gamepad_message(buffer, "M"))
                         start_time = time.time()  # Start the timer when sending message
                         write_serial.addMessage(message)
                         # Log time after receiving ACK
