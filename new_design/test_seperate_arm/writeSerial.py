@@ -77,7 +77,7 @@ class WriteSerialObject(threading.Thread):
             if not self.lastSentMessage.compareMessage(message):
                 if (message.getMessage() in self.stop_signals):
                     if self.stop_signals[message.getMessage()] == 0:
-                        self.stop_signals[message.getMessage()] += 1
+                        self.stop_signals[message.getMessage()] = 1
                         self.messageQueue.put(message)
                 else: 
                     self.messageQueue.put(message)
@@ -86,6 +86,10 @@ class WriteSerialObject(threading.Thread):
 
     def stop(self):
         self.isRunning = False
+
+    def clearQueue(self):
+        while (self.getQueueSize() != 0):
+            self.messageQueue.get()
 
     def checkACK(self):
         with self.ack_lock:
@@ -104,14 +108,15 @@ class WriteSerialObject(threading.Thread):
                 currentMessage = self.messageQueue.queue[0]  # Get the top message from the queue
                 
                 if not self.lastSentMessage.compareMessage(currentMessage):
-                # Send the message
+                    # Send the message
                     self.serialObj.write(currentMessage.encodeMessage())
+                    self.lastSentMessage = copy.deepcopy(currentMessage)
                     
                     # Wait for ACK within TIMEOUT_MS
-                    ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1.0)
+                    ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1000.0)
 
-                    if (not ack_received):
-                        # If no ACK received or ACK wrong, increase retry count
+                    if not ack_received:
+                        # If no ACK received, increase retry count
                         currentMessage.increaseCall()
                         if currentMessage.excessCall(MAX_RETRY):
                             print(f"Failed to send message after {MAX_RETRY} retries, dropping message")
@@ -119,10 +124,11 @@ class WriteSerialObject(threading.Thread):
                         else:
                             print(f"Retrying to send message: {currentMessage.getMessage()}")
                     else:
-                        # If ACK is received true, remove the message from the queue and reset retry count
+                        # If ACK is received, remove the message from the queue and reset retry count
                         self.messageQueue.get()
                         self.ack_event.clear()  # Clear ACK status for the next message
-                else: 
+                else:
+                    # If the message is a duplicate, just remove it from the queue
                     self.messageQueue.get()
             else:
                 time.sleep(0.1)  # Wait if the queue is empty to avoid busy-waiting
