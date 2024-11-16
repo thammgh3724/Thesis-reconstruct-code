@@ -57,7 +57,6 @@ class WriteSerialObject(threading.Thread):
         if not self.messageQueue.full():
             if not self.lastSentMessage.compareMessage(message):
                 if (message.getMessage() in self.stop_signals):
-                    print("==============STOP SIGNAL CAUGHT=============")
                     if self.stop_signals[message.getMessage()] == 0:
                         self.stop_signals[message.getMessage()] += 1
                         self.messageQueue.put(message)

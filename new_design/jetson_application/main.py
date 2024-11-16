@@ -43,7 +43,7 @@ def main():
 
     hand_detect_handler = HandDetectHandler()
     hand_detect_handler.start()
-    hand_detect_handler.pause()
+    #hand_detect_handler.pause()
     
     slider_serial = WriteSerialObject(serial_obj, ack_event)
     gripper_serial = WriteSerialObject(serial_obj, ack_event)
@@ -68,7 +68,7 @@ def main():
     STOP_INTERVAL = 1  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
-    hand_detect_started = False
+    hand_detect_started = True
     try:
         # Send !init# to initialize the robotic arm
         init_message = Message("!init#")
@@ -88,6 +88,10 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
+                if hand_detect_started:
+                    hand_detect_handler.pause()
+                    hand_detect_started = False
+                    
                 if (write_serial.getQueueSize() != 0 and gamepad_handler.getModeChanged()):
                     gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
