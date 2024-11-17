@@ -39,7 +39,7 @@ def main():
     # Initialize all objects
     write_serial = WriteSerialObject(serial_obj, ack_event)
     read_serial = ReadSerialObject(serial_obj, ack_event)
-    gamepad_handler = GamepadHandler()
+    gamepad_handler = GamepadHandler(serial_obj)
 
     hand_detect_handler = HandDetectHandler()
     hand_detect_handler.start()
@@ -64,7 +64,7 @@ def main():
     last_stop_time = 0
     slider_last_time = 0
     gripper_last_time = 0
-    stop_urgent_signal = 0
+    stop_urgent_signal = False
     STOP_INTERVAL = 0.01  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
@@ -215,8 +215,8 @@ def main():
                     # Trigger stop signal
                     if stopSignal[0] == 1:
                         write_serial.clearQueue()
-                        write_serial.directSending(Message("!astop#"))
-                    else: 
+                    else:
+                        gamepad_handler.isSendStop = False
                         write_serial.resetStopCounter("!astop#")
                         # Get the hand position
                         x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
