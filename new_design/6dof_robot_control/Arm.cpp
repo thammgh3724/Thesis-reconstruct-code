@@ -249,7 +249,7 @@ void Arm::initManualMove(){
 void Arm::manualMove(int i, double* input, unsigned long &timeout, double incValue = 300)
 {
   // input = data from gamepad
-  if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i]) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
+  if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i])) {
     this->jointManualMoveDone[i] = false;
     // set new timeout
     if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
@@ -274,7 +274,7 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
     }
     this->joint[i] = this->joint[i] + this->DL[i]/2.0;
   } 
-  else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i]) ) {
+  else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i])) {
     this->jointManualMoveDone[i] = false;
     // set new timeout
     if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
