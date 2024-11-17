@@ -164,15 +164,6 @@ def main():
                             print(f"SENT: {gripperMsg.getMessage()}")
                             # gripper_serial.addMessage(gripperMsg)
                             write_serial.addMessage(gripperMsg)
-                    
-                    # TODO: Add stop button (still modifying)
-                    # if stop_urgent_signal:
-                    #     print("Stop Urgent signal received")
-                    #     write_serial.addMessage(Message("!astop#"))
-                    #     slider_serial.addMessage(Message("!sstop#"))
-                    #     gripper_serial.addMessage(Message("!gstop#"))
-                    #     last_stop_time = time.time()
-                    #     stop_urgent_signal = 0
 
                 else:
                     # If no new value, check if we need to send STOP
@@ -189,7 +180,6 @@ def main():
             elif mode == "hand_detect":
                 # Get stop signal 
                 stopSignal = gamepad_handler.getStopSignal()
-
                 if (write_serial.getQueueSize != 0 and gamepad_handler.getModeChanged()):
                     gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
