@@ -19,7 +19,7 @@ class HandDetectHandler(threading.Thread):
         self.hand_position = None
         self.isSending = False
         self.cap = None
-        self.threshold = 40  # Threshold for position change in pixels
+        self.threshold = 60  # Threshold for position change in pixels
 
     def stop(self):
         self.stop_event.set()
