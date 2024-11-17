@@ -74,6 +74,9 @@ class WriteSerialObject(threading.Thread):
     def stop(self):
         self.isRunning = False
 
+    def removeFront(self):
+        self.messageQueue.get()
+
     def clearQueue(self):
         while (self.getQueueSize() != 0):
             self.messageQueue.get()

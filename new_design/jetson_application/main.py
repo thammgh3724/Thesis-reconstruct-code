@@ -214,6 +214,7 @@ def main():
                 if hand_detect_handler.hand_position and hand_detect_handler.isSending:
                     # Trigger stop signal
                     if stopSignal[0] == 1:
+                        write_serial.removeFront()
                         write_serial.addMessage(Message("!astop#"))
                     else: 
                         write_serial.resetStopCounter("!astop#")

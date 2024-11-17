@@ -99,7 +99,10 @@ class GamepadHandler(threading.Thread):
             if __debug__: print("Right stick button pressed")
         elif button == 8: # Button to stop urgent
             if __debug__: print("Left trigger (L2) pressed")
-            self.stop_signal[0] = 1
+            if (self.stop_signal[0] == 1):
+                self.stop_signal[0] = 0
+            else: 
+                self.stop_signal[0] = 1
             debounce = 2
         elif button == 9: # Button to change mode, can modify
             if __debug__: print("Right trigger (R2) pressed")
@@ -137,7 +140,7 @@ class GamepadHandler(threading.Thread):
             if __debug__: print("Right stick button released")
         elif button == 8:
             if __debug__: print("Left trigger (L2) released")
-            self.stop_signal[0] = 0
+            # self.stop_signal[0] = 0
         elif button == 9:
             if __debug__: print("Right trigger (R2) released")
         else: 
