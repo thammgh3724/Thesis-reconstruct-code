@@ -137,6 +137,7 @@ class GamepadHandler(threading.Thread):
             if __debug__: print("Right stick button released")
         elif button == 8:
             if __debug__: print("Left trigger (L2) released")
+            self.stop_signal[0] = 0
         elif button == 9:
             if __debug__: print("Right trigger (R2) released")
         else: 
