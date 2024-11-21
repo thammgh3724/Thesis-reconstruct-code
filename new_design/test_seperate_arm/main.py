@@ -103,13 +103,17 @@ def main():
                     write_serial.addMessage(Message("!agohome#"))
                     gamepad_handler.isGoHome = True
                     while True:
-                        if ack_event.is_set():
-                            print("GOHOME ACK received: AH!#")
-                            ack_event.clear()  # Reset ACK event for next message
-                            break
-                        time.sleep(0.1)  # Short delay to avoid busy-waiting
-                    #home_serial.lastSentMessage = Message('!#')
-                    write_serial.lastSentMessage = Message("!#")
+                        if robot_status_event.is_set():
+                            with robot_status_lock:
+                                print("status come")
+                                if (robot_status[0] == "$MD#"):
+                                    print("Robot move done")
+                                    break
+                                robot_status[0] = ""
+                                robot_status_event.clear()  # Reset event for next message
+
+                    print("Start control")
+                    write_serial.lastSentMessage = Message('!#')
                 hand_detect_started = False
                 if gamepad_handler.newValue:
                     # Retrieve buffer and sliders signals
