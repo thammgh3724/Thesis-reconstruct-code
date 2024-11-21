@@ -96,7 +96,7 @@ def main():
                     print("DEBUG: MODE CHANGED, CLEAR QUEUE FOR GAMEPAD")
                     gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
-
+                    print("ISSUE DEBUG: ESCAPED CLEAR QUEUE FOR GAMEPAD")
                 # Process gamepad inputs
                 if not gamepad_handler.isGoHome:
                     # home_serial.addMessage(Message("!agohome#"))
