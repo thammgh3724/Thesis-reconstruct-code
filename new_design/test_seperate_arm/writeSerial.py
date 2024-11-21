@@ -124,9 +124,20 @@ class WriteSerialObject(threading.Thread):
                         else:
                             print(f"Retrying to send message: {currentMessage.getMessage()}")
                     else:
-                        # If ACK is received, remove the message from the queue and reset retry count
-                        self.messageQueue.get()
-                        self.ack_event.clear()  # Clear ACK status for the next message
+                        # If ACK is received, 
+                        # + If ACK is valid, remove the message from the queue and reset retry count
+                        # + else retry sending message
+                        if self.checkACK():
+                            self.messageQueue.get()
+                            self.ack_event.clear()  # Clear ACK status for the next message
+                        else: 
+                            currentMessage.increaseCall()
+                            if currentMessage.excessCall(MAX_RETRY):
+                                print(f"Failed to send message after {MAX_RETRY} retries, dropping message")
+                                self.messageQueue.get()  # Remove the message after too many retries
+                            else:
+                                print(f"Retrying to send message: {currentMessage.getMessage()}")
+
                 else:
                     # If the message is a duplicate, just remove it from the queue
                     self.messageQueue.get()
