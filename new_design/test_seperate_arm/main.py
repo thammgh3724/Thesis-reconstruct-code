@@ -212,6 +212,9 @@ def main():
                     if stopSignal[0] == 1:
                         write_serial.clearQueue()
                     else:
+                        gamepad_handler.isSendStop = False
+                        write_serial.resetStopCounter("!astop#")
+
                         x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
                         y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
                         
