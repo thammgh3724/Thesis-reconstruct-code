@@ -3,14 +3,16 @@ import pygame
 import time
 
 class GamepadHandler(threading.Thread):
-    def __init__(self):
+    def __init__(self, serialObj):
         threading.Thread.__init__(self)
         pygame.init()
+        self.serialObj = serialObj
         self.joystick = None
         self.buffer = [0] * 6        # Assuming there are 6 parameters to track
         self.slide_signal = [0, 0]   # Control slide signal
         self.gripper_signal = [0, 0] # Control gripper signal
         self.stop_signal = [0]       # Stop urgent signal
+        self.isSendStop = False
         self.newValue = False
         self.mode = "gamepad"        # Default to gamepad mode
         self.debounce_time = 0.5     # Time to wait before toggling mode again
@@ -23,6 +25,13 @@ class GamepadHandler(threading.Thread):
     
     def getMode(self):
         return self.mode
+
+    def isSendStopSignal(self):
+        return self.isSendStop
+    
+    def sendInstantStop(self):
+        if not self.isSendStopSignal():
+            self.serialObj.write(bytes(str("!astop#"), encoding='utf-8'))
     
     def getModeChanged(self):
         return self.modeChanged
@@ -100,6 +109,8 @@ class GamepadHandler(threading.Thread):
         elif button == 8: # Button to stop urgent
             if __debug__: print("Left trigger (L2) pressed")
             self.stop_signal[0] = 1
+            self.sendInstantStop()
+            self.isSendStop = True
             debounce = 2
         elif button == 9: # Button to change mode, can modify
             if __debug__: print("Right trigger (R2) pressed")
@@ -137,6 +148,7 @@ class GamepadHandler(threading.Thread):
             if __debug__: print("Right stick button released")
         elif button == 8:
             if __debug__: print("Left trigger (L2) released")
+            self.stop_signal[0] = 0
         elif button == 9:
             if __debug__: print("Right trigger (R2) released")
         else: 

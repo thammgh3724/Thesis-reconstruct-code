@@ -7,7 +7,7 @@ import serial
 import time
 import threading
 import serial.tools.list_ports
-
+ 
 # Function to find and return Arduino's port name
 def getPort():
     ports = list(serial.tools.list_ports.comports())
@@ -44,21 +44,10 @@ def main():
     hand_detect_handler = HandDetectHandler()
     hand_detect_handler.start()
     #hand_detect_handler.pause()
-    
-    slider_serial = WriteSerialObject(serial_obj, ack_event)
-    gripper_serial = WriteSerialObject(serial_obj, ack_event)
-    hand_serial = WriteSerialObject(serial_obj, ack_event)
-    home_serial = WriteSerialObject(serial_obj, ack_event)
     # Start all threads
     gamepad_handler.start()
     read_serial.start()
     write_serial.start()
-    slider_serial.start()
-    gripper_serial.start()
-    hand_serial.start()
-
-    # Gohome event.
-    home_serial.start()
 
     # Timer for STOP signal debounce
     last_stop_time = 0
@@ -224,7 +213,7 @@ def main():
                 # TODO: Add auto mode logic here: Detect fruit
                 # Placeholder for auto mode command
                 if not gamepad_handler.isGoHome:
-                    home_serial.addMessage(Message("!agohome#"))
+                    write_serial.addMessage(Message("!agohome#"))
                     gamepad_handler.isGoHome = True
                     while True:
                         if ack_event.is_set():
@@ -232,7 +221,7 @@ def main():
                             ack_event.clear()  # Reset ACK event for next message
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
-                    home_serial.lastSentMessage = Message('!#')
+                    write_serial.lastSentMessage = Message('!#')
 
                 if hand_detect_started:
                     print("Switching to auto mode")
@@ -246,17 +235,9 @@ def main():
     except KeyboardInterrupt:
         print("Stopping threads...")
         write_serial.stop()
-        slider_serial.stop()
-        hand_serial.stop()
         read_serial.stop()
-        home_serial.stop()
-        gripper_serial.stop()
         write_serial.join()
-        slider_serial.join()
-        gripper_serial.join()
-        hand_serial.join()
         read_serial.join()
-        home_serial.join()
         gamepad_handler.join()
         hand_detect_handler.stop()
         hand_detect_handler.join()
