@@ -46,7 +46,7 @@ def main():
     # Initialize all objects
     write_serial = WriteSerialObject(serial_obj, ack_event, ack_data, ack_lock)
     read_serial = ReadSerialObject(serial_obj, ack_event, ack_data, ack_lock, robot_status_event, robot_status, robot_status_lock)
-    gamepad_handler = GamepadHandler()
+    gamepad_handler = GamepadHandler(serial_obj)
 
     hand_detect_handler = HandDetectHandler()
     hand_detect_handler.start()
