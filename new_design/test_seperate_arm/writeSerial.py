@@ -57,6 +57,8 @@ class WriteSerialObject(threading.Thread):
             "H#": "@HA#",
             "S#": "@SL#",
             "!astop#": "@AS#",
+            "!sstop#": "@SS#",
+            "!gstop#": "@GS#"
         }
 
     def isStopSignalLocked(self, message):
