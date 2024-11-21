@@ -93,6 +93,7 @@ def main():
                     hand_detect_started = False
                     
                 if (write_serial.getQueueSize() != 0 and gamepad_handler.getModeChanged()):
+                    print("DEBUG: MODE CHANGED, CLEAR QUEUE FOR GAMEPAD")
                     gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
 
@@ -179,6 +180,7 @@ def main():
                 # Clear write_serial queue message after switching mode.
                 stopSignal = gamepad_handler.getStopSignal()
                 if (write_serial.getQueueSize != 0 and gamepad_handler.getModeChanged()):
+                    print("DEBUG: MODE CHANGED, CLEAR QUEUE FOR HAND")
                     gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
                 if not gamepad_handler.isGoHome:
