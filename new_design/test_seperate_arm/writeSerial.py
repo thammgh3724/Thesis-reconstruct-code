@@ -2,6 +2,7 @@ import threading
 import queue
 import time
 import copy
+import re
 
 QUEUE_MAX_SIZE = 10
 MAX_RETRY = 3  # Maximum number of retries if no ACK is received
@@ -58,8 +59,15 @@ class WriteSerialObject(threading.Thread):
             "S#": "@SL#",
             "!astop#": "@AS#",
             "!sstop#": "@SS#",
-            "!gstop#": "@GS#"
+            "!gstop#": "@GS#",
+            "!gopen#": "@GO#",
+            "!gclose#": "@GCLS#",
         }
+
+        self.regex_ack_map = [
+            (re.compile(r"^!\d+:\d+:\d+:\d+:\d+:\d+M#$"), "@M#"),
+            (re.compile(r"^!\d+:\d+S#$"), "@S#")
+        ]
 
     def isStopSignalLocked(self, message):
         return self.stop_signals[message] == 0
@@ -99,6 +107,12 @@ class WriteSerialObject(threading.Thread):
                 if (self.lastSentMessage.message.endswith(last_char) and self.ack_data[0] == self.message_ack_map[last_char] ):
                     self.ack_data[0] = ""
                     return True
+                
+            for regex, ack in self.regex_ack_map:
+                if regex.match(self.lastSentMessage.message) and self.ack_data[0] == ack:
+                    self.ack_data[0] = ""
+                    return True
+                
             self.ack_data[0] = ""
             print("wrong ack")
             return False
