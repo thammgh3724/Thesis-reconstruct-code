@@ -117,7 +117,6 @@ def main():
                 hand_detect_started = False
                 if gamepad_handler.newValue:
                     # Retrieve buffer and sliders signals
-                    write_serial.clearQueue()
                     slider_signal = gamepad_handler.getSlidersSignal()
                     buffer = gamepad_handler.getBuffer()
                     gripper_signal = gamepad_handler.getGripperSignal()
@@ -135,6 +134,8 @@ def main():
                         write_serial.resetStopCounter("!0:0:0:0:0:0M#")
                         message = Message(format_gamepad_message(buffer, "M"))
                         start_time = time.time()  # Start the timer when sending message
+                        if (write_serial.getQueueSize() != 0):
+                            write_serial.clearQueue()
                         write_serial.addMessage(message)
                         # Log time after receiving ACK
                         log_ack_time(start_time, "Gamepad message")
@@ -150,6 +151,8 @@ def main():
                         write_serial.resetStopCounter("!sstop#")
                         slideMsg = Message(format_gamepad_message(slider_signal, "S"))
                         # slider_serial.addMessage(slideMsg)
+                        if (write_serial.getQueueSize() != 0):
+                            write_serial.clearQueue()
                         write_serial.addMessage(slideMsg)
                     #griper
                     if gripper_signal == [0] * len(gripper_signal):
