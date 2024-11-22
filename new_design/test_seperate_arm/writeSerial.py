@@ -100,7 +100,6 @@ class WriteSerialObject(threading.Thread):
 
     def clearQueue(self):
         if (self.getQueueSize() == 0):
-            print("QUEUE IS CLEAR")
             return
         print("CLEARING QUEUE IN PROGRESS...")
         while (self.getQueueSize() != 0):
