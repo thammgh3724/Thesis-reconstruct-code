@@ -73,6 +73,7 @@ class WriteSerialObject(threading.Thread):
         return self.stop_signals[message] == 0
 
     def resetStopCounter(self, message): 
+        print(f"UNLOCKED STOP SIGNAL: {message}")
         self.stop_signals[message] = 0
 
     def lockStopSignal(self, message): 
@@ -87,12 +88,12 @@ class WriteSerialObject(threading.Thread):
             if not self.lastSentMessage.compareMessage(message):
                 if (message.getMessage() in self.stop_signals):
                     if self.stop_signals[message.getMessage()] == 0:
+                        print(f"PUTTING STOP SIGNAL ONCE, LOCKED {message.getMessage()}")
                         self.stop_signals[message.getMessage()] = 1
                         self.messageQueue.put(message)
                 else: 
                     self.messageQueue.put(message)
         else:
-            self.clearQueue()
             print("Queue is full, unable to add message")
 
     def stop(self):
@@ -150,6 +151,7 @@ class WriteSerialObject(threading.Thread):
                         # + If ACK is valid, remove the message from the queue and reset retry count
                         # + else retry sending message
                         if self.checkACK():
+                            print(f"SUCCESSFULL CASE: VALID ACK FOR {currentMessage.getMessage()}")
                             self.messageQueue.get()
                             self.ack_event.clear()  # Clear ACK status for the next message
                         else: 
