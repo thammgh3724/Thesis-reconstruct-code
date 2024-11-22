@@ -127,6 +127,7 @@ def main():
                     if buffer == [0] * len(buffer):
                         current_time = time.time()
                         if float(current_time) - float(last_stop_time) > STOP_INTERVAL:
+                            print("STOP ARM, CONTROL OTHER")
                             write_serial.addMessage(Message("!0:0:0:0:0:0M#"))
                             last_stop_time = current_time
                     else:
@@ -145,6 +146,7 @@ def main():
                         current_time = time.time()
                         if float(current_time) - float(slider_last_time) > STOP_INTERVAL:
                             #slider_serial.addMessage(Message("!sstop#"))
+                            print("STOP SLIDER, CONTROL OTHER")
                             write_serial.addMessage(Message("!sstop#"))
                             slider_last_time = current_time
                     else: 
@@ -159,6 +161,7 @@ def main():
                         current_time = time.time()
                         if float(current_time) - float(gripper_last_time) > STOP_INTERVAL:
                             # gripper_serial.addMessage(Message("!gstop#"))
+                            print("STOP GRIPPER, CONTROL OTHER")
                             write_serial.addMessage(Message("!gstop#"))
                             gripper_last_time = current_time
                     else: 
