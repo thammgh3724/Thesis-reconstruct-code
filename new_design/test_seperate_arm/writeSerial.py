@@ -92,6 +92,7 @@ class WriteSerialObject(threading.Thread):
                 else: 
                     self.messageQueue.put(message)
         else:
+            self.clearQueue()
             print("Queue is full, unable to add message")
 
     def stop(self):
