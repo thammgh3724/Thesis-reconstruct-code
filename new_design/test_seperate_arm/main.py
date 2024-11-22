@@ -178,6 +178,7 @@ def main():
                         write_serial.addMessage(Message("!sstop#"))
                         write_serial.addMessage(Message("!gstop#"))
                         last_stop_time = current_time
+                    write_serial.clearQueue()
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":

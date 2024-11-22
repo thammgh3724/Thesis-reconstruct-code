@@ -99,8 +99,13 @@ class WriteSerialObject(threading.Thread):
         self.isRunning = False
 
     def clearQueue(self):
+        if (self.getQueueSize() == 0):
+            print("QUEUE IS CLEAR")
+            return
+        print("CLEARING QUEUE IN PROGRESS...")
         while (self.getQueueSize() != 0):
             self.messageQueue.get()
+        print("CLEARING QUEUE DONE!")
 
     def checkACK(self):
         with self.ack_lock:
@@ -134,6 +139,7 @@ class WriteSerialObject(threading.Thread):
 
                     if not ack_received:
                         # If no ACK received, increase retry count
+                        print("CASE 1: NO ACK RECEIVED")
                         currentMessage.increaseCall()
                         if currentMessage.excessCall(MAX_RETRY):
                             print(f"Failed to send message after {MAX_RETRY} retries, dropping message")
@@ -148,6 +154,7 @@ class WriteSerialObject(threading.Thread):
                             self.messageQueue.get()
                             self.ack_event.clear()  # Clear ACK status for the next message
                         else: 
+                            print("CASE 2: WRONG ACK RECEIVED")
                             currentMessage.increaseCall()
                             if currentMessage.excessCall(MAX_RETRY):
                                 print(f"Failed to send message after {MAX_RETRY} retries, dropping message")
