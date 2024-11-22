@@ -88,8 +88,8 @@ class WriteSerialObject(threading.Thread):
             if not self.lastSentMessage.compareMessage(message):
                 if (message.getMessage() in self.stop_signals):
                     if self.stop_signals[message.getMessage()] == 0:
-                        print(f"PUTTING STOP SIGNAL ONCE, LOCKED {message.getMessage()}")
-                        self.stop_signals[message.getMessage()] = 1
+                        # print(f"PUTTING STOP SIGNAL ONCE, LOCKED {message.getMessage()}")
+                        # self.stop_signals[message.getMessage()] = 1
                         self.messageQueue.put(message)
                 else: 
                     self.messageQueue.put(message)
