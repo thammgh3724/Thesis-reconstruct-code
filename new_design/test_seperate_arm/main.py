@@ -117,6 +117,7 @@ def main():
                 hand_detect_started = False
                 if gamepad_handler.newValue:
                     # Retrieve buffer and sliders signals
+                    write_serial.clearQueue()
                     slider_signal = gamepad_handler.getSlidersSignal()
                     buffer = gamepad_handler.getBuffer()
                     gripper_signal = gamepad_handler.getGripperSignal()
@@ -178,7 +179,6 @@ def main():
                         write_serial.addMessage(Message("!sstop#"))
                         write_serial.addMessage(Message("!gstop#"))
                         last_stop_time = current_time
-                    write_serial.clearQueue()
             
             # SYSTEM MODE: HAND DETECTION
             elif mode == "hand_detect":
