@@ -94,6 +94,7 @@ class WriteSerialObject(threading.Thread):
                         self.messageQueue.put(message)
                 else: 
                     self.messageQueue.put(message)
+                print(f"MESSAGE ADDED: {message.getMessage()}")
         else:
             print("Queue is full, unable to add message")
 
