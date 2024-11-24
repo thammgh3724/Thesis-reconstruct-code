@@ -89,12 +89,12 @@ class WriteSerialObject(threading.Thread):
             if not self.lastSentMessage.compareMessage(message):
                 if (message.getMessage() in self.stop_signals):
                     if self.stop_signals[message.getMessage()] == 0:
-                        print("PUTTING STOP SIGNAL ONCE")
+                        print(f"PUTTING STOP SIGNAL ONCE: {message.getMessage()}")
                         self.lockStopSignal(message.getMessage())
                         self.messageQueue.put(message)
                 else: 
                     self.messageQueue.put(message)
-                print(f"MESSAGE ADDED: {message.getMessage()}")
+                    print(f"MESSAGE ADDED: {message.getMessage()}")
         else:
             print("Queue is full, unable to add message")
 
@@ -112,6 +112,13 @@ class WriteSerialObject(threading.Thread):
     def sendMessageToSerialLine(self, message):
         print(f"SEND: {message.getMessage()}")
         self.serialObj.write(message.encodeMessage())
+
+    def instantSend(self, message):
+        if message.getMessage() in self.stop_signals:
+            if self.isStopSignalLocked(message.getMessage()):
+                self.sendMessageToSerialLine(message)
+                self.lastSentMessage = message
+                self.lockStopSignal(message.getMessage())
 
     def checkACK(self):
         with self.ack_lock:

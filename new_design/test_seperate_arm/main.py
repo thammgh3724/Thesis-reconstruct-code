@@ -59,7 +59,6 @@ def main():
     last_stop_time = 0
     slider_last_time = 0
     gripper_last_time = 0
-    stop_urgent_signal = False
     STOP_INTERVAL = 0.01  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
