@@ -180,9 +180,12 @@ def main():
                     # If no new value, check if we need to send STOP
                     current_time = time.time()
                     if float(current_time) - float(last_stop_time) > STOP_INTERVAL:
-                        write_serial.addMessage(Message("!astop#"))
-                        write_serial.addMessage(Message("!sstop#"))
-                        write_serial.addMessage(Message("!gstop#"))
+                        # write_serial.addMessage(Message("!astop#"))
+                        # write_serial.addMessage(Message("!sstop#"))
+                        # write_serial.addMessage(Message("!gstop#"))
+                        write_serial.instantSend(Message("!astop#"))
+                        write_serial.instantSend(Message("!gstop#"))
+                        write_serial.instantSend(Message("!sstop#"))
                         last_stop_time = current_time
             
             # SYSTEM MODE: HAND DETECTION
