@@ -77,6 +77,7 @@ class WriteSerialObject(threading.Thread):
         self.stop_signals[message] = 0
 
     def lockStopSignal(self, message): 
+        print(f"LOCKED STOP SIGNAL: {message}")
         self.stop_signals[message] = 1
 
     def getQueueSize(self):
@@ -88,8 +89,8 @@ class WriteSerialObject(threading.Thread):
             if not self.lastSentMessage.compareMessage(message):
                 if (message.getMessage() in self.stop_signals):
                     if self.stop_signals[message.getMessage()] == 0:
-                        print(f"PUTTING STOP SIGNAL ONCE, LOCKED {message.getMessage()}")
-                        self.stop_signals[message.getMessage()] = 1
+                        print("PUTTING STOP SIGNAL ONCE")
+                        self.lockStopSignal(message.getMessage())
                         self.messageQueue.put(message)
                 else: 
                     self.messageQueue.put(message)
@@ -106,6 +107,10 @@ class WriteSerialObject(threading.Thread):
         while (self.getQueueSize() != 0):
             self.messageQueue.get()
         print("CLEARING QUEUE DONE!")
+
+    def sendMessageToSerialLine(self, message):
+        print(f"SEND: {message.getMessage()}")
+        self.serialObj.write(message.encodeMessage())
 
     def checkACK(self):
         with self.ack_lock:
@@ -131,7 +136,7 @@ class WriteSerialObject(threading.Thread):
                 
                 if not self.lastSentMessage.compareMessage(currentMessage):
                     # Send the message
-                    self.serialObj.write(currentMessage.encodeMessage())
+                    self.sendMessageToSerialLine(currentMessage)
                     self.lastSentMessage = copy.deepcopy(currentMessage)
                     
                     # Wait for ACK within TIMEOUT_MS
