@@ -59,6 +59,7 @@ def main():
     last_stop_time = 0
     slider_last_time = 0
     gripper_last_time = 0
+    isInit = True
     STOP_INTERVAL = 0.01  # Time interval to send STOP signal (in seconds)
     
     # Check if hand detection thread started
@@ -183,7 +184,11 @@ def main():
                         # write_serial.addMessage(Message("!astop#"))
                         # write_serial.addMessage(Message("!sstop#"))
                         # write_serial.addMessage(Message("!gstop#"))
-                        write_serial.instantSend(Message("!astop#"))
+                        if isInit:
+                            write_serial.instantSend(Message("!astop#"))
+                            isInit = False
+                        else: 
+                            write_serial.instantSend(Message("!0:0:0:0:0:0M#"))
                         write_serial.instantSend(Message("!gstop#"))
                         write_serial.instantSend(Message("!sstop#"))
                         last_stop_time = current_time
