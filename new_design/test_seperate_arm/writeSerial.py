@@ -124,7 +124,6 @@ class WriteSerialObject(threading.Thread):
             if self.isStopSignalLocked(message.getMessage()):
                 self.sendMessageToSerialLine(message)
                 self.lastSentMessage = copy.deepcopy(message)
-                self.lockStopSignal(message.getMessage())
 
         self.clearQueue()
         self.pause.set()
