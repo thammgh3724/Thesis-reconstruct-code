@@ -69,6 +69,10 @@ class WriteSerialObject(threading.Thread):
             (re.compile(r"^!\d+:\d+S#$"), "@S#")
         ]
 
+        # Pause normal communication event
+        self.pause = threading.Event()
+        self.pause.set()
+
     def isStopSignalLocked(self, message):
         return self.stop_signals[message] == 0
 
@@ -114,11 +118,16 @@ class WriteSerialObject(threading.Thread):
         self.serialObj.write(message.encodeMessage())
 
     def instantSend(self, message):
+        self.pause.clear()
+
         if message.getMessage() in self.stop_signals:
             if self.isStopSignalLocked(message.getMessage()):
                 self.sendMessageToSerialLine(message)
                 self.lastSentMessage = copy.deepcopy(message)
                 self.lockStopSignal(message.getMessage())
+
+        self.clearQueue()
+        self.pause.set()
 
     def checkACK(self):
         with self.ack_lock:
@@ -139,12 +148,15 @@ class WriteSerialObject(threading.Thread):
     def run(self):
         self.isRunning = True
         while self.isRunning:
+            self.pause.wait()
+
             if not self.messageQueue.empty():
                 currentMessage = self.messageQueue.queue[0]  # Get the top message from the queue
                 
                 if not self.lastSentMessage.compareMessage(currentMessage):
                     # Send the message
                     self.sendMessageToSerialLine(currentMessage)
+                    self.lastSentMessage = copy.deepcopy(currentMessage)
                     
                     # Wait for ACK within TIMEOUT_MS
                     ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1000.0)
@@ -165,7 +177,6 @@ class WriteSerialObject(threading.Thread):
                         if self.checkACK():
                             print(f"SUCCESSFULL CASE: VALID ACK FOR {currentMessage.getMessage()}")
                             self.messageQueue.get()
-                            self.lastSentMessage = copy.deepcopy(currentMessage)
                             self.ack_event.clear()  # Clear ACK status for the next message
                         else: 
                             print("CASE 2: WRONG ACK RECEIVED")
