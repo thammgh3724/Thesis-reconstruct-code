@@ -6,7 +6,7 @@ import re
 
 QUEUE_MAX_SIZE = 10
 MAX_RETRY = 3  # Maximum number of retries if no ACK is received
-TIMEOUT_MS = 1000  # Timeout for waiting for ACK (1000ms = 1 second)
+TIMEOUT_MS = 2000  # Timeout for waiting for ACK (1000ms = 1 second)
 
 class Message:
     def __init__(self, message, retryCount=0) -> None:
@@ -89,18 +89,21 @@ class WriteSerialObject(threading.Thread):
 
     def addMessage(self, message: 'Message'):
         # Only add message to the queue if it's not full and is different from the last sent message
-        if not self.messageQueue.full():
-            if not self.lastSentMessage.compareMessage(message):
-                if (message.getMessage() in self.stop_signals):
-                    if self.stop_signals[message.getMessage()] == 0:
-                        print(f"PUTTING STOP SIGNAL ONCE: {message.getMessage()}")
-                        self.instantSend(message)
-                        self.lockStopSignal(message.getMessage())
-                else: 
-                    self.messageQueue.put(message)
-                    print(f"MESSAGE ADDED: {message.getMessage()}")
-        else:
-            print("Queue is full, unable to add message")
+        if (message.getMessage() in self.stop_signals):
+            if self.stop_signals[message.getMessage()] == 0:
+                print(f"PUTTING STOP SIGNAL ONCE: {message.getMessage()}")
+                self.instantSend(message)
+                self.lockStopSignal(message.getMessage())
+        else: 
+            if not self.messageQueue.full():
+                if not any(msg.compareMessage(message) for msg in self.messageQueue.queue):
+                    if not self.lastSentMessage.compareMessage(message):
+                        self.messageQueue.put(message)
+                        print(f"MESSAGE ADDED: {message.getMessage()}")
+            else:
+                print("Queue is full, unable to add message")
+                self.messageQueue.get()
+                self.messageQueue.put(message)
 
     def stop(self):
         self.isRunning = False
