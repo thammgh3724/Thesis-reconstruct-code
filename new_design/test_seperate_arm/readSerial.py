@@ -32,7 +32,6 @@ class ReadSerialObject(threading.Thread):
         # ack_messages = ["!I#", "!AH#", "!AS#", "!SS#", "!M#", "!A#", "!HA#", "!S#", "!X#"]
         
         if data.startswith("!"):
-            self.ack_event.set()
             print(f"Data received: {data}")
         elif data.startswith("@"):
             with self.ack_lock:

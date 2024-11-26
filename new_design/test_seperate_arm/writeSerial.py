@@ -136,10 +136,6 @@ class WriteSerialObject(threading.Thread):
 
     def checkACK(self):
         with self.ack_lock:
-            if (self.ack_data[0].startswith("!")):
-                self.ack_data[0] = ""
-                return True
-
             for last_char in self.message_ack_map:
                 if (self.lastSentMessage.message.endswith(last_char) and self.ack_data[0] == self.message_ack_map[last_char] ):
                     self.ack_data[0] = ""

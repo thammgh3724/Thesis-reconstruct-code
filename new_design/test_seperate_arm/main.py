@@ -135,8 +135,8 @@ def main():
                         write_serial.resetStopCounter("!0:0:0:0:0:0M#")
                         message = Message(format_gamepad_message(buffer, "M"))
                         start_time = time.time()  # Start the timer when sending message
-                        if (write_serial.getQueueSize() != 0):
-                            write_serial.clearQueue()
+                        # if (write_serial.getQueueSize() != 0):
+                        #     write_serial.clearQueue()
                         write_serial.addMessage(message)
                         # Log time after receiving ACK
                         log_ack_time(start_time, "Gamepad message")
