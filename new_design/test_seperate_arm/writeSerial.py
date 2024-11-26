@@ -145,7 +145,6 @@ class WriteSerialObject(threading.Thread):
                 if not self.lastSentMessage.compareMessage(currentMessage):
                     # Send the message
                     self.sendMessageToSerialLine(currentMessage)
-                    self.lastSentMessage = copy.deepcopy(currentMessage)
                     
                     # Wait for ACK within TIMEOUT_MS
                     ack_received = self.ack_event.wait(timeout=TIMEOUT_MS / 1000.0)
@@ -166,6 +165,7 @@ class WriteSerialObject(threading.Thread):
                         if self.checkACK():
                             print(f"SUCCESSFULL CASE: VALID ACK FOR {currentMessage.getMessage()}")
                             self.messageQueue.get()
+                            self.lastSentMessage = copy.deepcopy(currentMessage)
                             self.ack_event.clear()  # Clear ACK status for the next message
                         else: 
                             print("CASE 2: WRONG ACK RECEIVED")
