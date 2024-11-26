@@ -124,6 +124,9 @@ class WriteSerialObject(threading.Thread):
             if self.isStopSignalLocked(message.getMessage()):
                 self.sendMessageToSerialLine(message)
                 self.lastSentMessage = copy.deepcopy(message)
+        else: 
+            self.sendMessageToSerialLine(message)
+            self.lastSentMessage = copy.deepcopy(message)
 
         self.clearQueue()
         self.pause.set()
@@ -167,6 +170,7 @@ class WriteSerialObject(threading.Thread):
                         if currentMessage.excessCall(MAX_RETRY):
                             print(f"Failed to send message after {MAX_RETRY} retries, dropping message")
                             self.messageQueue.get()  # Remove the message after too many retries
+                            self.lastSentMessage = Message("!#")
                         else:
                             print(f"Retrying to send message: {currentMessage.getMessage()}")
                     else:
@@ -183,9 +187,9 @@ class WriteSerialObject(threading.Thread):
                             if currentMessage.excessCall(MAX_RETRY):
                                 print(f"Failed to send message after {MAX_RETRY} retries, dropping message")
                                 self.messageQueue.get()  # Remove the message after too many retries
+                                self.lastSentMessage = Message("!#")
                             else:
                                 print(f"Retrying to send message: {currentMessage.getMessage()}")
-
                 else:
                     # If the message is a duplicate, just remove it from the queue
                     self.messageQueue.get()
