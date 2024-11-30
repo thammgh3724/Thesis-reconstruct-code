@@ -64,7 +64,7 @@ void setup() {
   // Setup for Gripper
   mySystem.gripper_setup(); 
 
-  Serial.begin(115200);
+  mySystem.communicate_setup();
 }
 
 // Main function go here

@@ -12,6 +12,7 @@ System::System(){
     this->gripper = new Gripper(); 
     this->listener = new Listener();
     this->sender = new Sender();
+    this->timer_sendStatus = new Timer();
     for (int i = 0; i < 6; ++i){
         this->timer_arm[i] = new Timer();  
     }
@@ -30,6 +31,11 @@ System::~System(){
     delete this->timer_slider;
 }
 
+void System::communicate_setup(){
+    Serial.begin(115200);
+    this->timer_sendStatus->setLoopAction(this->TIME_SEND_STATUS, micros());
+}
+
 void System::gripper_setup() {
     this->gripper->setupGripper(); 
 }
@@ -39,6 +45,71 @@ void System::communicate(){
     this->nextAction = this->listener->parseCommandToAction(); // if command ready -> read cmd and return action need to do 
     this->distributeAction(); // consume command (get needed data and reset cmd to "") and distribute action to the right object 
     // and send ACK here
+    if(this->timer_sendStatus->checkTimeoutAction()) {
+        this->sendSystemStatus();
+    }
+}
+
+void System::sendSystemStatus() {
+    // send arm status
+    switch (this->arm->getCurrentState())
+    {
+    case INIT:
+        this->sender->sendSystemStatus("$AINIT#");
+        break;
+    case MANUAL_MOVING:
+        this->sender->sendSystemStatus("$AMOVING#");
+        break;
+    case GENERAL_AUTO_MOVING:
+        this->sender->sendSystemStatus("$AMOVING#");
+        break;
+    case DETECT_HAND_AUTO_MOVING:
+        this->sender->sendSystemStatus("$AMOVING#");
+        break;
+    case STOP:
+        this->sender->sendSystemStatus("$ASTOP#");
+        break;
+    default:
+        break;
+    }
+
+    // send slider status
+    switch (this->slider1->getCurrentState())
+    {
+    case INIT:
+        this->sender->sendSystemStatus("$SINIT#");
+        break;
+    case HOME:
+        this->sender->sendSystemStatus("$SHOME#");
+        break;
+    case MANUAL_MOVING:
+        this->sender->sendSystemStatus("$SMOVING#");
+        break;
+    case GENERAL_AUTO_MOVING:
+        this->sender->sendSystemStatus("$SMOVING#");
+        break;
+    case STOP:
+        this->sender->sendSystemStatus("$SSTOP#");
+        break;
+    default:
+        break;
+    }
+
+    //send gripper status
+    switch(this->gripper->getCurrentState()) 
+    {
+    case INIT:
+        this->sender->sendSystemStatus("$GINIT#");
+        break; 
+    case MANUAL_MOVING:
+        this->sender->sendSystemStatus("$GMOVING#");
+        break; 
+    case STOP:
+        this->sender->sendSystemStatus("$GSTOP#");
+        break;
+    default:
+        break;
+    }
 }
 
 void System::arm_fsm(){
@@ -51,7 +122,7 @@ void System::arm_fsm(){
             this->nextArmAction == ARM_STOP_ACTION;
             this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
-            this->sender->sendData("$MD#"); // send when move done. TODO : create a queue and implement stop and wait 
+            this->sender->sendSystemStatus("$ASTOP#");
             #ifdef DEBUG
             this->sender->sendData("!GO STATE STOP");
             #endif
@@ -65,6 +136,7 @@ void System::arm_fsm(){
                 this->arm->updateCurrentPosition();
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
+                this->sender->sendSystemStatus("$ASTOP#");
                 #ifdef DEBUG
                 this->arm->printCurrentJoint();
                 this->sender->sendData("!GO STATE STOP");
@@ -82,6 +154,7 @@ void System::arm_fsm(){
         else if(this->nextArmAction == ARM_STOP_ACTION){
             this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
+            this->sender->sendSystemStatus("$ASTOP#");
             #ifdef DEBUG
             this->sender->sendData("!GO STATE STOP");
             #endif
@@ -96,7 +169,7 @@ void System::arm_fsm(){
                 this->arm->updateCurrentPosition();
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
-                this->sender->sendData("$MD#"); // send when move done. TODO : create a queue and implement stop and wait 
+                this->sender->sendSystemStatus("$ASTOP#");
                 #ifdef DEBUG
                 this->sender->sendData("!GO STATE STOP");
                 #endif
@@ -113,6 +186,7 @@ void System::arm_fsm(){
         else if (this->nextArmAction == ARM_STOP_ACTION){
             this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
+            this->sender->sendSystemStatus("$ASTOP#");
             #ifdef DEBUG
             this->sender->sendData("!STOP");
             #endif
@@ -143,6 +217,7 @@ void System::arm_fsm(){
         else if (this->nextArmAction == ARM_STOP_ACTION){
             this->arm->updateCurrentPosition();
             this->arm->setState(STOP);
+            this->sender->sendSystemStatus("$ASTOP#");
             #ifdef DEBUG
             this->sender->sendData("!STOP");
             #endif
@@ -233,7 +308,7 @@ void System::arm_fsm(){
                 this->arm->updateCurrentPosition();
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
-                this->sender->sendData("$MD#"); // send when move done. TODO : create a queue and implement stop and wait 
+                this->sender->sendSystemStatus("$ASTOP#");
                 #ifdef DEBUG
                 this->arm->printCurrentPos();
                 this->sender->sendData("!GO STATE STOP");
@@ -409,7 +484,9 @@ void System::gripper_fsm() {
         }
         break; 
     case STOP:
-        break; 
+        break;
+    default:
+        break;
     }
 }
 

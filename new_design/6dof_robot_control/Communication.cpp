@@ -216,6 +216,16 @@ void Listener::readData() {
 }
 
 //*************************************//
+
+// MessageQueue::MessageQueue(){
+//   for(int i = 0; i < this->QUEUE_SIZE, i++){
+//     this->queue[i] = "";
+//   }
+// };
+
+// MessageQueue::~MessageQueue(){}
+
+//*************************************//
 Sender::Sender(){};
 Sender::~Sender(){};
 
@@ -225,4 +235,8 @@ void Sender::sendData(String data){
 
 void Sender::sendACK(String ack){
   Serial.println(ack);
+}
+
+void Sender::sendSystemStatus(String status){
+  Serial.println(status);
 }

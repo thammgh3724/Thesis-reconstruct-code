@@ -21,15 +21,20 @@ class System {
         Gripper* gripper; 
         Listener* listener;
         Sender* sender;
+        Timer* timer_sendStatus;
         Timer* timer_arm[6]; // 6 timer for arm to take loop action for 6 joint
                              // can creat more
         Timer* timer_slider;
         Timer* timer_gripper; 
 
+        const int TIME_SEND_STATUS = 1000000; //1s
+
     public:
         System();
         ~System();
+        void communicate_setup();
         void communicate();
+        void sendSystemStatus();
         void arm_fsm();
         void slider_fsm();
         void gripper_fsm(); 

@@ -6,9 +6,6 @@
 
 #define NUM_BYTES_BUFFER    (6 * sizeof(double))
 
-#define NUMBER_MANUAL_STEP_ACCELERATE 10 // define 6 number for 6 joint
-#define NUMBER_MANUAL_STEP_DECELERATE 20
-
 
 Arm::Arm(){
   this->state = INIT;
@@ -252,7 +249,7 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
   if ( (input[i] >= 0.9) && (input[i] <= 1.1) && (this->joint[i] + this->DL[i]/2.0 <= MAX_JOINT_ANGLE[i])) {
     this->jointManualMoveDone[i] = false;
     // set new timeout
-    if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
+    if(this->numberStepDoneAccelerate_manual[i] < this->NUMBER_MANUAL_STEP_ACCELERATE[i]) {
       // acceleration
       if(timeout - incValue > 100.0) timeout = timeout - incValue;
       this->numberStepDoneAccelerate_manual[i] = this->numberStepDoneAccelerate_manual[i] + 0.5;
@@ -277,7 +274,7 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
   else if ( (input[i] >= 1.9) && (input[i] <= 2.1) && (this->joint[i] - this->DL[i]/2.0 >= MIN_JOINT_ANGLE[i])) {
     this->jointManualMoveDone[i] = false;
     // set new timeout
-    if(this->numberStepDoneAccelerate_manual[i] < NUMBER_MANUAL_STEP_ACCELERATE) {
+    if(this->numberStepDoneAccelerate_manual[i] < this->NUMBER_MANUAL_STEP_ACCELERATE[i]) {
       // acceleration
       if(timeout - incValue > 100.0) timeout = timeout - incValue;
       this->numberStepDoneAccelerate_manual[i] = this->numberStepDoneAccelerate_manual[i] + 0.5;
@@ -299,7 +296,7 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
     }
     this->joint[i] = this->joint[i] - this->DL[i]/2.0;
   }
-  else if ((this->numberStepDoneAccelerate_manual[i] > 0.1) && (input[i] < 0.1) && (this->numberStepDoneDecelerate_manual[i] < NUMBER_MANUAL_STEP_DECELERATE) ) {
+  else if ((this->numberStepDoneAccelerate_manual[i] > 0.1) && (input[i] < 0.1) && (this->numberStepDoneDecelerate_manual[i] < this->NUMBER_MANUAL_STEP_DECELERATE[i]) ) {
     this->jointManualMoveDone[i] = false;
     // deceleration
     if(timeout + incValue < 6000.0) timeout = timeout + incValue;
