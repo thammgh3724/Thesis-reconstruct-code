@@ -44,12 +44,13 @@
 #define PUMP_PIN  63
 
 // Define global state
-#define INIT 0
-#define HOME 1
-#define MANUAL_MOVING 2 
-#define GENERAL_AUTO_MOVING 3
-#define STOP 4
+#define INIT                    0
+#define HOME                    1
+#define MANUAL_MOVING           2 
+#define GENERAL_AUTO_MOVING     3
+#define STOP                    4
 #define DETECT_HAND_AUTO_MOVING 5
+#define CLASSIFY_AUTO_MOVING    6
 
 // Define action to do
 #define NO_ACTION                               0
@@ -58,6 +59,10 @@
 #define ARM_GOHOME_ACTION                       3
 #define ARM_AUTO_MOVE_POSITION_ACTION           4
 #define ARM_AUTO_MOVE_DETECT_HAND_ACTION        5
+#define INIT_CLASSIFY_ACTION                    20 // arm go home, slider go around and gripper open
+#define AUTO_MOVE_CLASSIFY_ACTION               18 // arm ready to pick up and gripper open
+#define ARM_AUTO_MOVE_CLASSIFY_ACTION           19 // arm pick up then go home -> slider go to the box position -> arm drop then go home -> slider back to previous position
+#define ARM_GOHOME_CLASSIFY_ACTION              21
 #define ARM_MANUAL_MOVE_DISTANCE_ACTION         6
 #define SLIDER_MANUAL_MOVE_DISTANCE_ACTION      7
 #define SLIDER_AUTO_MOVE_FREE_ACTION            8
@@ -66,6 +71,7 @@
 #define SLIDER_INIT_ACTION                      12
 #define SLIDER_AUTO_MOVE_DETECT_HAND_ACTION     13
 #define SLIDER_AUTO_MOVE_POSITION_ACTION        14
+#define SLIDER_AUTO_MOVE_CLASSIFY_ACTION        22
 #define ARM_STOP_ACTION                         9
 #define SLIDER_STOP_ACTION                      16
 #define SLIDER_GOHOME_ACTION                    17

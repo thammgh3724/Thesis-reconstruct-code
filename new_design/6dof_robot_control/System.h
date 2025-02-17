@@ -27,7 +27,7 @@ class System {
         Timer* timer_slider;
         Timer* timer_gripper; 
 
-        const int TIME_SEND_STATUS = 1000000; //1s
+        const int TIME_SEND_STATUS = 1000000000; //1s
 
     public:
         System();

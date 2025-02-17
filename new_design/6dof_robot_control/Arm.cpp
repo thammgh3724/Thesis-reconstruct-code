@@ -492,6 +492,20 @@ void Arm::calculateLengthwiseNextJoint_detectHand(){
   this->nextJoint[4] = this->joint[4] + angleJ2Move + angleJ3Move;
 }
 
+void Arm::calculateNextPosition_classify(double* model_data){
+  for (int i = 0; i < 6; i++) 
+  {
+      this->nextPosition[i] = this->position[i]; 
+  }
+  // caculate new position
+  this->nextPosition[0] = this->nextPosition[0] + ( (-81.0/212.0)*(model_data[0]-320.0) );
+  this->nextPosition[1] = this->nextPosition[1] + ( (-75.0/75.0)*(model_data[1]-240.0) );
+  this->nextPosition[2] = 60;
+}
+void Arm::calculateNextJoint_classify(){
+  InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
+}
+
 // void Arm::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin){
 //   this->sender->sendData("!Start Calculate new Position");
 //   double Jcurr[6]; // tmp for this->currJoint;

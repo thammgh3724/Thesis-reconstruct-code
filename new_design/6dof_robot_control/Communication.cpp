@@ -48,6 +48,7 @@ void Listener::consumeCommand(int action, double* output){
     break; 
   case ARM_GOHOME_ACTION:
     break;
+
   case ARM_MANUAL_MOVE_DISTANCE_ACTION:
     // get data move arm from gamepad
     for (int i = 0; i < 6; i++) 
@@ -57,6 +58,7 @@ void Listener::consumeCommand(int action, double* output){
     commandLength = this->command.length(); 
     getDoubleArrayData(output, 6, commandLength, 'M');
     break;
+
   case ARM_AUTO_MOVE_POSITION_ACTION:
     // get new arm position
     for (int i = 0; i < 6; i++) 
@@ -66,6 +68,7 @@ void Listener::consumeCommand(int action, double* output){
     commandLength = this->command.length(); 
     getDoubleArrayData(output, 6, commandLength, 'A');
     break;
+
   case ARM_AUTO_MOVE_DETECT_HAND_ACTION:
     // get data of distance from model detect hand
     for (int i = 0; i < 2; i++) 
@@ -75,6 +78,20 @@ void Listener::consumeCommand(int action, double* output){
     commandLength = this->command.length(); 
     getDoubleArrayData(output, 2, commandLength, 'H');
     break;
+
+  case INIT_CLASSIFY_ACTION:
+    break;
+
+  case ARM_AUTO_MOVE_CLASSIFY_ACTION:
+    // get data of distance from model detect hand
+    for (int i = 0; i < 2; i++) 
+    {
+        output[i] = 0.0; 
+    }
+    commandLength = this->command.length(); 
+    getDoubleArrayData(output, 2, commandLength, 'C');
+    break;
+
   case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
     // get data move arm from gamepad
     for (int i = 0; i < 1; i++) 
@@ -84,6 +101,7 @@ void Listener::consumeCommand(int action, double* output){
     commandLength = this->command.length(); 
     getDoubleArrayData(output, 1, commandLength, 'S');
     break;
+
   case GRIPPER_MANUAL_MOVE_ACTION: 
     for (int i = 0; i < 2; i++) 
     {
@@ -92,6 +110,7 @@ void Listener::consumeCommand(int action, double* output){
     commandLength = this->command.length(); 
     getDoubleArrayData(output, 2, commandLength, 'G');
     break;
+
   case SLIDER_AUTO_MOVE_FREE_ACTION:
     for (int i = 0; i < 1; i++) 
     {
@@ -99,6 +118,9 @@ void Listener::consumeCommand(int action, double* output){
     }
     commandLength = this->command.length(); 
     getDoubleArrayData(output, 1, commandLength, 'X');
+    break;
+
+  case SLIDER_AUTO_MOVE_CLASSIFY_ACTION:
     break;
   case ARM_STOP_ACTION:
     break;
@@ -144,6 +166,13 @@ int Listener::parseCommandToAction(){ // need 1 command "STOP"
     // !0:0H#
     else if(this->command.endsWith("H")){
       return ARM_AUTO_MOVE_DETECT_HAND_ACTION;
+    }
+    else if( this->command == "classify"){
+      return INIT_CLASSIFY_ACTION;
+    }
+    // !0:0C#
+    else if(this->command.endsWith("C")){
+      return AUTO_MOVE_CLASSIFY_ACTION;
     }
     // !0:0:0:0:0:0M#
     else if(this->command.endsWith("M")){

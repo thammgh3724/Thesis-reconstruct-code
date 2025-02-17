@@ -163,7 +163,7 @@ void System::arm_fsm(){
         }
         break;
     case GENERAL_AUTO_MOVING:
-        if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION || this->nextArmAction == ARM_GOHOME_ACTION)
+        if (this->nextArmAction == ARM_AUTO_MOVE_POSITION_ACTION || this->nextArmAction == ARM_GOHOME_ACTION || this->nextArmAction == ARM_GOHOME_CLASSIFY_ACTION)
         {
             if(this->arm->isAutoMoveDone()) {
                 this->arm->updateCurrentPosition();
@@ -225,6 +225,37 @@ void System::arm_fsm(){
         else{
         }
         break;
+    case CLASSIFY_AUTO_MOVING:
+        if (this->nextArmAction == ARM_AUTO_MOVE_CLASSIFY_ACTION)
+        {
+            if(this->arm->isAutoMoveDone()) {
+                this->arm->updateCurrentPosition();
+                this->nextArmAction = ARM_STOP_ACTION;
+                this->arm->setState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!GO STATE STOP");
+                #endif
+            }
+            else {
+                this->arm->setState(CLASSIFY_AUTO_MOVING);
+                for(int i = 0; i < 6; i++){
+                    if(this->timer_arm[i]->checkTimeoutAction()) {
+                        this->arm->generalAutoMove(i, this->timer_arm[i]->timeout);
+                    }
+                }
+            }
+        }
+        else if (this->nextArmAction == ARM_STOP_ACTION){
+            this->arm->updateCurrentPosition();
+            this->arm->setState(STOP);
+            this->sender->sendSystemStatus("$ASTOP#");
+            #ifdef DEBUG
+            this->sender->sendData("!STOP");
+            #endif
+        }
+        else{
+        }
+        break;
     case STOP:
         // waiting new action
         if (this->nextArmAction == ARM_GOHOME_ACTION){
@@ -257,6 +288,16 @@ void System::arm_fsm(){
                 }
                 #ifdef DEBUG
                 this->sender->sendData("!GO AUTO POSITION");
+                #endif
+            }
+            else {
+                this->arm->updateCurrentPosition();
+                this->nextArmAction = ARM_STOP_ACTION;
+                this->arm->setState(STOP);
+                this->sender->sendSystemStatus("$ASTOP#");
+                #ifdef DEBUG
+                this->arm->printCurrentJoint();
+                this->sender->sendData("!GO STATE STOP");
                 #endif
             }
         }
@@ -311,6 +352,50 @@ void System::arm_fsm(){
                 this->sender->sendSystemStatus("$ASTOP#");
                 #ifdef DEBUG
                 this->arm->printCurrentPos();
+                this->sender->sendData("!GO STATE STOP");
+                #endif
+            }
+        }
+        else if (this->nextArmAction == ARM_GOHOME_CLASSIFY_ACTION){
+            this->arm->setNextPosition(this->arm->home_classify_position);
+            this->arm->setNextJoint(this->arm->home_classify_joint);
+            this->arm->calculateTotalSteps();
+            double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+            this->arm->setNumberStepDone(initNumberStepsDone);
+            this->arm->initjointAutoMoveDone();
+            this->arm->setState(GENERAL_AUTO_MOVING);
+            for(int i = 0; i < 6; i++){
+                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+            }
+            #ifdef DEBUG
+            this->sender->sendData("!GO HOME CLASSIFY");
+            #endif
+        }
+        else if (this->nextArmAction == ARM_AUTO_MOVE_CLASSIFY_ACTION){
+            this->arm->calculateNextPosition_classify(this->model_data);
+            this->arm->calculateNextJoint_classify();
+            if(this->arm->validateNextJoint() == 0){
+                #ifdef DEBUG
+                this->sender->sendData("!GO CLASSIFY");
+                this->arm->printNextJoint();
+                #endif
+                //can move
+                this->arm->calculateTotalSteps();
+                double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                this->arm->setNumberStepDone(initNumberStepsDone);
+                this->arm->initjointAutoMoveDone();
+                this->arm->setState(CLASSIFY_AUTO_MOVING);
+                for(int i = 0; i < 6; i++){
+                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                }
+            }
+            else {
+                this->arm->updateCurrentPosition();
+                this->nextArmAction = ARM_STOP_ACTION;
+                this->arm->setState(STOP);
+                this->sender->sendSystemStatus("$ASTOP#");
+                #ifdef DEBUG
+                this->arm->printCurrentJoint();
                 this->sender->sendData("!GO STATE STOP");
                 #endif
             }
@@ -556,6 +641,25 @@ void System::distributeAction(){ // send ACK here
         this->arm->isHorizontalMove = true;
         this->arm->isLengthwiseMove = true;
         this->sender->sendACK("@HA#");
+        this->nextAction = NO_ACTION;
+        break;
+    case INIT_CLASSIFY_ACTION:
+        this->nextArmAction = ARM_GOHOME_CLASSIFY_ACTION;
+        this->nextSliderAction = SLIDER_AUTO_MOVE_CLASSIFY_ACTION;
+        this->nextGripperAction = GRIPPER_OPEN;
+        this->listener->consumeCommand(ARM_GOHOME_CLASSIFY_ACTION, nullptr);
+        this->listener->consumeCommand(SLIDER_AUTO_MOVE_CLASSIFY_ACTION, nullptr);
+        this->listener->consumeCommand(GRIPPER_OPEN, nullptr);
+        this->gripper->setCurrentState(MANUAL_MOVING); 
+        this->sender->sendACK("@C#");
+        this->nextAction = NO_ACTION;
+        break;
+    case AUTO_MOVE_CLASSIFY_ACTION:
+        this->nextArmAction = ARM_AUTO_MOVE_CLASSIFY_ACTION;
+        this->nextGripperAction = GRIPPER_OPEN; 
+        this->listener->consumeCommand(ARM_AUTO_MOVE_CLASSIFY_ACTION, this->model_data);
+        this->gripper->setCurrentState(MANUAL_MOVING); 
+        this->sender->sendACK("@C#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
