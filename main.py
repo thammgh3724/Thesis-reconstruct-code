@@ -77,6 +77,8 @@ def main():
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
+                if gamepad_handler.classify == True:
+                    gamepad_handler.classify = False
                 if hand_detect_started:
                     hand_detect_handler.pause()
                     hand_detect_started = False
@@ -172,6 +174,8 @@ def main():
                 if (write_serial.getQueueSize != 0 and gamepad_handler.getModeChanged()):
                     gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
+                if gamepad_handler.classify == True:
+                    gamepad_handler.classify = False
                 if not gamepad_handler.isGoHome:
                     # home_serial.addMessage(Message("!agohome#"))
                     write_serial.addMessage(Message("!agohome#"))
@@ -212,9 +216,9 @@ def main():
             elif mode == "auto":
                 # TODO: Add auto mode logic here: Detect fruit
                 # Placeholder for auto mode command
-                if not gamepad_handler.isGoHome:
+                if not gamepad_handler.classify:
                     write_serial.addMessage(Message("!classify#"))
-                    gamepad_handler.isGoHome = True
+                    gamepad_handler.classify  = True
                     while True:
                         if ack_event.is_set():
                             print("GOHOME ACK received: AH!#")
