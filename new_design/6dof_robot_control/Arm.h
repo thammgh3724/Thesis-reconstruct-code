@@ -24,8 +24,8 @@ class Arm {
         const double home_position[6] = {192.5, 0.0, 269.0, 0.0, 90.0, 0.0};
         const double home_joint[6] = {0.0, 0.0, 0.0, 180.0, 0.0, 0.0};
 
-        const double home_classify_position[6] = {164.5, 0.0, 241.0, 90.0, 180.0, -90.0};
-        const double home_classify_joint[6] = {0.0, 0.0, 0.0, 0.0, 90.0, 0.0}; //ckeck later
+        const double home_classify_position[6] = {164.5, 0.0, 241.0, 180.0, 180.0, 180.0};//ckeck later
+        const double home_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};
 
         const int NUMBER_MANUAL_STEP_ACCELERATE[6] = {10, 10, 10, 10, 10, 10};
         const int NUMBER_MANUAL_STEP_DECELERATE[6] = {20, 20, 20, 20, 20, 20};

@@ -138,8 +138,8 @@ void System::arm_fsm(){
                 this->arm->setState(STOP);
                 this->sender->sendSystemStatus("$ASTOP#");
                 #ifdef DEBUG
-                this->arm->printCurrentJoint();
-                this->sender->sendData("!GO STATE STOP");
+                this->arm->printCurrentPos();
+                // this->sender->sendData("!GO STATE STOP");
                 #endif
             }
             else {
@@ -171,6 +171,7 @@ void System::arm_fsm(){
                 this->arm->setState(STOP);
                 this->sender->sendSystemStatus("$ASTOP#");
                 #ifdef DEBUG
+                this->arm->printCurrentPos();
                 this->sender->sendData("!GO STATE STOP");
                 #endif
             }
