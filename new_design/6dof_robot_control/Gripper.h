@@ -18,10 +18,14 @@ class Gripper {
     const float MIN_ANGLE = 90.0;
 
   public:
+    const unsigned long MOVING_TIME = 500000; // 0.5s
+
+  public:
     Gripper();  
     void setupGripper();     
     void initGripper();  
-    float getCurrentAngle();      
+    float getCurrentAngle();
+    void setCurrentAngle(float angle); 
     void moveGripper(double* input); 
     int getCurrentState(); 
     void setCurrentState(int state);

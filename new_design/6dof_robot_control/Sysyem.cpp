@@ -17,6 +17,7 @@ System::System(){
         this->timer_arm[i] = new Timer();  
     }
     this->timer_slider = new Timer();
+    this->timer_gripper = new Timer();
 }
 
 System::~System(){
@@ -29,6 +30,7 @@ System::~System(){
         delete this->timer_arm[i];  
     }
     delete this->timer_slider;
+    delete this->timer_gripper;
 }
 
 void System::communicate_setup(){
@@ -231,9 +233,10 @@ void System::arm_fsm(){
         {
             if(this->arm->isAutoMoveDone()) {
                 this->arm->updateCurrentPosition();
-                this->nextArmAction = ARM_STOP_ACTION;
+                this->nextArmAction = ARM_AUTO_MOVE_CLASSIFY_ACTION;
                 this->arm->setState(STOP);
                 #ifdef DEBUG
+                this->arm->printCurrentJoint();
                 this->sender->sendData("!GO STATE STOP");
                 #endif
             }
@@ -373,30 +376,99 @@ void System::arm_fsm(){
             #endif
         }
         else if (this->nextArmAction == ARM_AUTO_MOVE_CLASSIFY_ACTION){
-            this->arm->calculateNextPosition_classify(this->model_data);
-            this->arm->calculateNextJoint_classify();
-            if(this->arm->validateNextJoint() == 0){
-                #ifdef DEBUG
-                this->sender->sendData("!GO CLASSIFY");
-                this->arm->printNextJoint();
-                #endif
-                //can move
-                this->arm->calculateTotalSteps();
-                double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-                this->arm->setNumberStepDone(initNumberStepsDone);
-                this->arm->initjointAutoMoveDone();
-                this->arm->setState(CLASSIFY_AUTO_MOVING);
-                for(int i = 0; i < 6; i++){
-                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+            if(this->arm->isPickingMove){
+                if ( ((this->gripper->getCurrentAngle() - 180.0) < -0.1) || ((this->gripper->getCurrentAngle() - 180.0) > 0.1)) {
+                    this->nextGripperAction = GRIPPER_OPEN;   
+                }
+                // wait gripper open
+                else {
+                    this->arm->calculateNextPosition_classify(this->model_data);
+                    this->arm->calculateNextJoint_classify();
+                    if(this->arm->validateNextJoint() == 0){
+                        #ifdef DEBUG
+                        this->sender->sendData("!GO CLASSIFY");
+                        this->arm->printNextJoint();
+                        #endif
+                        //can move
+                        this->arm->calculateTotalSteps();
+                        double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                        this->arm->setNumberStepDone(initNumberStepsDone);
+                        this->arm->initjointAutoMoveDone();
+                        this->arm->setState(CLASSIFY_AUTO_MOVING);
+                        for(int i = 0; i < 6; i++){
+                            this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                        }
+                        this->arm->isPickingMove = false;
+                    }
+                    else {
+                        this->arm->isHomeMove = true;
+                        this->arm->isPickingMove = true;
+                        this->arm->isDroppingMove = true;
+                        this->arm->updateCurrentPosition();
+                        this->nextArmAction = ARM_STOP_ACTION;
+                        this->arm->setState(STOP);
+                        this->sender->sendSystemStatus("$ASTOP#");
+                        #ifdef DEBUG
+                        this->arm->printCurrentJoint();
+                        this->sender->sendData("!GO STATE STOP");
+                        #endif
+                    }
+                }
+            }
+            else if (this->arm->isDroppingMove) {
+                if ( ((this->gripper->getCurrentAngle() - 100.0) < -0.1) ||  ((this->gripper->getCurrentAngle() - 100.0) > 0.1)) {
+                    this->nextGripperAction = GRIPPER_CLOSE;   
+                }
+                // wait gripper close
+                else {
+                    this->arm->setNextPosition(this->arm->box1_classify_position);
+                    this->arm->calculateNextJoint();
+                    this->arm->calculateTotalSteps();
+                    double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                    this->arm->setNumberStepDone(initNumberStepsDone);
+                    this->arm->initjointAutoMoveDone();
+                    this->arm->setState(CLASSIFY_AUTO_MOVING);
+                    for(int i = 0; i < 6; i++){
+                        this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                    }
+                    this->arm->isDroppingMove = false;
+                    #ifdef DEBUG
+                    this->sender->sendData("!GO BOX1 CLASSIFY");
+                    #endif
+                }
+            }
+            else if (this->arm->isHomeMove) {
+                if ( ((this->gripper->getCurrentAngle() - 180.0) < -0.1) || ((this->gripper->getCurrentAngle() - 180.0) > 0.1)) {
+                    this->nextGripperAction = GRIPPER_OPEN;   
+                }
+                // wait gripper open
+                else {
+                    this->arm->setNextPosition(this->arm->home_classify_position);
+                    this->arm->setNextJoint(this->arm->home_classify_joint);
+                    this->arm->calculateTotalSteps();
+                    double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                    this->arm->setNumberStepDone(initNumberStepsDone);
+                    this->arm->initjointAutoMoveDone();
+                    this->arm->setState(CLASSIFY_AUTO_MOVING);
+                    for(int i = 0; i < 6; i++){
+                        this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                    }
+                    this->arm->isHomeMove = false;
+                    #ifdef DEBUG
+                    this->sender->sendData("!GO HOME CLASSIFY");
+                    #endif
                 }
             }
             else {
+                this->arm->isHomeMove = true;
+                this->arm->isPickingMove = true;
+                this->arm->isDroppingMove = true;
                 this->arm->updateCurrentPosition();
                 this->nextArmAction = ARM_STOP_ACTION;
                 this->arm->setState(STOP);
                 this->sender->sendSystemStatus("$ASTOP#");
                 #ifdef DEBUG
-                this->arm->printCurrentJoint();
+                this->arm->printCurrentPos();
                 this->sender->sendData("!GO STATE STOP");
                 #endif
             }
@@ -434,6 +506,7 @@ void System::slider_fsm(){
             String tmp_str = "!RETURN COUNT :" + String(tmp); // may crash
             this->sender->sendData(tmp_str);
             #endif
+            this->nextSliderAction == SLIDER_STOP_ACTION;
             this->slider1->setState(HOME);
         }
         else{
@@ -552,24 +625,61 @@ void System::gripper_fsm() {
             #endif
         }
         break; 
-    case MANUAL_MOVING:
+    // case MANUAL_MOVING:
+    //     if (this->nextGripperAction == GRIPPER_OPEN) {
+    //         this->gripper->gripperOpen(); 
+    //         this->nextGripperAction = GRIPPER_STOP_ACTION; 
+    //         this->gripper->setCurrentState(STOP); 
+    //         #ifdef DEBUG
+    //         this->sender->sendData("!GRIPPER MOVE DONE");
+    //         #endif
+    //     } else if (this->nextGripperAction == GRIPPER_CLOSE) {
+    //         this->gripper->gripperClose(); 
+    //         this->nextGripperAction = GRIPPER_STOP_ACTION; 
+    //         this->gripper->setCurrentState(STOP); 
+    //         #ifdef DEBUG
+    //         this->sender->sendData("!GRIPPER MOVE DONE");
+    //         #endif
+    //     }
+    //     break; 
+    case GRIPPER_MOVING:
+        if (this->nextGripperAction == GRIPPER_OPEN) {   
+            this->gripper->gripperOpen();
+            if (this->timer_gripper->checkTimeoutAction()){
+                this->gripper->setCurrentAngle(180.0);
+                this->nextGripperAction = GRIPPER_STOP_ACTION; 
+                this->gripper->setCurrentState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!GRIPPER STOP");
+                #endif
+            }
+
+        } else if (this->nextGripperAction == GRIPPER_CLOSE) {
+            this->gripper->gripperClose();
+            if (this->timer_gripper->checkTimeoutAction()){
+                this->gripper->setCurrentAngle(100.0);
+                this->nextGripperAction = GRIPPER_STOP_ACTION; 
+                this->gripper->setCurrentState(STOP);
+                #ifdef DEBUG
+                this->sender->sendData("!GRIPPER STOP");
+                #endif
+            }
+        }
+        break;
+    case STOP:
         if (this->nextGripperAction == GRIPPER_OPEN) {
-            this->gripper->gripperOpen(); 
-            this->nextGripperAction = GRIPPER_STOP_ACTION; 
-            this->gripper->setCurrentState(STOP); 
+            this->gripper->setCurrentState(GRIPPER_MOVING);
+            this->timer_gripper->setLoopAction(this->gripper->MOVING_TIME, micros());
             #ifdef DEBUG
-            this->sender->sendData("!GRIPPER MOVE DONE");
+            this->sender->sendData("!GRIPPER OPENING");
             #endif
         } else if (this->nextGripperAction == GRIPPER_CLOSE) {
-            this->gripper->gripperClose(); 
-            this->nextGripperAction = GRIPPER_STOP_ACTION; 
-            this->gripper->setCurrentState(STOP); 
+            this->gripper->setCurrentState(GRIPPER_MOVING); 
+            this->timer_gripper->setLoopAction(this->gripper->MOVING_TIME, micros());
             #ifdef DEBUG
-            this->sender->sendData("!GRIPPER MOVE DONE");
+            this->sender->sendData("!GRIPPER CLOSING");
             #endif
         }
-        break; 
-    case STOP:
         break;
     default:
         break;
@@ -619,7 +729,6 @@ void System::distributeAction(){ // send ACK here
         break;
     case GRIPPER_STOP_ACTION:
         this->nextGripperAction = GRIPPER_STOP_ACTION;
-        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_STOP_ACTION,nullptr);
         this->sender->sendACK("@GS#");
         this->nextAction = NO_ACTION;
@@ -651,7 +760,6 @@ void System::distributeAction(){ // send ACK here
         this->listener->consumeCommand(ARM_GOHOME_CLASSIFY_ACTION, nullptr);
         this->listener->consumeCommand(SLIDER_AUTO_MOVE_CLASSIFY_ACTION, nullptr);
         this->listener->consumeCommand(GRIPPER_OPEN, nullptr);
-        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->sender->sendACK("@C#");
         this->nextAction = NO_ACTION;
         break;
@@ -659,7 +767,6 @@ void System::distributeAction(){ // send ACK here
         this->nextArmAction = ARM_AUTO_MOVE_CLASSIFY_ACTION;
         this->nextGripperAction = GRIPPER_OPEN; 
         this->listener->consumeCommand(ARM_AUTO_MOVE_CLASSIFY_ACTION, this->model_data);
-        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->sender->sendACK("@C#");
         this->nextAction = NO_ACTION;
         break;
@@ -678,21 +785,18 @@ void System::distributeAction(){ // send ACK here
     /** GRIPPER CONTROLLER */
     case GRIPPER_MANUAL_MOVE_ACTION: 
         this->nextGripperAction = GRIPPER_MANUAL_MOVE_ACTION; 
-        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_MANUAL_MOVE_ACTION, this->output_gripper); 
         this->sender->sendACK("@GM#"); 
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_OPEN:
         this->nextGripperAction = GRIPPER_OPEN;
-        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_OPEN, nullptr); 
         this->sender->sendACK("@GO#"); 
         this->nextAction = NO_ACTION; 
         break; 
     case GRIPPER_CLOSE:
         this->nextGripperAction = GRIPPER_CLOSE;
-        this->gripper->setCurrentState(MANUAL_MOVING); 
         this->listener->consumeCommand(GRIPPER_CLOSE, nullptr); 
         this->sender->sendACK("@GCLS#"); 
         this->nextAction = NO_ACTION; 

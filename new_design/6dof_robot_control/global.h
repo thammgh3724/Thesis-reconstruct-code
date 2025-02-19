@@ -51,6 +51,7 @@
 #define STOP                    4
 #define DETECT_HAND_AUTO_MOVING 5
 #define CLASSIFY_AUTO_MOVING    6
+#define GRIPPER_MOVING          7
 
 // Define action to do
 #define NO_ACTION                               0

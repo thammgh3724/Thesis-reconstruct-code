@@ -48,6 +48,10 @@ float Gripper::getCurrentAngle() {
   return this->currentAngle; 
 }
 
+void Gripper::setCurrentAngle(float angle) {
+  this->currentAngle = angle;
+}
+
 int Gripper::getCurrentState() {
   return this->currentState;
 }

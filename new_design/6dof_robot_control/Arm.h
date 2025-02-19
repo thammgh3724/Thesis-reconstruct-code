@@ -26,6 +26,8 @@ class Arm {
 
         const double home_classify_position[6] = {164.5, 0.0, 241.0, 180.0, 180.0, 180.0};//ckeck later
         const double home_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};
+        const double box1_classify_position[6] = {100.0, 0.0, 90.0, 180.0, 180.0, 180.0};//ckeck later
+        const double box1_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};//ckeck later
 
         const int NUMBER_MANUAL_STEP_ACCELERATE[6] = {10, 10, 10, 10, 10, 10};
         const int NUMBER_MANUAL_STEP_DECELERATE[6] = {20, 20, 20, 20, 20, 20};
@@ -79,6 +81,10 @@ class Arm {
         // variables for specific use case move
         bool isHorizontalMove = true;
         bool isLengthwiseMove = true;
+
+        bool isHomeMove = true;
+        bool isPickingMove = true;
+        bool isDroppingMove = true;
 
     private:
         // funtions for general move
