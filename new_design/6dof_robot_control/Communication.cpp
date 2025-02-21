@@ -84,12 +84,12 @@ void Listener::consumeCommand(int action, double* output){
 
   case ARM_AUTO_MOVE_CLASSIFY_ACTION:
     // get data of distance from model detect hand
-    for (int i = 0; i < 2; i++) 
+    for (int i = 0; i < 3; i++) 
     {
         output[i] = 0.0; 
     }
     commandLength = this->command.length(); 
-    getDoubleArrayData(output, 2, commandLength, 'C');
+    getDoubleArrayData(output, 3, commandLength, 'C');
     break;
 
   case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:

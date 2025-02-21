@@ -44,7 +44,7 @@ class System {
         // attributes as static variables using for store array
         double gamepad_data[6];
         double nextPosition_data[6];
-        double model_data[2];
+        double model_data[3];
         double output_slider_manual;
         double output_slider_auto;
 

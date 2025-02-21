@@ -421,7 +421,12 @@ void System::arm_fsm(){
                 }
                 // wait gripper close
                 else {
-                    this->arm->setNextPosition(this->arm->box1_classify_position);
+                    if ( ((this->model_data[2] - 0.0) > -0.1) && ((this->model_data[2] - 0.0) < 0.1) ) {
+                        this->arm->setNextPosition(this->arm->box1_classify_position);
+                    }
+                    else if ( ((this->model_data[2] - 1.0) > -0.1) && ((this->model_data[2] - 1.0) < 0.1) ) {
+                        this->arm->setNextPosition(this->arm->box2_classify_position);
+                    }
                     this->arm->calculateNextJoint();
                     this->arm->calculateTotalSteps();
                     double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -760,7 +765,7 @@ void System::distributeAction(){ // send ACK here
         this->listener->consumeCommand(ARM_GOHOME_CLASSIFY_ACTION, nullptr);
         this->listener->consumeCommand(SLIDER_AUTO_MOVE_CLASSIFY_ACTION, nullptr);
         this->listener->consumeCommand(GRIPPER_OPEN, nullptr);
-        this->sender->sendACK("@C#");
+        this->sender->sendACK("@IC#");
         this->nextAction = NO_ACTION;
         break;
     case AUTO_MOVE_CLASSIFY_ACTION:
