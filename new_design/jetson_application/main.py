@@ -74,9 +74,13 @@ def main():
 
         # Main control loop
         while True:
+
             mode = gamepad_handler.getMode()
             # SYSTEM MODE: GAMEPAD
             if mode == "gamepad":
+                if gamepad_handler.classify == True:
+                    print("Gamepad mode: classify is true")
+                    gamepad_handler.classify = False
                 if hand_detect_started:
                     hand_detect_handler.pause()
                     hand_detect_started = False
@@ -172,6 +176,9 @@ def main():
                 if (write_serial.getQueueSize != 0 and gamepad_handler.getModeChanged()):
                     gamepad_handler.modeChanged = False
                     write_serial.clearQueue()
+                if gamepad_handler.classify == True:
+                    print("Gamepad mode: classify is true")
+                    gamepad_handler.classify = False
                 if not gamepad_handler.isGoHome:
                     # home_serial.addMessage(Message("!agohome#"))
                     write_serial.addMessage(Message("!agohome#"))
@@ -210,11 +217,20 @@ def main():
                         hand_detect_handler.isSending = False
                         print(f"Send to write_serial queue HAND DETECT: {message_content}")
             elif mode == "auto":
-                # TODO: Add auto mode logic here: Detect fruit
-                # Placeholder for auto mode command
-                if not gamepad_handler.isGoHome:
-                    write_serial.addMessage(Message("!agohome#"))
-                    gamepad_handler.isGoHome = True
+                # Stop hand_detection_model
+                if hand_detect_started:
+                    print("Switching to auto mode")
+                    hand_detect_started = False
+                    hand_detect_handler.pause()
+
+                if (write_serial.getQueueSize != 0 and gamepad_handler.getModeChanged()):
+                    gamepad_handler.modeChanged = False
+                    write_serial.clearQueue()
+
+                if  not gamepad_handler.isGoHome:
+                    write_serial.addMessage(Message("!classify#"))
+                    print("classify is sended")
+                    gamepad_handler.isGoHome  = True
                     while True:
                         if ack_event.is_set():
                             print("GOHOME ACK received: AH!#")
@@ -222,13 +238,9 @@ def main():
                             break
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
                     write_serial.lastSentMessage = Message('!#')
-
-                if hand_detect_started:
-                    print("Switching to auto mode")
-                    hand_detect_started = False
-                    hand_detect_handler.pause()
+                
                 # Proceed with auto mode logic here
-                print("Auto mode")
+                # print("Auto mode")
 
             time.sleep(0.1)
 

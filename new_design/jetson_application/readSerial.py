@@ -26,7 +26,7 @@ class ReadSerialObject(threading.Thread):
         # Define the list of valid ACK messages
         #ack_messages = ["!I#", "!AH#", "!AS#", "!SS#", "!M#", "!A#", "!HA#", "!S#", "!X#"]
         
-        if data.startswith("!"):
+        if data.startswith("!") or data.startswith("@"):
             print(f"ACK received: {data}")
             # Signal ACK received by setting the event
             self.ack_event.set()
