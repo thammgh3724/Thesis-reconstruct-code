@@ -3,9 +3,12 @@
 Slider::Slider(){
     this->state = INIT;
     this->position = 0.0;
+    this->sender = new Sender();
 };
 
-Slider::~Slider(){};
+Slider::~Slider(){
+    delete(sender);
+};
 
 double Slider::double_abs(double num) { 
   if ( num < 0.1 ) {
@@ -96,7 +99,7 @@ int Slider::validatePosition(double input){
     if(input <0 || input > 28246) return 1;
     return 0; 
 }
-void Slider::setNextPosition(int newPosition){
+void Slider::setNextPosition(double newPosition){
   this->nextPosition = newPosition;
 }
 void Slider::calculateTotalSteps(){
@@ -109,11 +112,14 @@ void Slider::initStepDone(){
   this->numberStepDone = 0.0;
 }
 bool Slider::isAutoMoveDone(){
-  if (this->numberStepDone == this->numberStepToGo) return true;
+  if ( ((this->numberStepDone - double_abs(this->numberStepToGo)) > -0.1) && ((this->numberStepDone - double_abs(this->numberStepToGo)) < 0.1)) return true;
   return false;
 }
 double Slider::getNumberStepToGo(){
   return this->numberStepToGo;
+}
+double Slider::getNumberStepDone(){
+  return this->numberStepDone;
 }
 void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int accRate = 20){
   if((double_abs(this->numberStepToGo) > 0.2) && (double_abs(this->numberStepToGo) - this->numberStepDone) > 0.2){
@@ -158,12 +164,13 @@ void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int acc
       }
     }
     this->numberStepDone = this->numberStepDone + 0.5;
+
   }
-  else if ( this->isAutoMoveDone()){
-    #ifdef DEBUG
-    String data_print = "!SLIDER ";
-    data_print += " move done";
+  else {
+    // #ifdef DEBUG
+    // String data_print = "!SLIDER ";
+    // data_print += " move done";
     // this->sender->sendData(data_print);
-    #endif
+    // #endif
   }
 }

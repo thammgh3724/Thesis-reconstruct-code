@@ -19,7 +19,9 @@ class Slider {
 
         bool PULstat = 0;
         int PUL_PINS = SLIDER_PUL;
-        int DIR_PINS = SLIDER_DIR; 
+        int DIR_PINS = SLIDER_DIR;
+
+        Sender* sender;
     
     public:
         Slider();
@@ -29,12 +31,13 @@ class Slider {
         void setState(int state);
         double getCurrentPosition();
         double getNumberStepToGo();
+        double getNumberStepDone();
         void setPosition(double position);
         void manualMove(double input);
         int inductiveSrDetect();
         int validatePosition(double input);
         void calculateTotalSteps();
-        void setNextPosition(int newPosition);
+        void setNextPosition(double newPosition);
         void updatePosition();
         void initStepDone();
         double double_abs(double value);

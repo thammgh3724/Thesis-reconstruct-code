@@ -512,41 +512,41 @@ void System::slider_fsm(){
             this->sender->sendData(tmp_str);
             #endif
             this->nextSliderAction == SLIDER_STOP_ACTION;
-            this->slider1->setState(HOME);
-        }
-        else{
-        }
-        break;
-    case HOME:
-        // waiting new action
-        if (this->nextSliderAction == SLIDER_AUTO_MOVE_FREE_ACTION)
-        {
-            if(this->slider1->validatePosition(this->output_slider_auto) == 0){
-                //can move
-                this->slider1->setNextPosition(this->output_slider_auto);
-                this->slider1->calculateTotalSteps();
-                this->slider1->initStepDone();
-                this->slider1->setState(GENERAL_AUTO_MOVING);
-                this->output_slider_auto = 0.0;
-                this->timer_slider->setLoopAction(400, micros());
-                #ifdef DEBUG
-                this->sender->sendData("!GO AUTO SLIDER");
-                #endif
-            }
-        }
-        else if (this->nextSliderAction ==  SLIDER_AUTO_MOVE_DETECT_HAND_ACTION){
-            this->slider1->setState(DETECT_HAND_AUTO_MOVING);
-        }
-        else if (this->nextSliderAction ==  SLIDER_MANUAL_MOVE_DISTANCE_ACTION){
-            this->slider1->setState(MANUAL_MOVING);
-            this->timer_slider->setLoopAction(100, micros()); //int delValue = 400
-        }
-        else if (this->nextSliderAction == SLIDER_STOP_ACTION){
             this->slider1->setState(STOP);
         }
         else{
         }
         break;
+    // case HOME:
+    //     // waiting new action
+    //     if (this->nextSliderAction == SLIDER_AUTO_MOVE_FREE_ACTION)
+    //     {
+    //         if(this->slider1->validatePosition(this->output_slider_auto) == 0){
+    //             //can move
+    //             this->slider1->setNextPosition(this->output_slider_auto);
+    //             this->slider1->calculateTotalSteps();
+    //             this->slider1->initStepDone();
+    //             this->slider1->setState(GENERAL_AUTO_MOVING);
+    //             this->output_slider_auto = 0.0;
+    //             this->timer_slider->setLoopAction(400, micros());
+    //             #ifdef DEBUG
+    //             this->sender->sendData("!GO AUTO SLIDER");
+    //             #endif
+    //         }
+    //     }
+    //     else if (this->nextSliderAction ==  SLIDER_AUTO_MOVE_DETECT_HAND_ACTION){
+    //         this->slider1->setState(DETECT_HAND_AUTO_MOVING);
+    //     }
+    //     else if (this->nextSliderAction ==  SLIDER_MANUAL_MOVE_DISTANCE_ACTION){
+    //         this->slider1->setState(MANUAL_MOVING);
+    //         this->timer_slider->setLoopAction(100, micros()); //int delValue = 400
+    //     }
+    //     else if (this->nextSliderAction == SLIDER_STOP_ACTION){
+    //         this->slider1->setState(STOP);
+    //     }
+    //     else{
+    //     }
+    //     break;
     case MANUAL_MOVING:
         if(this->nextSliderAction == SLIDER_MANUAL_MOVE_DISTANCE_ACTION)
         {
@@ -568,19 +568,19 @@ void System::slider_fsm(){
                 this->nextSliderAction = SLIDER_STOP_ACTION;
                 this->slider1->setState(STOP);
                 #ifdef DEBUG
-                this->sender->sendData("!SLIDER GO STATE STOP");
+                this->sender->sendData("!SLIDER STOP");
                 #endif
             }
             else{
                 this->slider1->setState(GENERAL_AUTO_MOVING);
                 if(this->timer_slider->checkTimeoutAction()) {
                     #ifdef DEBUG
-                    String tmpstr = "!SLIDER GO step to move" + String(this->slider1->getNumberStepToGo());
-                    this->sender->sendData(tmpstr);
+                    // String tmpstr = "!SLIDER GO step to move" + String(this->slider1->getNumberStepToGo());
+                    // this->sender->sendData(tmpstr);
                     #endif
                     this->slider1->generalAutoMove(this->timer_slider->timeout);
                     #ifdef DEBUG
-                    this->sender->sendData("!SLIDER GO AUTO");
+                    // this->sender->sendData(String(this->slider1->getNumberStepDone()));
                     #endif
                 }
             }
@@ -589,7 +589,7 @@ void System::slider_fsm(){
             this->slider1->updatePosition();
             this->slider1->setState(STOP);
             #ifdef DEBUG
-            this->sender->sendData("!SLIDER GO STATE STOP");
+            this->sender->sendData("!SLIDER STOP");
             #endif
         }
         else {
@@ -599,14 +599,25 @@ void System::slider_fsm(){
         // waiting new action
         if (this->nextSliderAction == SLIDER_AUTO_MOVE_FREE_ACTION)
         {
-            this->slider1->setState(GENERAL_AUTO_MOVING);
+            if(this->slider1->validatePosition(this->output_slider_auto) == 0){
+                //can move
+                this->slider1->setNextPosition(this->output_slider_auto);
+                this->slider1->calculateTotalSteps();
+                this->slider1->initStepDone();
+                this->slider1->setState(GENERAL_AUTO_MOVING);
+                this->output_slider_auto = 0.0;
+                this->timer_slider->setLoopAction(3000, micros());
+                #ifdef DEBUG
+                this->sender->sendData("!GO AUTO SLIDER");
+                #endif
+            }
         }
         else if  (this->nextSliderAction == SLIDER_AUTO_MOVE_DETECT_HAND_ACTION){
             this->slider1->setState(DETECT_HAND_AUTO_MOVING);
         }
         else if (this->nextSliderAction ==  SLIDER_MANUAL_MOVE_DISTANCE_ACTION){
             this->slider1->setState(MANUAL_MOVING);
-            this->timer_slider->setLoopAction(100, micros()); //int delValue = 4000
+            this->timer_slider->setLoopAction(3000, micros()); //int delValue = 4000
         }
         else{
         }
@@ -777,13 +788,13 @@ void System::distributeAction(){ // send ACK here
         break;
     case SLIDER_MANUAL_MOVE_DISTANCE_ACTION:
         this->nextSliderAction = SLIDER_MANUAL_MOVE_DISTANCE_ACTION;
-        this->listener->consumeCommand(SLIDER_MANUAL_MOVE_DISTANCE_ACTION,&this->output_slider_manual);
+        this->listener->consumeCommand(SLIDER_MANUAL_MOVE_DISTANCE_ACTION, &this->output_slider_manual);
         this->sender->sendACK("@S#");
         this->nextAction = NO_ACTION;
         break;
     case SLIDER_AUTO_MOVE_FREE_ACTION:
         this->nextSliderAction = SLIDER_AUTO_MOVE_FREE_ACTION;
-        this->listener->consumeCommand(SLIDER_AUTO_MOVE_FREE_ACTION,&this->output_slider_auto);
+        this->listener->consumeCommand(SLIDER_AUTO_MOVE_FREE_ACTION, &this->output_slider_auto);
         this->sender->sendACK("@X#");
         this->nextAction = NO_ACTION;
         break;
