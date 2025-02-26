@@ -93,17 +93,24 @@ class AutoModeHandler(threading.Thread):
                     cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (255, 0, 0), 2)
                     cv2.circle(frame, (int(x_center), int(y_center)), 5, (0, 255, 0), -1)
 
-            if len(current_positions) == 1:
+            if len(current_positions) >= 1:
+                min_x = float("inf")
+                min_pos = None
+                for pos in current_positions:
+                    x_center, y_center = pos
+                    if x_center < min_x:
+                        min_x = x_center
+                        min_pos = pos
                 if len(object_positions) == 0:
-                    object_positions = current_positions
+                    object_positions = min_pos
                     accumulate_count = 1
                 else:
                     stable = all(abs(old_pos[0] - new_pos[0]) <= 5 and abs(old_pos[1] - new_pos[1]) <= 5
-                                 for old_pos, new_pos in zip(object_positions, current_positions))
+                                 for old_pos, new_pos in zip(object_positions, min_pos))
                     if stable:
                         accumulate_count += 1
                     else:
-                        object_positions = current_positions
+                        object_positions = min_pos
                         accumulate_count = 1
 
                 if accumulate_count >= 3:
