@@ -151,6 +151,7 @@ void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int acc
         digitalWrite(this->PUL_PINS, LOW);
         this->PULstat = 0;
       }
+      this->position = this->position + 0.5;
     }
     else if (this->numberStepToGo < -0.2 ) {
       //Rotate negative direction
@@ -162,6 +163,7 @@ void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int acc
         digitalWrite(this->PUL_PINS, LOW);
         PULstat = 0;
       }
+      this->position = this->position - 0.5;
     }
     this->numberStepDone = this->numberStepDone + 0.5;
 

@@ -25,6 +25,7 @@ class System {
         Timer* timer_arm[6]; // 6 timer for arm to take loop action for 6 joint
                              // can creat more
         Timer* timer_slider;
+        Timer* timer_slider_classify;
         Timer* timer_gripper; 
 
         const int TIME_SEND_STATUS = 1000000000; //1s
