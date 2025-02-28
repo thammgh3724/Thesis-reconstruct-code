@@ -53,6 +53,7 @@ class HandDetectHandler(threading.Thread):
             if self.pause_event.is_set():
                 hand_pos = self.cam_proc()
                 if hand_pos:
+                    self.hand_position = hand_pos
                     if self.start_time is None:
                         self.start_time = time.time()
 

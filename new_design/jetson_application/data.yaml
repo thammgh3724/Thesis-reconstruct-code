@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 3
+names: ['Guava', 'Mango', 'fresh orange']
+
+roboflow:
+  workspace: worth-adam
+  project: fruit_beta
+  version: 1
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/worth-adam/fruit_beta/dataset/1

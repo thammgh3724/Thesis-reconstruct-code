@@ -1,6 +1,7 @@
 from serialObjectSingleton import SerialSingleton
 from gamepad import GamepadHandler
 from handDetectv4 import HandDetectHandler
+from automode import AutoModeHandler
 from writeSerial import WriteSerialObject, Message
 from readSerial import ReadSerialObject
 import serial
@@ -42,7 +43,11 @@ def main():
     gamepad_handler = GamepadHandler(serial_obj)
 
     hand_detect_handler = HandDetectHandler()
+    auto_detect_handler = AutoModeHandler()
+
     hand_detect_handler.start()
+    auto_detect_handler.start()
+
     #hand_detect_handler.pause()
     # Start all threads
     gamepad_handler.start()
@@ -58,6 +63,8 @@ def main():
     
     # Check if hand detection thread started
     hand_detect_started = True
+    # Check if fruite detection thread started
+    fruit_detection_started = True # AUTOMODE
     try:
         # Send !init# to initialize the robotic arm
         init_message = Message("!init#")
@@ -84,6 +91,10 @@ def main():
                 if hand_detect_started:
                     hand_detect_handler.pause()
                     hand_detect_started = False
+
+                if fruit_detection_started:
+                    auto_detect_handler.pause()
+                    fruit_detection_started = False
                     
                 if (write_serial.getQueueSize() != 0 and gamepad_handler.getModeChanged()):
                     gamepad_handler.modeChanged = False
@@ -205,8 +216,8 @@ def main():
                         gamepad_handler.isSendStop = False
                         write_serial.resetStopCounter("!astop#")
                         # Get the hand position
-                        x_center = round(hand_detect_handler.hand_position[0][0].item(), 5)
-                        y_center = round(hand_detect_handler.hand_position[0][1].item(), 5)
+                        x_center = round(hand_detect_handler.hand_position[0].item(), 5)
+                        y_center = round(hand_detect_handler.hand_position[1].item(), 5)
                         
                         message_content = f"!{round(x_center, 5)}:{round(y_center, 5)}H#\0"  # Format message
                         message = Message(message_content)
@@ -239,9 +250,26 @@ def main():
                         time.sleep(0.1)  # Short delay to avoid busy-waiting
                     write_serial.lastSentMessage = Message('!#')
                 
-                # Proceed with auto mode logic here
-                # print("Auto mode")
+                if not fruit_detection_started: 
+                    fruit_detection_started = True
+                    auto_detect_handler.resume()
 
+                # Proceed with auto mode logic here
+                # TODO: Send !<x1:x2:label>C# to serial.
+                if auto_detect_handler.fruit_position:
+                    # Get the fruit position and label
+                    fruit_x_center = round(auto_detect_handler.fruit_position[0][0].item(), 5)
+                    fruit_y_center = round(auto_detect_handler.fruit_position[0][1].item(), 5)
+                    fruit_label = auto_detect_handler.class_labels[0]
+                    label = 0
+                    if (fruit_label == "Mango"):
+                        label = 1
+                    
+                    message_content = f"!{fruit_x_center}:{fruit_y_center}:{label}C#\0"
+                    auto_message = Message(message_content)
+
+                    write_serial.addMessage(auto_message)
+                    print(f"Send to write_serial queue AUTO DETECT: {message_content}")
             time.sleep(0.1)
 
     except KeyboardInterrupt:
@@ -251,8 +279,12 @@ def main():
         write_serial.join()
         read_serial.join()
         gamepad_handler.join()
+
         hand_detect_handler.stop()
         hand_detect_handler.join()
+        
+        auto_detect_handler.stop()
+        auto_detect_handler.join()
         print("All threads stopped.")
 
     finally:

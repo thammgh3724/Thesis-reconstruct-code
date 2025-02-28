@@ -6,6 +6,7 @@ import numpy as np
 import torch 
 import sys
 import os
+import yaml 
 import requests 
 from PIL import Image, ImageOps
 from ultralytics import YOLO
@@ -14,7 +15,7 @@ class AutoModeHandler(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         ## load model for classify fruit
-        self.model = YOLO("class_fruit.engine")
+        self.model = YOLO("beta_fruit1.engine")
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
         self.fruit_position = None
@@ -26,6 +27,12 @@ class AutoModeHandler(threading.Thread):
         self.detection_count = 0
         self.start_time = None
 
+        # Class labels
+        with open("data.yaml", "r") as f:
+            self.class_names = yaml.safe_load(f)["names"]  # Load danh sách class
+        
+        self.class_labels = []
+    
     def stop(self):
         self.stop_event.set()
         self.pause_event.set()
@@ -54,6 +61,7 @@ class AutoModeHandler(threading.Thread):
             if self.pause_event.is_set():
                 hand_pos = self.cam_proc()
                 if hand_pos:
+                    self.fruit_position = hand_pos
                     if self.start_time is None:
                         self.start_time = time.time()
 
@@ -61,7 +69,7 @@ class AutoModeHandler(threading.Thread):
 
                     if self.detection_count == 5:
                         elapsed_time = time.time() - self.start_time
-                        print(f"Detected 5 hand positions in {elapsed_time:.2f} seconds.")
+                        print(f"Detected 5 fruit positions in {elapsed_time:.2f} seconds. Fruit is {self.class_labels[0]}")
 
                         # Reset count and timer
                         self.detection_count = 0
@@ -92,6 +100,13 @@ class AutoModeHandler(threading.Thread):
                     current_positions.append((x_center, y_center))
                     cv2.rectangle(frame, (int(x_min), int(y_min)), (int(x_max), int(y_max)), (255, 0, 0), 2)
                     cv2.circle(frame, (int(x_center), int(y_center)), 5, (0, 255, 0), -1)
+                
+                boxes = result.boxes.xyxy.cpu().numpy()  # [x_min, y_min, x_max, y_max]
+                class_ids = result.boxes.cls.cpu().numpy()  # Danh sách class ID
+                
+                # Sắp xếp theo tọa độ x_min (vị trí từ trái sang phải)
+                sorted_indices = np.argsort(boxes[:, 0])  # Sắp xếp theo x_min
+                self.class_labels = [self.class_names[int(class_ids[i])] for i in sorted_indices]
 
             if len(current_positions) >= 1:
                 min_x = float("inf")
@@ -103,25 +118,25 @@ class AutoModeHandler(threading.Thread):
                         min_pos = pos
                 if len(object_positions) == 0:
                     object_positions = min_pos
-                    accumulate_count = 1
-                else:
-                    stable = all(abs(old_pos[0] - new_pos[0]) <= 5 and abs(old_pos[1] - new_pos[1]) <= 5
-                                 for old_pos, new_pos in zip(object_positions, min_pos))
-                    if stable:
-                        accumulate_count += 1
-                    else:
-                        object_positions = min_pos
-                        accumulate_count = 1
+                    # accumulate_count = 1
+                # else:
+                #     stable = all(abs(old_pos[0] - new_pos[0]) <= 5 and abs(old_pos[1] - new_pos[1]) <= 5
+                #                  for old_pos, new_pos in zip(object_positions, min_pos))
+                #     if stable:
+                #         accumulate_count += 1
+                #     else:
+                #         object_positions = min_pos
+                #         accumulate_count = 1
 
-                if accumulate_count >= 3:
-                    accumulate_count = 0
-                    return object_positions
+                # if accumulate_count >= 3:
+                #     accumulate_count = 0
+                return object_positions
 
             cv2.imshow("YOLOv8 Real-Time", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        return None  # Return None if no valid hand position detected
+        return None  # Return None if no fruits is detected
 
     def is_position_changed(self, new_position):
         """
