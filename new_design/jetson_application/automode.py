@@ -28,8 +28,7 @@ class AutoModeHandler(threading.Thread):
         self.start_time = None
 
         # Class labels
-        with open("data.yaml", "r") as f:
-            self.class_names = yaml.safe_load(f)["names"]  # Load danh sách class
+        self.class_names = ['Guava', 'Mango', 'fresh orange']
         
         self.class_labels = []
     
@@ -61,7 +60,12 @@ class AutoModeHandler(threading.Thread):
             if self.pause_event.is_set():
                 hand_pos = self.cam_proc()
                 if hand_pos:
-                    self.fruit_position = hand_pos
+                    if not self.fruit_position: 
+                        self.fruit_position = hand_pos
+                        self.isSending = True
+                    elif self.is_position_changed(hand_pos[0]):
+                        self.fruit_position = hand_pos
+                        self.isSending = True
                     if self.start_time is None:
                         self.start_time = time.time()
 
@@ -110,27 +114,27 @@ class AutoModeHandler(threading.Thread):
 
             if len(current_positions) >= 1:
                 min_x = float("inf")
-                min_pos = None
+                min_pos = None # Tuple
                 for pos in current_positions:
                     x_center, y_center = pos
                     if x_center < min_x:
                         min_x = x_center
                         min_pos = pos
                 if len(object_positions) == 0:
-                    object_positions = min_pos
-                    # accumulate_count = 1
-                # else:
-                #     stable = all(abs(old_pos[0] - new_pos[0]) <= 5 and abs(old_pos[1] - new_pos[1]) <= 5
-                #                  for old_pos, new_pos in zip(object_positions, min_pos))
-                #     if stable:
-                #         accumulate_count += 1
-                #     else:
-                #         object_positions = min_pos
-                #         accumulate_count = 1
+                    object_positions.append(min_pos)
+                    accumulate_count = 1
+                else:
+                    stable = all(abs(old_pos[0] - min_pos[0]) <= 5 and abs(old_pos[1] - min_pos[1]) <= 5
+                                 for old_pos in object_positions)
+                    if stable:
+                        accumulate_count += 1
+                    else:
+                        object_positions.append(min_pos)
+                        accumulate_count = 1
 
-                # if accumulate_count >= 3:
-                #     accumulate_count = 0
-                return object_positions
+                if accumulate_count >= 3:
+                    accumulate_count = 0
+                    return object_positions
 
             cv2.imshow("YOLOv8 Real-Time", frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -142,7 +146,7 @@ class AutoModeHandler(threading.Thread):
         """
         Check if the position change exceeds the threshold.
         """
-        old_x, old_y = self.hand_position[0]
+        old_x, old_y = self.fruit_position[0]
         new_x, new_y = new_position
         return abs(new_x - old_x) > self.threshold or abs(new_y - old_y) > self.threshold
 

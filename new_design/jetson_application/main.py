@@ -227,6 +227,7 @@ def main():
                         write_serial.addMessage(message)
                         hand_detect_handler.isSending = False
                         print(f"Send to write_serial queue HAND DETECT: {message_content}")
+            # AUTOMODE: FRUIT CLASSIFICATION
             elif mode == "auto":
                 # Stop hand_detection_model
                 if hand_detect_started:
@@ -256,19 +257,22 @@ def main():
 
                 # Proceed with auto mode logic here
                 # TODO: Send !<x1:x2:label>C# to serial.
-                if auto_detect_handler.fruit_position:
+                if auto_detect_handler.fruit_position and auto_detect_handler.isSending:
                     # Get the fruit position and label
                     fruit_x_center = round(auto_detect_handler.fruit_position[0][0].item(), 5)
                     fruit_y_center = round(auto_detect_handler.fruit_position[0][1].item(), 5)
-                    fruit_label = auto_detect_handler.class_labels[0]
+                   
+                    #TODO: Need rework on label extraction
+                    # fruit_label = auto_detect_handler.class_labels[0]
                     label = 0
-                    if (fruit_label == "Mango"):
-                        label = 1
-                    
+                    # if (fruit_label == "Mango"):
+                    #     label = 1
+                
+                    #TODO: Sending signal to write_serial after getting x_center, y_center and label
                     message_content = f"!{fruit_x_center}:{fruit_y_center}:{label}C#\0"
                     auto_message = Message(message_content)
-
                     write_serial.addMessage(auto_message)
+                    auto_detect_handler.isSending = False
                     print(f"Send to write_serial queue AUTO DETECT: {message_content}")
             time.sleep(0.1)
 
