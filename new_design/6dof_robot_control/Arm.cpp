@@ -30,11 +30,11 @@ Arm::~Arm(){
 
 void Arm::onStart(){
   // go home here
-  // enable all joints
+  // enable all joints except joint 6
   digitalWrite(EN321_PIN, LOW);
   digitalWrite(EN4_PIN, LOW);
   digitalWrite(EN5_PIN, LOW);
-  digitalWrite(EN6_PIN, LOW);
+  digitalWrite(EN6_PIN, HIGH);
   // joint #2
   // singleJointMove_onStart(DIR2_PIN, HIGH, PUL2_PIN, 5582);
   singleJointMove_onStart(DIR2_PIN, HIGH, PUL2_PIN, (int)((75) / this->dl2));
@@ -42,9 +42,9 @@ void Arm::onStart(){
   // singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, 6569);
   singleJointMove_onStart(DIR3_PIN, LOW, PUL3_PIN, (int)((80) / this->dl3));
 // // joint #4
-  singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / this->dl4));
+  // singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / this->dl4));
   // joint #5
-  // singleJointMove_onStart(DIR5_PIN, LOW, PUL5_PIN, (int)((20) / this->dl5)); // minus 20 in initial 
+  singleJointMove_onStart(DIR5_PIN, LOW, PUL5_PIN, (int)((20) / this->dl5)); // minus 20 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
   this->joint[3] = 180;
@@ -504,6 +504,12 @@ void Arm::calculateNextPosition_classify(double* model_data){
 }
 void Arm::calculateNextJoint_classify(){
   InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
+    // dont move joint 4
+    this->nextJoint[3] = this->joint[3];
+    // self calculate for joint 5 move
+    double angleJ2Move = this->nextJoint[1] - this->joint[1];
+    double angleJ3Move = this->nextJoint[2] - this->joint[2];
+    this->nextJoint[4] = this->joint[4] + angleJ2Move + angleJ3Move;
 }
 
 // void Arm::autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin){

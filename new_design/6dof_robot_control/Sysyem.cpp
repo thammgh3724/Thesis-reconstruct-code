@@ -431,19 +431,21 @@ void System::arm_fsm(){
                     else if ( ((this->model_data[2] - 1.0) > -0.1) && ((this->model_data[2] - 1.0) < 0.1) ) {
                         this->arm->setNextPosition(this->arm->box2_classify_position);
                     }
-                    this->arm->calculateNextJoint();
-                    this->arm->calculateTotalSteps();
-                    double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-                    this->arm->setNumberStepDone(initNumberStepsDone);
-                    this->arm->initjointAutoMoveDone();
-                    this->arm->setState(CLASSIFY_AUTO_MOVING);
-                    for(int i = 0; i < 6; i++){
-                        this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                    this->arm->calculateNextJoint_classify();
+                    if(this->arm->validateNextJoint() == 0){
+                        this->arm->calculateTotalSteps();
+                        double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                        this->arm->setNumberStepDone(initNumberStepsDone);
+                        this->arm->initjointAutoMoveDone();
+                        this->arm->setState(CLASSIFY_AUTO_MOVING);
+                        for(int i = 0; i < 6; i++){
+                            this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                        }
+                        this->arm->isDroppingMove = false;
+                        #ifdef DEBUG
+                        this->sender->sendData("!GO BOX1 CLASSIFY");
+                        #endif
                     }
-                    this->arm->isDroppingMove = false;
-                    #ifdef DEBUG
-                    this->sender->sendData("!GO BOX1 CLASSIFY");
-                    #endif
                 }
             }
             else if (this->arm->isHomeMove) {
@@ -458,19 +460,21 @@ void System::arm_fsm(){
                 else {
                     this->arm->setNextPosition(this->arm->home_classify_position);
                     this->arm->setNextJoint(this->arm->home_classify_joint);
-                    this->arm->calculateTotalSteps();
-                    double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-                    this->arm->setNumberStepDone(initNumberStepsDone);
-                    this->arm->initjointAutoMoveDone();
-                    this->arm->setState(CLASSIFY_AUTO_MOVING);
-                    for(int i = 0; i < 6; i++){
-                        this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                    if(this->arm->validateNextJoint() == 0){
+                        this->arm->calculateTotalSteps();
+                        double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                        this->arm->setNumberStepDone(initNumberStepsDone);
+                        this->arm->initjointAutoMoveDone();
+                        this->arm->setState(CLASSIFY_AUTO_MOVING);
+                        for(int i = 0; i < 6; i++){
+                            this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                        }
+                        this->arm->isHomeMove = false;
+                        #ifdef DEBUG
+                        this->sender->sendData("!GO HOME CLASSIFY");
+                        #endif
+                        this->nextSliderAction = SLIDER_MOVE_BACK_CLASSIFY_ACTION;
                     }
-                    this->arm->isHomeMove = false;
-                    #ifdef DEBUG
-                    this->sender->sendData("!GO HOME CLASSIFY");
-                    #endif
-                    this->nextSliderAction = SLIDER_MOVE_BACK_CLASSIFY_ACTION;
                 }
             }
             else {
@@ -616,7 +620,7 @@ void System::slider_fsm(){
                 if (this->nextSliderAction == SLIDER_MOVE_BACK_CLASSIFY_ACTION) {
                     this->nextSliderAction = SLIDER_AUTO_MOVE_CLASSIFY_ACTION;
                 }
-                this->timer_slider_classify->setLoopAction(5000000, micros()); // wait 5s before continue moving
+                this->timer_slider_classify->setLoopAction(10000000, micros()); // wait 10s before continue moving
                 this->slider1->setState(STOP);
                 #ifdef DEBUG
                 this->sender->sendData("!SLIDER STOP");
@@ -725,7 +729,7 @@ void System::slider_fsm(){
                 this->timer_slider->setLoopAction(2000, micros());
                 #ifdef DEBUG
                 this->sender->sendData("!SLIDER GO BOX1");
-                this->sender->sendData(String(this->slider1->getPreviousPosition()));
+                this->sender->sendData(String(this->slider1->getNextPosition()));
                 #endif
             }
         }

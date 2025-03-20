@@ -24,10 +24,10 @@ int Slider::onStart(){
     while (inductiveSrDetect() != LOW){
       digitalWrite(this->PUL_PINS,HIGH);
       this->PULstat = 1;
-      delayMicroseconds(100);
+      delayMicroseconds(3000);
       digitalWrite(this->PUL_PINS,LOW);
       this->PULstat = 0;
-      delayMicroseconds(100); 
+      delayMicroseconds(3000); 
     }
     return 1;
     // digitalWrite(SLIDER_DIR,LOW);
