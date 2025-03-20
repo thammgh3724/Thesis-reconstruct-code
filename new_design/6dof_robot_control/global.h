@@ -73,6 +73,9 @@
 #define SLIDER_AUTO_MOVE_DETECT_HAND_ACTION     13
 #define SLIDER_AUTO_MOVE_POSITION_ACTION        14
 #define SLIDER_AUTO_MOVE_CLASSIFY_ACTION        22
+#define SLIDER_MOVE_BACK_CLASSIFY_ACTION        23
+#define SLIDER_MOVE_BOX1_CLASSIFY_ACTION        24
+#define SLIDER_MOVE_BOX2_CLASSIFY_ACTION        25
 #define ARM_STOP_ACTION                         9
 #define SLIDER_STOP_ACTION                      16
 #define SLIDER_GOHOME_ACTION                    17

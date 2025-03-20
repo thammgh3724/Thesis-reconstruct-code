@@ -10,6 +10,7 @@ class Slider {
         int state;
         double position;
         double nextPosition;
+        double previousPosition;
         double numberStepToGo;
         double numberStepDone;
 
@@ -21,7 +22,7 @@ class Slider {
 
         public:
         
-        const double MAX_POSITION = 28246.0;
+        const double MAX_POSITION = 1200.0;
         const double MIN_POSITION = 0.0;
         double dl = 0.1;
         // variables for specific use case move
@@ -46,6 +47,9 @@ class Slider {
         int validatePosition(double input);
         void calculateTotalSteps();
         void setNextPosition(double newPosition);
+        double getNextPosition();
+        double getPreviousPosition();
+        void setPreviousPosition(double prevPosition);
         void updatePosition();
         void initStepDone();
         double double_abs(double value);

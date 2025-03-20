@@ -102,6 +102,15 @@ int Slider::validatePosition(double input){
 void Slider::setNextPosition(double newPosition){
   this->nextPosition = newPosition;
 }
+double Slider::getNextPosition(){
+  return this->nextPosition;
+}
+double Slider::getPreviousPosition(){
+  return this->previousPosition;
+}
+void Slider::setPreviousPosition(double prevPosition){
+  this->previousPosition = prevPosition;
+}
 void Slider::calculateTotalSteps(){
   this->numberStepToGo = this->nextPosition - this->position;
 }
@@ -151,7 +160,7 @@ void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int acc
         digitalWrite(this->PUL_PINS, LOW);
         this->PULstat = 0;
       }
-      this->position = this->position + 0.5;
+      this->position = this->position + 1;
     }
     else if (this->numberStepToGo < -0.2 ) {
       //Rotate negative direction
@@ -163,9 +172,9 @@ void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int acc
         digitalWrite(this->PUL_PINS, LOW);
         PULstat = 0;
       }
-      this->position = this->position - 0.5;
+      this->position = this->position - 1;
     }
-    this->numberStepDone = this->numberStepDone + 0.5;
+    this->numberStepDone = this->numberStepDone + 1;
 
   }
   else {
