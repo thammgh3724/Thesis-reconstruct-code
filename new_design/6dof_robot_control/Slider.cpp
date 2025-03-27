@@ -3,6 +3,7 @@
 Slider::Slider(){
     this->state = INIT;
     this->position = 0.0;
+    this->previousPosition = 0.0;
     this->sender = new Sender();
 };
 
@@ -70,7 +71,7 @@ int Slider::inductiveSrDetect() {
 }
 
 void Slider::manualMove(double input){
-    if ( (input >= 0.9) && (input <= 1.1) && (this->position + 1 <= MAX_POSITION)) {
+    if ( (input >= 0.9) && (input <= 1.1) && (this->position + 1 <= (MAX_POSITION + 0.2) )) {
       //Rotate positive direction
       digitalWrite(this->DIR_PINS, LOW);
       if (PULstat == 0) {
@@ -82,7 +83,7 @@ void Slider::manualMove(double input){
       }
       this->position = this->position + 1;
     } 
-    else if ( (input >= 1.9) && (input <= 2.1) && (this->position - 1 >= MIN_POSITION )) {
+    else if ( (input >= 1.9) && (input <= 2.1) && (this->position - 1 >= (MIN_POSITION - 0.2) )) {
       //Rotate negative direction
       digitalWrite(this->DIR_PINS, HIGH);
       if (PULstat == 0) {

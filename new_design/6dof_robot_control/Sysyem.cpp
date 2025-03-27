@@ -536,7 +536,7 @@ void System::arm_fsm(){
                 }
             }
             else if (this->arm->isHomeMove) {
-                if (this->slider1->getCurrentPosition() != this->slider1->MIN_POSITION && this->slider1->getCurrentPosition() != this->slider1->MAX_POSITION) {
+                if ( (this->slider1->getCurrentPosition() > (this->slider1->MIN_POSITION + 0.2)) && (this->slider1->getCurrentPosition() <= (this->slider1->MAX_POSITION - 0.2)) ) {
                     //wait slider go to box
                 }
                 else if ( ((this->gripper->getCurrentAngle() - 180.0) < -0.1) || ((this->gripper->getCurrentAngle() - 180.0) > 0.1)) {
@@ -695,7 +695,7 @@ void System::slider_fsm(){
         else {
         }
         break;
-        case CLASSIFY_AUTO_MOVING:
+    case CLASSIFY_AUTO_MOVING:
         if (this->nextSliderAction == SLIDER_STOP_ACTION){
             this->slider1->setState(STOP);
             #ifdef DEBUG
@@ -768,10 +768,19 @@ void System::slider_fsm(){
             }
             else if (this->timer_slider_classify->checkTimeoutAction()) {
                 if (this->slider1->isLeftMove) {
-                    double nextPosition = this->slider1->getCurrentPosition() + 600; // go left 5000 unit
-                    if (nextPosition > this->slider1->MAX_POSITION) {
+                    double nextPosition = this->slider1->getCurrentPosition() + 600;
+                    if (nextPosition > (this->slider1->MAX_POSITION + 0.2) ) {
                         this->slider1->isLeftMove = false;
                         this->slider1->isRightMove = true;
+                        nextPosition = this->slider1->getCurrentPosition() - 600;
+                        this->slider1->setNextPosition(nextPosition);
+                        this->slider1->calculateTotalSteps();
+                        this->slider1->initStepDone();
+                        this->slider1->setState(CLASSIFY_AUTO_MOVING);
+                        this->timer_slider->setLoopAction(2000, micros());
+                        #ifdef DEBUG
+                        this->sender->sendData("!SLIDER GO RIGHT CLASSIFY");
+                        #endif
                     }
                     else {
                         this->slider1->isRightMove = false;
@@ -785,11 +794,20 @@ void System::slider_fsm(){
                         #endif
                     }
                 }
-                if (this->slider1->isRightMove) {
-                    double nextPosition = this->slider1->getCurrentPosition() - 200; // go left 5000 unit
-                    if (nextPosition < this->slider1->MIN_POSITION) {
+                else if (this->slider1->isRightMove) {
+                    double nextPosition = this->slider1->getCurrentPosition() - 600;
+                    if (nextPosition < (this->slider1->MIN_POSITION - 0.2) ) {
                         this->slider1->isLeftMove = true;
                         this->slider1->isRightMove = false;
+                        nextPosition = this->slider1->getCurrentPosition() + 600;
+                        this->slider1->setNextPosition(nextPosition);
+                        this->slider1->calculateTotalSteps();
+                        this->slider1->initStepDone();
+                        this->slider1->setState(CLASSIFY_AUTO_MOVING);
+                        this->timer_slider->setLoopAction(2000, micros());
+                        #ifdef DEBUG
+                        this->sender->sendData("!SLIDER GO LEFT CLASSIFY");
+                        #endif
                     }
                     else {
                         this->slider1->isLeftMove = false;
@@ -807,7 +825,7 @@ void System::slider_fsm(){
 
         }
         else if (this->nextSliderAction == SLIDER_MOVE_BOX1_CLASSIFY_ACTION) {
-            if (this->slider1->getCurrentPosition() != this->slider1->MIN_POSITION) {
+            if ( this->slider1->getCurrentPosition() > (this->slider1->MIN_POSITION + 0.2) ) {
                 this->slider1->setPreviousPosition(this->slider1->getCurrentPosition());
                 this->slider1->setNextPosition(this->slider1->MIN_POSITION);
                 this->slider1->calculateTotalSteps();
@@ -918,7 +936,7 @@ void System::gripper_fsm() {
         // }
         else if (this->nextGripperAction == GRIPPER_CLOSE)
         {
-            this->gripper->setNextAngle(90.0);
+            this->gripper->setNextAngle(100.0);
             this->gripper->setCurrentState(GRIPPER_MOVING);
             this->timer_gripper->setLoopAction(300000, micros());
             #ifdef DEBUG
