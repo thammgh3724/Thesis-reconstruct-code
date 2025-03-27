@@ -385,36 +385,80 @@ void System::arm_fsm(){
                 }
                 // wait gripper open
                 else {
-                    this->arm->calculateNextPosition_classify(this->model_data);
-                    this->arm->calculateNextJoint_classify();
-                    if(this->arm->validateNextJoint() == 0){
-                        #ifdef DEBUG
-                        this->sender->sendData("!GO CLASSIFY");
-                        this->arm->printNextJoint();
-                        #endif
-                        //can move
-                        this->arm->calculateTotalSteps();
-                        double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-                        this->arm->setNumberStepDone(initNumberStepsDone);
-                        this->arm->initjointAutoMoveDone();
-                        this->arm->setState(CLASSIFY_AUTO_MOVING);
-                        for(int i = 0; i < 6; i++){
-                            this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                    if (this->arm->isPositionMove_classify) {
+                        this->arm->calculateNextPosition_classify(this->model_data);
+                        this->arm->calculateNextJoint_classify();
+                        if(this->arm->validateNextJoint() == 0){
+                            #ifdef DEBUG
+                            this->sender->sendData("!GO POSITION CLASSIFY");
+                            this->arm->printNextJoint();
+                            #endif
+                            //can move
+                            this->arm->calculateTotalSteps();
+                            double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                            this->arm->setNumberStepDone(initNumberStepsDone);
+                            this->arm->initjointAutoMoveDone();
+                            this->arm->setState(CLASSIFY_AUTO_MOVING);
+                            for(int i = 0; i < 6; i++){
+                                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                            }
+                            this->arm->isPositionMove_classify = false;
                         }
-                        this->arm->isPickingMove = false;
+                        else {
+                            this->arm->isHomeMove = true;
+                            this->arm->isPickingMove = true;
+                            this->arm->isDroppingMove = true;
+                            this->arm->isPositionMove_classify = true;
+                            this->arm->isDeepMove_classify = true;
+                            this->arm->updateCurrentPosition();
+                            this->nextArmAction = ARM_STOP_ACTION;
+                            this->arm->setState(STOP);
+                            this->sender->sendSystemStatus("$ASTOP#");
+                            #ifdef DEBUG
+                            this->arm->printCurrentJoint();
+                            this->sender->sendData("!GO STATE STOP");
+                            #endif
+                        }
+                    }
+                    else if (this->arm->isDeepMove_classify) {
+                        this->arm->calculateNextDeepPosition_classify();
+                        this->arm->calculateNextJoint_classify();
+                        if(this->arm->validateNextJoint() == 0){
+                            #ifdef DEBUG
+                            this->sender->sendData("!GO DEEP CLASSIFY");
+                            this->arm->printNextJoint();
+                            #endif
+                            //can move
+                            this->arm->calculateTotalSteps();
+                            double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                            this->arm->setNumberStepDone(initNumberStepsDone);
+                            this->arm->initjointAutoMoveDone();
+                            this->arm->setState(CLASSIFY_AUTO_MOVING);
+                            for(int i = 0; i < 6; i++){
+                                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                            }
+                            this->arm->isPickingMove = false;
+                            this->arm->isPositionMove_classify = true;
+                            this->arm->isDeepMove_classify = true;
+                        }
+                        else {
+                            this->arm->isHomeMove = true;
+                            this->arm->isPickingMove = true;
+                            this->arm->isDroppingMove = true;
+                            this->arm->isPositionMove_classify = true;
+                            this->arm->isDeepMove_classify = true;
+                            this->arm->updateCurrentPosition();
+                            this->nextArmAction = ARM_STOP_ACTION;
+                            this->arm->setState(STOP);
+                            this->sender->sendSystemStatus("$ASTOP#");
+                            #ifdef DEBUG
+                            this->arm->printCurrentJoint();
+                            this->sender->sendData("!GO STATE STOP");
+                            #endif
+                        }
                     }
                     else {
-                        this->arm->isHomeMove = true;
-                        this->arm->isPickingMove = true;
-                        this->arm->isDroppingMove = true;
-                        this->arm->updateCurrentPosition();
-                        this->nextArmAction = ARM_STOP_ACTION;
-                        this->arm->setState(STOP);
-                        this->sender->sendSystemStatus("$ASTOP#");
-                        #ifdef DEBUG
-                        this->arm->printCurrentJoint();
-                        this->sender->sendData("!GO STATE STOP");
-                        #endif
+                        this->sender->sendData("!WRONG PICKING MOVE");
                     }
                 }
             }
@@ -424,27 +468,70 @@ void System::arm_fsm(){
                 }
                 // wait gripper close
                 else {
-                    if ( ((this->model_data[2] - 0.0) > -0.1) && ((this->model_data[2] - 0.0) < 0.1) ) {
-                        this->arm->setNextPosition(this->arm->box1_classify_position);
-                        this->nextSliderAction = SLIDER_MOVE_BOX1_CLASSIFY_ACTION;
-                    }
-                    else if ( ((this->model_data[2] - 1.0) > -0.1) && ((this->model_data[2] - 1.0) < 0.1) ) {
-                        this->arm->setNextPosition(this->arm->box2_classify_position);
-                    }
-                    this->arm->calculateNextJoint_classify();
-                    if(this->arm->validateNextJoint() == 0){
-                        this->arm->calculateTotalSteps();
-                        double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-                        this->arm->setNumberStepDone(initNumberStepsDone);
-                        this->arm->initjointAutoMoveDone();
-                        this->arm->setState(CLASSIFY_AUTO_MOVING);
-                        for(int i = 0; i < 6; i++){
-                            this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                    if (this->arm->isDeepMove_classify) {
+                        this->arm->calculateNextBoxDeepPosition_classify();
+                        this->arm->calculateNextJoint_classify();
+                        if(this->arm->validateNextJoint() == 0){
+                            #ifdef DEBUG
+                            this->sender->sendData("!GO BOX DEEP CLASSIFY");
+                            this->arm->printNextJoint();
+                            #endif
+                            //can move
+                            this->arm->calculateTotalSteps();
+                            double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                            this->arm->setNumberStepDone(initNumberStepsDone);
+                            this->arm->initjointAutoMoveDone();
+                            this->arm->setState(CLASSIFY_AUTO_MOVING);
+                            for(int i = 0; i < 6; i++){
+                                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                            }
+                            this->arm->isDeepMove_classify = false;
+                            this->arm->isPositionMove_classify = true;
                         }
-                        this->arm->isDroppingMove = false;
-                        #ifdef DEBUG
-                        this->sender->sendData("!GO BOX1 CLASSIFY");
-                        #endif
+                        else {
+                            this->arm->isHomeMove = true;
+                            this->arm->isPickingMove = true;
+                            this->arm->isDroppingMove = true;
+                            this->arm->isPositionMove_classify = true;
+                            this->arm->isDeepMove_classify = true;
+                            this->arm->updateCurrentPosition();
+                            this->nextArmAction = ARM_STOP_ACTION;
+                            this->arm->setState(STOP);
+                            this->sender->sendSystemStatus("$ASTOP#");
+                            #ifdef DEBUG
+                            this->arm->printCurrentJoint();
+                            this->sender->sendData("!GO STATE STOP");
+                            #endif
+                        }
+                    }
+                    else if (this->arm->isPositionMove_classify) {
+                        if ( ((this->model_data[2] - 0.0) > -0.1) && ((this->model_data[2] - 0.0) < 0.1) ) {
+                            this->arm->setNextPosition(this->arm->box1_classify_position);
+                            this->nextSliderAction = SLIDER_MOVE_BOX1_CLASSIFY_ACTION;
+                        }
+                        else if ( ((this->model_data[2] - 1.0) > -0.1) && ((this->model_data[2] - 1.0) < 0.1) ) {
+                            this->arm->setNextPosition(this->arm->box2_classify_position);
+                        }
+                        this->arm->calculateNextJoint_classify();
+                        if(this->arm->validateNextJoint() == 0){
+                            this->arm->calculateTotalSteps();
+                            double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                            this->arm->setNumberStepDone(initNumberStepsDone);
+                            this->arm->initjointAutoMoveDone();
+                            this->arm->setState(CLASSIFY_AUTO_MOVING);
+                            for(int i = 0; i < 6; i++){
+                                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                            }
+                            this->arm->isDroppingMove = false;
+                            this->arm->isDeepMove_classify = true;
+                            this->arm->isPositionMove_classify = true;
+                            #ifdef DEBUG
+                            this->sender->sendData("!GO BOX1 CLASSIFY");
+                            #endif
+                        }
+                    }
+                    else {
+                        this->sender->sendData("!WRONG DROPPING MOVE");
                     }
                 }
             }
@@ -620,7 +707,7 @@ void System::slider_fsm(){
                 if (this->nextSliderAction == SLIDER_MOVE_BACK_CLASSIFY_ACTION) {
                     this->nextSliderAction = SLIDER_AUTO_MOVE_CLASSIFY_ACTION;
                 }
-                this->timer_slider_classify->setLoopAction(10000000, micros()); // wait 10s before continue moving
+                this->timer_slider_classify->setLoopAction(25000000, micros()); // wait 25s before continue moving
                 this->slider1->setState(STOP);
                 #ifdef DEBUG
                 this->sender->sendData("!SLIDER STOP");
@@ -681,7 +768,7 @@ void System::slider_fsm(){
             }
             else if (this->timer_slider_classify->checkTimeoutAction()) {
                 if (this->slider1->isLeftMove) {
-                    double nextPosition = this->slider1->getCurrentPosition() + 200; // go left 5000 unit
+                    double nextPosition = this->slider1->getCurrentPosition() + 600; // go left 5000 unit
                     if (nextPosition > this->slider1->MAX_POSITION) {
                         this->slider1->isLeftMove = false;
                         this->slider1->isRightMove = true;
@@ -796,14 +883,21 @@ void System::gripper_fsm() {
             }
 
         } else if (this->nextGripperAction == GRIPPER_CLOSE) {
-            this->gripper->gripperClose();
             if (this->timer_gripper->checkTimeoutAction()){
-                this->gripper->setCurrentAngle(100.0);
-                this->nextGripperAction = GRIPPER_STOP_ACTION; 
-                this->gripper->setCurrentState(STOP);
-                #ifdef DEBUG
-                this->sender->sendData("!GRIPPER STOP");
-                #endif
+                float currentAngle = this->gripper->getCurrentAngle();
+                if ( currentAngle > (this->gripper->getNextAngle() + 1.0) ) {
+                    this->nextGripperAction == GRIPPER_CLOSE;
+                    currentAngle = currentAngle - 10.0;
+                    this->gripper->moveGripper(currentAngle);
+                    this->gripper->setCurrentAngle(currentAngle);
+                }
+                else {
+                    this->nextGripperAction = GRIPPER_STOP_ACTION; 
+                    this->gripper->setCurrentState(STOP);
+                    #ifdef DEBUG
+                    this->sender->sendData("!GRIPPER STOP");
+                    #endif
+                }
             }
         }
         break;
@@ -814,11 +908,21 @@ void System::gripper_fsm() {
             #ifdef DEBUG
             this->sender->sendData("!GRIPPER OPENING");
             #endif
-        } else if (this->nextGripperAction == GRIPPER_CLOSE) {
-            this->gripper->setCurrentState(GRIPPER_MOVING); 
-            this->timer_gripper->setLoopAction(this->gripper->MOVING_TIME, micros());
+        } 
+        // else if (this->nextGripperAction == GRIPPER_CLOSE) {
+        //     this->gripper->setCurrentState(GRIPPER_MOVING); 
+        //     this->timer_gripper->setLoopAction(this->gripper->MOVING_TIME, micros());
+        //     #ifdef DEBUG
+        //     this->sender->sendData("!GRIPPER CLOSING");
+        //     #endif
+        // }
+        else if (this->nextGripperAction == GRIPPER_CLOSE)
+        {
+            this->gripper->setNextAngle(90.0);
+            this->gripper->setCurrentState(GRIPPER_MOVING);
+            this->timer_gripper->setLoopAction(300000, micros());
             #ifdef DEBUG
-            this->sender->sendData("!GRIPPER CLOSING");
+            this->sender->sendData("!CLOSE GRIPPER");
             #endif
         }
         break;

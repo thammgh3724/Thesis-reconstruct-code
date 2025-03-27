@@ -44,7 +44,7 @@ void Arm::onStart(){
 // // joint #4
   // singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / this->dl4));
   // joint #5
-  singleJointMove_onStart(DIR5_PIN, LOW, PUL5_PIN, (int)((20) / this->dl5)); // minus 20 in initial 
+  singleJointMove_onStart(DIR5_PIN, LOW, PUL5_PIN, (int)((50) / this->dl5)); // minus 20 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
   this->joint[3] = 180;
@@ -335,6 +335,12 @@ void Arm::manualMove(int i, double* input, unsigned long &timeout, double incVal
 
 void Arm::calculateNextJoint() {
   InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
+  // dont move joint 4
+  this->nextJoint[3] = this->joint[3];
+  // self calculate for joint 5 move
+  double angleJ2Move = this->nextJoint[1] - this->joint[1];
+  double angleJ3Move = this->nextJoint[2] - this->joint[2];
+  this->nextJoint[4] = this->joint[4] + angleJ2Move + angleJ3Move;
 }
 
 void Arm::calculateTotalSteps(){
@@ -498,10 +504,28 @@ void Arm::calculateNextPosition_classify(double* model_data){
       this->nextPosition[i] = this->position[i];
   }
   // caculate new position
-  this->nextPosition[0] = this->nextPosition[0] + ( (-0.8145)*(model_data[1]-240.0) );
-  this->nextPosition[1] = this->nextPosition[1] + ( (-0.6)*(model_data[0]-320.0) );
-  this->nextPosition[2] = 65;
+  this->nextPosition[0] = this->nextPosition[0] + ( (-0.4651)*(model_data[1]-240.0) - 4 );
+  this->nextPosition[1] = this->nextPosition[1] + ( (-0.9651)*(model_data[0]-320.0) + 3.1337 );
 }
+
+void Arm::calculateNextDeepPosition_classify(){
+  for (int i = 0; i < 6; i++) 
+  {
+      this->nextPosition[i] = this->position[i];
+  }
+  // caculate new position
+  this->nextPosition[2] = -30;
+}
+
+void Arm::calculateNextBoxDeepPosition_classify(){
+  for (int i = 0; i < 6; i++) 
+  {
+      this->nextPosition[i] = this->position[i];
+  }
+  // caculate new position
+  this->nextPosition[2] = 150;
+}
+
 void Arm::calculateNextJoint_classify(){
   InverseK(this->nextPosition, this->nextJoint); // calculate Jnext by IK
     // dont move joint 4

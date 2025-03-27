@@ -70,20 +70,8 @@ int Slider::inductiveSrDetect() {
 }
 
 void Slider::manualMove(double input){
-    if ( (input >= 0.9) && (input <= 1.1) && (this->position - 0.5 >= MIN_POSITION)) {
+    if ( (input >= 0.9) && (input <= 1.1) && (this->position + 1 <= MAX_POSITION)) {
       //Rotate positive direction
-      digitalWrite(this->DIR_PINS, HIGH);
-      if (PULstat == 0) {
-        digitalWrite(this->PUL_PINS, HIGH);
-        PULstat = 1;
-      } else {
-        digitalWrite(this->PUL_PINS, LOW);
-        PULstat = 0;
-      }
-      this->position = this->position - 0.5;
-    } 
-    else if ( (input >= 1.9) && (input <= 2.1) && (this->position + 0.5 <= MAX_POSITION )) {
-      //Rotate negative direction
       digitalWrite(this->DIR_PINS, LOW);
       if (PULstat == 0) {
         digitalWrite(this->PUL_PINS, HIGH);
@@ -92,7 +80,19 @@ void Slider::manualMove(double input){
         digitalWrite(this->PUL_PINS, LOW);
         PULstat = 0;
       }
-      this->position = this->position + 0.5;
+      this->position = this->position + 1;
+    } 
+    else if ( (input >= 1.9) && (input <= 2.1) && (this->position - 1 >= MIN_POSITION )) {
+      //Rotate negative direction
+      digitalWrite(this->DIR_PINS, HIGH);
+      if (PULstat == 0) {
+        digitalWrite(this->PUL_PINS, HIGH);
+        PULstat = 1;
+      } else {
+        digitalWrite(this->PUL_PINS, LOW);
+        PULstat = 0;
+      }
+      this->position = this->position - 1;
     }
 }
 int Slider::validatePosition(double input){
@@ -152,7 +152,7 @@ void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int acc
     }
     if ( this->numberStepToGo > 0.2 ) {
       //Rotate positive direction
-      digitalWrite(this->DIR_PINS, HIGH);
+      digitalWrite(this->DIR_PINS, LOW);
       if (this->PULstat == 0) {
         digitalWrite(this->PUL_PINS, HIGH);
         this->PULstat = 1;
@@ -164,7 +164,7 @@ void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int acc
     }
     else if (this->numberStepToGo < -0.2 ) {
       //Rotate negative direction
-      digitalWrite(this->DIR_PINS, LOW);
+      digitalWrite(this->DIR_PINS, HIGH);
       if (PULstat == 0) {
         digitalWrite(this->PUL_PINS, HIGH);
         PULstat = 1;

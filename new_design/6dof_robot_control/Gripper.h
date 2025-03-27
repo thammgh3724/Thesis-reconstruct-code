@@ -11,7 +11,7 @@ class Gripper {
     Servo gripperServo;       
     int currentState;       
     float currentAngle;       
-    float nextAngle;        
+    float nextAngle;
 
     const int servoPin = 11;   
     const float MAX_ANGLE = 180.0;
@@ -26,7 +26,9 @@ class Gripper {
     void initGripper();  
     float getCurrentAngle();
     void setCurrentAngle(float angle); 
-    void moveGripper(double* input); 
+    float getNextAngle();
+    void setNextAngle(float angle); 
+    void moveGripper(float input); 
     int getCurrentState(); 
     void setCurrentState(int state);
     void gripperOpen();

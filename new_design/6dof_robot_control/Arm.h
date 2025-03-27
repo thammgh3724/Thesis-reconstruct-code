@@ -26,7 +26,7 @@ class Arm {
 
         const double home_classify_position[6] = {164.5, 0.0, 241.0, 180.0, 180.0, 180.0};//check later
         const double home_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};
-        const double box1_classify_position[6] = {164.5, 100.0, 90.0, 180.0, 180.0, 180.0};//check later : [0] - lengthwise, [1] - horizontal
+        const double box1_classify_position[6] = {164.5, 100.0, 50.0, 180.0, 180.0, 180.0};
         const double box1_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};//check later
         const double box2_classify_position[6] = {164.5, -100.0, 90.0, 180.0, 180.0, 180.0};
         const double box2_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};//check later
@@ -75,6 +75,8 @@ class Arm {
         void calculateLengthwiseNextPosition_detectHand(double* model_data);
         void calculateLengthwiseNextJoint_detectHand();
         void calculateNextPosition_classify(double* model_data);
+        void calculateNextDeepPosition_classify();
+        void calculateNextBoxDeepPosition_classify();
         void calculateNextJoint_classify();
         // void autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin);
         // void calculateNewPosition_detectHand(double* output, double* input);
@@ -83,6 +85,9 @@ class Arm {
         // variables for specific use case move
         bool isHorizontalMove = true;
         bool isLengthwiseMove = true;
+
+        bool isPositionMove_classify = true;
+        bool isDeepMove_classify = true;
 
         bool isHomeMove = true;
         bool isPickingMove = true;
