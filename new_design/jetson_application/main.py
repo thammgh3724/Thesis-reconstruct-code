@@ -43,7 +43,7 @@ def main():
     gamepad_handler = GamepadHandler(serial_obj)
 
     hand_detect_handler = HandDetectHandler()
-    auto_detect_handler = AutoModeHandler()
+    auto_detect_handler = AutoModeHandler(serial_obj)
 
     hand_detect_handler.start()
     auto_detect_handler.start()

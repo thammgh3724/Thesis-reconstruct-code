@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 from ultralytics import YOLO
 
 class AutoModeHandler(threading.Thread):
-    def __init__(self):
+    def __init__(self, serialObj):
         threading.Thread.__init__(self)
         ## load model for classify fruit
         self.model = YOLO("beta_fruit1.engine")
@@ -27,10 +27,26 @@ class AutoModeHandler(threading.Thread):
         self.detection_count = 0
         self.start_time = None
 
+        # Add serial object for instant slider control signal
+        self.serialObj = serialObj
+
+        # Add verification slider signal variabl
+        self.isSendSliderSignal = False
+
         # Class labels
         self.class_names = ['Guava', 'Mango', 'fresh orange']
         
         self.class_labels = []
+
+    # Function: Send instant slider control signal
+    def isSendSlider(self):
+        return self.isSendSliderSignal
+    
+    def sendInstantSliderSignal(self):
+        if not self.isSendSliderSignal:
+            self.serialObj.write(bytes(str("!1:0S#"), encoding='utf-8'))
+            self.isSendSliderSignal = True
+
     
     def stop(self):
         self.stop_event.set()
@@ -60,24 +76,20 @@ class AutoModeHandler(threading.Thread):
             if self.pause_event.is_set():
                 hand_pos = self.cam_proc()
                 if hand_pos:
-                    if not self.fruit_position: 
-                        self.fruit_position = hand_pos
-                        self.isSending = True
-                    elif self.is_position_changed(hand_pos[0]):
-                        self.fruit_position = hand_pos
-                        self.isSending = True
-                    if self.start_time is None:
-                        self.start_time = time.time()
+                    self.fruit_position = hand_pos
+                    self.isSending = True
+                    time.sleep(10)
 
-                    self.detection_count += 1
+                    
+                    # self.detection_count += 1
 
-                    if self.detection_count == 5:
-                        elapsed_time = time.time() - self.start_time
-                        print(f"Detected 5 fruit positions in {elapsed_time:.2f} seconds. Fruit is {self.class_labels[0]}")
+                    # if self.detection_count == 5:
+                    #     elapsed_time = time.time() - self.start_time
+                    #     print(f"Detected 5 fruit positions in {elapsed_time:.2f} seconds. Fruit is {self.class_labels[0]}")
 
-                        # Reset count and timer
-                        self.detection_count = 0
-                        self.start_time = None
+                    #     # Reset count and timer
+                    #     self.detection_count = 0
+                    #     self.start_time = None
 
         if self.cap and self.cap.isOpened():
             self.cap.release()
@@ -115,11 +127,22 @@ class AutoModeHandler(threading.Thread):
             if len(current_positions) >= 1:
                 min_x = float("inf")
                 min_pos = None # Tuple
+                obj = 0
                 for pos in current_positions:
                     x_center, y_center = pos
+                    obj = obj + 1
+                    # print(obj)
+                    # print("Object  has position: ", pos)
                     if x_center < min_x:
                         min_x = x_center
                         min_pos = pos
+                        
+                if (abs(min_pos[0]) > 440 or abs(min_pos[0]) < 160):
+                    print(f"object need to be closer :{min_pos} ")
+                    #TODO: Add signal to automate slider movement immediately
+                    
+                    continue
+
                 if len(object_positions) == 0:
                     object_positions.append(min_pos)
                     accumulate_count = 1
@@ -128,11 +151,14 @@ class AutoModeHandler(threading.Thread):
                                  for old_pos in object_positions)
                     if stable:
                         accumulate_count += 1
+                        print("Accumulated count ", accumulate_count)
                     else:
+                        object_positions = []
                         object_positions.append(min_pos)
                         accumulate_count = 1
+                time.sleep(0.5)
 
-                if accumulate_count >= 3:
+                if accumulate_count >= 5:
                     accumulate_count = 0
                     return object_positions
 
