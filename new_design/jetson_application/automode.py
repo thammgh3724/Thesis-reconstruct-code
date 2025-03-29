@@ -44,11 +44,13 @@ class AutoModeHandler(threading.Thread):
         return self.isSendSliderSignal
     
     def sendInstantSliderSignal(self):
-        if not self.isSendSliderSignal:
-            self.serialObj.write(bytes(str("!1:0S#"), encoding='utf-8'))
-            self.isSendSliderSignal = True
+        print("SLIDER: MOVING CLOSER TO THE TARGET")
+        self.serialObj.write(bytes(str("!1:0S#"), encoding='utf-8'))
+        self.isSendSliderSignal = True
+        time.sleep(1)
+        self.serialObj.write(bytes(str("!sstop#"), encoding="utf-8"))
+        print("SLIDER: MOVE DONE, CLOSER TO THE TARGET")
 
-    
     def stop(self):
         self.stop_event.set()
         self.pause_event.set()

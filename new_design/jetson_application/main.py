@@ -258,11 +258,6 @@ def main():
                 # Proceed with auto mode logic here
                 # TODO: Send !<x1:x2:label>C# to serial.
                 if auto_detect_handler.fruit_position and auto_detect_handler.isSending:
-                    # Check if the slider signal is sent
-                    if auto_detect_handler.isSendSliderSignal:
-                        auto_detect_handler.isSendSliderSignal = False  # Set isSendSliderSignal to False
-                        write_serial.clearQueue()                       # Clear write_serial queue for prevent full queue
-
                     # Get the fruit position and label
                     fruit_x_center = round(auto_detect_handler.fruit_position[0][0].item(), 5)
                     fruit_y_center = round(auto_detect_handler.fruit_position[0][1].item(), 5)
