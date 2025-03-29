@@ -10,6 +10,7 @@ import yaml
 import requests 
 from PIL import Image, ImageOps
 from ultralytics import YOLO
+from serialObjectSingleton import SerialSingleton
 
 class AutoModeHandler(threading.Thread):
     def __init__(self, serialObj):
@@ -140,7 +141,7 @@ class AutoModeHandler(threading.Thread):
                 if (abs(min_pos[0]) > 440 or abs(min_pos[0]) < 160):
                     print(f"object need to be closer :{min_pos} ")
                     #TODO: Add signal to automate slider movement immediately
-                    
+                    self.sendInstantSliderSignal()
                     continue
 
                 if len(object_positions) == 0:
@@ -184,6 +185,10 @@ if __name__ == "__main__":
 
     from ultralytics import YOLO
     print("here")
+
+    serial_port = '/dev/ttyACM0'
+    baud_rate = 115200
+    serial_obj = SerialSingleton(serial_port, baud_rate, 0.01)
     
-    fruitAutoDetection = AutoModeHandler()
+    fruitAutoDetection = AutoModeHandler(serial_obj)
     fruitAutoDetection.start()
