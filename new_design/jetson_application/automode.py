@@ -36,8 +36,26 @@ class AutoModeHandler(threading.Thread):
 
         # Class labels
         self.class_names = ['Guava', 'Mango', 'fresh orange']
+
+        # TEMP: New class labels
+        self.new_class_name = ['ORANGE', 'BANANA', 'MANGO', "STARFRUIT"]
         
         self.class_labels = []
+
+    # Function: Return int value of class
+    def classLabelValue(self, cls):
+        match cls: 
+            case 'ORANGE': 
+                return 0
+            case 'BANANA':
+                return 1
+            case 'MANGO':
+                return 2
+            case 'STARFRUIT':
+                return 3
+            case _:
+                print("INVALID CLASS")
+                return
 
     # Function: Send instant slider control signal
     def isSendSlider(self):
