@@ -47,7 +47,7 @@ class AutoModeHandler(threading.Thread):
         print("SLIDER: MOVING CLOSER TO THE TARGET")
         self.serialObj.write(bytes(str("!1:0S#"), encoding='utf-8'))
         self.isSendSliderSignal = True
-        time.sleep(1)
+        time.sleep(0.500)
         self.serialObj.write(bytes(str("!sstop#"), encoding="utf-8"))
         print("SLIDER: MOVE DONE, CLOSER TO THE TARGET")
 
@@ -127,6 +127,11 @@ class AutoModeHandler(threading.Thread):
                 sorted_indices = np.argsort(boxes[:, 0])  # Sắp xếp theo x_min
                 self.class_labels = [self.class_names[int(class_ids[i])] for i in sorted_indices]
 
+            if len(current_positions) == 0:
+                print("No object is captured")
+                self.sendInstantSliderSignal()
+                time.sleep(5)
+
             if len(current_positions) >= 1:
                 min_x = float("inf")
                 min_pos = None # Tuple
@@ -144,6 +149,7 @@ class AutoModeHandler(threading.Thread):
                     print(f"object need to be closer :{min_pos} ")
                     #TODO: Add signal to automate slider movement immediately
                     self.sendInstantSliderSignal()
+                    time.sleep(1)
                     continue
 
                 if len(object_positions) == 0:
@@ -161,7 +167,7 @@ class AutoModeHandler(threading.Thread):
                         accumulate_count = 1
                 time.sleep(0.5)
 
-                if accumulate_count >= 5:
+                if accumulate_count >= 3:
                     accumulate_count = 0
                     return object_positions
 
