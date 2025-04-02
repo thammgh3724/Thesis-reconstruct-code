@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 4
+names: ['BANANA', 'MANGO', 'ORANGE', 'STARFRUIT']
+
+roboflow:
+  workspace: worth-adam
+  project: fruit_detection-wqfco
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/worth-adam/fruit_detection-wqfco/dataset/2

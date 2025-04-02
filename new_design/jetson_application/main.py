@@ -269,7 +269,8 @@ def main():
                     #     label = 1
                     # TEMP: new label
                     newLabel = auto_detect_handler.classLabelValue(fruit_label)
-                    
+                    print(f"Class detected from left to right: {fruit_label} with value is {newLabel}")
+
                     #TODO: Sending signal to write_serial after getting x_center, y_center and label
                     message_content = f"!{fruit_x_center}:{fruit_y_center}:{label}C#\0"
                     auto_message = Message(message_content)
