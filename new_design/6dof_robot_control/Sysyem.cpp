@@ -421,7 +421,7 @@ void System::arm_fsm(){
                         }
                     }
                     else if (this->arm->isDeepMove_classify) {
-                        this->arm->calculateNextDeepPosition_classify();
+                        this->arm->calculateNextDeepPosition_classify(this->model_data[2]);
                         this->arm->calculateNextJoint_classify();
                         if(this->arm->validateNextJoint() == 0){
                             #ifdef DEBUG
@@ -511,23 +511,37 @@ void System::arm_fsm(){
                         }
                         else if ( ((this->model_data[2] - 1.0) > -0.1) && ((this->model_data[2] - 1.0) < 0.1) ) {
                             this->arm->setNextPosition(this->arm->box2_classify_position);
+                            this->nextSliderAction = SLIDER_MOVE_BOX2_CLASSIFY_ACTION;
                         }
-                        this->arm->calculateNextJoint_classify();
-                        if(this->arm->validateNextJoint() == 0){
-                            this->arm->calculateTotalSteps();
-                            double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-                            this->arm->setNumberStepDone(initNumberStepsDone);
-                            this->arm->initjointAutoMoveDone();
-                            this->arm->setState(CLASSIFY_AUTO_MOVING);
-                            for(int i = 0; i < 6; i++){
-                                this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                        else if ( ((this->model_data[2] - 2.0) > -0.1) && ((this->model_data[2] - 2.0) < 0.1) ) {
+                            this->arm->setNextPosition(this->arm->box1_classify_position);
+                            this->nextSliderAction = SLIDER_MOVE_BOX1_CLASSIFY_ACTION;
+                        }
+                        else if ( ((this->model_data[2] - 3.0) > -0.1) && ((this->model_data[2] - 3.0) < 0.1) ) {
+                            this->arm->setNextPosition(this->arm->box2_classify_position);
+                            this->nextSliderAction = SLIDER_MOVE_BOX2_CLASSIFY_ACTION;
+                        }
+                        if ( ( this->nextSliderAction == SLIDER_MOVE_BOX1_CLASSIFY_ACTION && (this->slider1->getCurrentPosition() > (this->slider1->MIN_POSITION + 0.2)) ) || ( this->nextSliderAction == SLIDER_MOVE_BOX2_CLASSIFY_ACTION && (this->slider1->getCurrentPosition() <= (this->slider1->MAX_POSITION - 0.2))  ) ) {
+                            //wait slider go to box
+                        }
+                        else {
+                            this->arm->calculateNextJoint_classify();
+                            if(this->arm->validateNextJoint() == 0){
+                                this->arm->calculateTotalSteps();
+                                double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                                this->arm->setNumberStepDone(initNumberStepsDone);
+                                this->arm->initjointAutoMoveDone();
+                                this->arm->setState(CLASSIFY_AUTO_MOVING);
+                                for(int i = 0; i < 6; i++){
+                                    this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                                }
+                                this->arm->isDroppingMove = false;
+                                this->arm->isDeepMove_classify = true;
+                                this->arm->isPositionMove_classify = true;
+                                #ifdef DEBUG
+                                this->sender->sendData("!ARM GO BOX CLASSIFY");
+                                #endif
                             }
-                            this->arm->isDroppingMove = false;
-                            this->arm->isDeepMove_classify = true;
-                            this->arm->isPositionMove_classify = true;
-                            #ifdef DEBUG
-                            this->sender->sendData("!GO BOX1 CLASSIFY");
-                            #endif
                         }
                     }
                     else {
@@ -536,10 +550,7 @@ void System::arm_fsm(){
                 }
             }
             else if (this->arm->isHomeMove) {
-                if ( (this->slider1->getCurrentPosition() > (this->slider1->MIN_POSITION + 0.2)) && (this->slider1->getCurrentPosition() <= (this->slider1->MAX_POSITION - 0.2)) ) {
-                    //wait slider go to box
-                }
-                else if ( ((this->gripper->getCurrentAngle() - 180.0) < -0.1) || ((this->gripper->getCurrentAngle() - 180.0) > 0.1)) {
+                if ( ((this->gripper->getCurrentAngle() - 180.0) < -0.1) || ((this->gripper->getCurrentAngle() - 180.0) > 0.1)) {
                     this->nextSliderAction = SLIDER_STOP_ACTION;
                     this->nextGripperAction = GRIPPER_OPEN;   
                 }
@@ -766,62 +777,62 @@ void System::slider_fsm(){
                 this->slider1->isLeftMove = true;
                 this->slider1->isRightMove = false;
             }
-            else if (this->timer_slider_classify->checkTimeoutAction()) {
-                if (this->slider1->isLeftMove) {
-                    double nextPosition = this->slider1->getCurrentPosition() + 600;
-                    if (nextPosition > (this->slider1->MAX_POSITION + 0.2) ) {
-                        this->slider1->isLeftMove = false;
-                        this->slider1->isRightMove = true;
-                        nextPosition = this->slider1->getCurrentPosition() - 600;
-                        this->slider1->setNextPosition(nextPosition);
-                        this->slider1->calculateTotalSteps();
-                        this->slider1->initStepDone();
-                        this->slider1->setState(CLASSIFY_AUTO_MOVING);
-                        this->timer_slider->setLoopAction(2000, micros());
-                        #ifdef DEBUG
-                        this->sender->sendData("!SLIDER GO RIGHT CLASSIFY");
-                        #endif
-                    }
-                    else {
-                        this->slider1->isRightMove = false;
-                        this->slider1->setNextPosition(nextPosition);
-                        this->slider1->calculateTotalSteps();
-                        this->slider1->initStepDone();
-                        this->slider1->setState(CLASSIFY_AUTO_MOVING);
-                        this->timer_slider->setLoopAction(2000, micros());
-                        #ifdef DEBUG
-                        this->sender->sendData("!SLIDER GO LEFT CLASSIFY");
-                        #endif
-                    }
-                }
-                else if (this->slider1->isRightMove) {
-                    double nextPosition = this->slider1->getCurrentPosition() - 600;
-                    if (nextPosition < (this->slider1->MIN_POSITION - 0.2) ) {
-                        this->slider1->isLeftMove = true;
-                        this->slider1->isRightMove = false;
-                        nextPosition = this->slider1->getCurrentPosition() + 600;
-                        this->slider1->setNextPosition(nextPosition);
-                        this->slider1->calculateTotalSteps();
-                        this->slider1->initStepDone();
-                        this->slider1->setState(CLASSIFY_AUTO_MOVING);
-                        this->timer_slider->setLoopAction(2000, micros());
-                        #ifdef DEBUG
-                        this->sender->sendData("!SLIDER GO LEFT CLASSIFY");
-                        #endif
-                    }
-                    else {
-                        this->slider1->isLeftMove = false;
-                        this->slider1->setNextPosition(nextPosition);
-                        this->slider1->calculateTotalSteps();
-                        this->slider1->initStepDone();
-                        this->slider1->setState(CLASSIFY_AUTO_MOVING);
-                        this->timer_slider->setLoopAction(2000, micros());
-                        #ifdef DEBUG
-                        this->sender->sendData("!SLIDER GO RIGHT CLASSIFY");
-                        #endif
-                    }
-                }
-            }
+            // else if (this->timer_slider_classify->checkTimeoutAction()) {
+            //     if (this->slider1->isLeftMove) {
+            //         double nextPosition = this->slider1->getCurrentPosition() + 600;
+            //         if (nextPosition > (this->slider1->MAX_POSITION + 0.2) ) {
+            //             this->slider1->isLeftMove = false;
+            //             this->slider1->isRightMove = true;
+            //             nextPosition = this->slider1->getCurrentPosition() - 600;
+            //             this->slider1->setNextPosition(nextPosition);
+            //             this->slider1->calculateTotalSteps();
+            //             this->slider1->initStepDone();
+            //             this->slider1->setState(CLASSIFY_AUTO_MOVING);
+            //             this->timer_slider->setLoopAction(2000, micros());
+            //             #ifdef DEBUG
+            //             this->sender->sendData("!SLIDER GO RIGHT CLASSIFY");
+            //             #endif
+            //         }
+            //         else {
+            //             this->slider1->isRightMove = false;
+            //             this->slider1->setNextPosition(nextPosition);
+            //             this->slider1->calculateTotalSteps();
+            //             this->slider1->initStepDone();
+            //             this->slider1->setState(CLASSIFY_AUTO_MOVING);
+            //             this->timer_slider->setLoopAction(2000, micros());
+            //             #ifdef DEBUG
+            //             this->sender->sendData("!SLIDER GO LEFT CLASSIFY");
+            //             #endif
+            //         }
+            //     }
+            //     else if (this->slider1->isRightMove) {
+            //         double nextPosition = this->slider1->getCurrentPosition() - 600;
+            //         if (nextPosition < (this->slider1->MIN_POSITION - 0.2) ) {
+            //             this->slider1->isLeftMove = true;
+            //             this->slider1->isRightMove = false;
+            //             nextPosition = this->slider1->getCurrentPosition() + 600;
+            //             this->slider1->setNextPosition(nextPosition);
+            //             this->slider1->calculateTotalSteps();
+            //             this->slider1->initStepDone();
+            //             this->slider1->setState(CLASSIFY_AUTO_MOVING);
+            //             this->timer_slider->setLoopAction(2000, micros());
+            //             #ifdef DEBUG
+            //             this->sender->sendData("!SLIDER GO LEFT CLASSIFY");
+            //             #endif
+            //         }
+            //         else {
+            //             this->slider1->isLeftMove = false;
+            //             this->slider1->setNextPosition(nextPosition);
+            //             this->slider1->calculateTotalSteps();
+            //             this->slider1->initStepDone();
+            //             this->slider1->setState(CLASSIFY_AUTO_MOVING);
+            //             this->timer_slider->setLoopAction(2000, micros());
+            //             #ifdef DEBUG
+            //             this->sender->sendData("!SLIDER GO RIGHT CLASSIFY");
+            //             #endif
+            //         }
+            //     }
+            // }
 
         }
         else if (this->nextSliderAction == SLIDER_MOVE_BOX1_CLASSIFY_ACTION) {
@@ -834,6 +845,20 @@ void System::slider_fsm(){
                 this->timer_slider->setLoopAction(2000, micros());
                 #ifdef DEBUG
                 this->sender->sendData("!SLIDER GO BOX1");
+                this->sender->sendData(String(this->slider1->getNextPosition()));
+                #endif
+            }
+        }
+        else if (this->nextSliderAction == SLIDER_MOVE_BOX2_CLASSIFY_ACTION) {
+            if ( this->slider1->getCurrentPosition() < (this->slider1->MAX_POSITION - 0.2) ) {
+                this->slider1->setPreviousPosition(this->slider1->getCurrentPosition());
+                this->slider1->setNextPosition(this->slider1->MAX_POSITION);
+                this->slider1->calculateTotalSteps();
+                this->slider1->initStepDone();
+                this->slider1->setState(CLASSIFY_AUTO_MOVING);
+                this->timer_slider->setLoopAction(2000, micros());
+                #ifdef DEBUG
+                this->sender->sendData("!SLIDER GO BOX2");
                 this->sender->sendData(String(this->slider1->getNextPosition()));
                 #endif
             }

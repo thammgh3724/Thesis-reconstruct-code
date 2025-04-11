@@ -24,7 +24,7 @@ class Slider {
         
         const double MAX_POSITION = 5000.0;
         const double MIN_POSITION = 0.0;
-        double dl = 0.1;
+        double dl = 1;
         // variables for specific use case move
 
         // classify auto moving

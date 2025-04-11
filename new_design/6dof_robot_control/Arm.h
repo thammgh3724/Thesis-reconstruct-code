@@ -75,7 +75,7 @@ class Arm {
         void calculateLengthwiseNextPosition_detectHand(double* model_data);
         void calculateLengthwiseNextJoint_detectHand();
         void calculateNextPosition_classify(double* model_data);
-        void calculateNextDeepPosition_classify();
+        void calculateNextDeepPosition_classify(double model_data);
         void calculateNextBoxDeepPosition_classify();
         void calculateNextJoint_classify();
         // void autoMove_detectHand(double* Xnext, double vel0, double acc0, double velini, double velfin);
@@ -100,7 +100,7 @@ class Arm {
 
     private:
         //robot geometry
-        const double MAX_JOINT_ANGLE[6] = {120.0, 110.0, 80.0, 180.0, 160.0, 180.0}; // refind max min joint
+        const double MAX_JOINT_ANGLE[6] = {120.0, 120.0, 80.0, 180.0, 160.0, 180.0}; // refind max min joint
         const double MIN_JOINT_ANGLE[6] = {-120.0, -60.0, -170.0, 170.0, -160.0, -180.0};
 
         const double r1 = 47.0;
