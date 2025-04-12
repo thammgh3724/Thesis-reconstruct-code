@@ -380,7 +380,7 @@ void System::arm_fsm(){
         else if (this->nextArmAction == ARM_AUTO_MOVE_CLASSIFY_ACTION){
             if(this->arm->isPickingMove){
                 this->nextSliderAction = SLIDER_STOP_ACTION;
-                if ( ((this->gripper->getCurrentAngle() - 180.0) < -0.1) || ((this->gripper->getCurrentAngle() - 180.0) > 0.1)) {
+                if ( ((this->gripper->getCurrentAngle() - this->gripper->MAX_ANGLE) < -0.1) || ((this->gripper->getCurrentAngle() - this->gripper->MAX_ANGLE) > 0.1)) {
                     this->nextGripperAction = GRIPPER_OPEN;   
                 }
                 // wait gripper open
@@ -463,7 +463,7 @@ void System::arm_fsm(){
                 }
             }
             else if (this->arm->isDroppingMove) {
-                if ( ((this->gripper->getCurrentAngle() - 100.0) < -0.1) ||  ((this->gripper->getCurrentAngle() - 100.0) > 0.1)) {
+                if ( ((this->gripper->getCurrentAngle() - this->gripper->MIN_ANGLE) < -0.1) ||  ((this->gripper->getCurrentAngle() - this->gripper->MIN_ANGLE) > 0.1)) {
                     this->nextGripperAction = GRIPPER_CLOSE;   
                 }
                 // wait gripper close
@@ -550,7 +550,7 @@ void System::arm_fsm(){
                 }
             }
             else if (this->arm->isHomeMove) {
-                if ( ((this->gripper->getCurrentAngle() - 180.0) < -0.1) || ((this->gripper->getCurrentAngle() - 180.0) > 0.1)) {
+                if ( ((this->gripper->getCurrentAngle() - this->gripper->MAX_ANGLE) < -0.1) || ((this->gripper->getCurrentAngle() - this->gripper->MAX_ANGLE) > 0.1)) {
                     this->nextSliderAction = SLIDER_STOP_ACTION;
                     this->nextGripperAction = GRIPPER_OPEN;   
                 }
@@ -917,7 +917,7 @@ void System::gripper_fsm() {
         if (this->nextGripperAction == GRIPPER_OPEN) {   
             this->gripper->gripperOpen();
             if (this->timer_gripper->checkTimeoutAction()){
-                this->gripper->setCurrentAngle(180.0);
+                this->gripper->setCurrentAngle(this->gripper->MAX_ANGLE);
                 this->nextGripperAction = GRIPPER_STOP_ACTION; 
                 this->gripper->setCurrentState(STOP);
                 #ifdef DEBUG
@@ -961,9 +961,9 @@ void System::gripper_fsm() {
         // }
         else if (this->nextGripperAction == GRIPPER_CLOSE)
         {
-            this->gripper->setNextAngle(100.0);
+            this->gripper->setNextAngle(this->gripper->MIN_ANGLE);
             this->gripper->setCurrentState(GRIPPER_MOVING);
-            this->timer_gripper->setLoopAction(300000, micros());
+            this->timer_gripper->setLoopAction(this->gripper->MOVING_TIME, micros());
             #ifdef DEBUG
             this->sender->sendData("!CLOSE GRIPPER");
             #endif

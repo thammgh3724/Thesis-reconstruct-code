@@ -7,7 +7,7 @@ void Gripper::setupGripper() {
 }
 
 void Gripper::initGripper() {
-  this->currentAngle = 120.0;
+  this->currentAngle = 40.0;
   this->gripperServo.write(static_cast<int>(this->currentAngle));
 }
 
@@ -16,11 +16,11 @@ void Gripper::moveGripper(float input) {
 }
 
 void Gripper::gripperOpen() {
-  this->gripperServo.write(180); 
+  this->gripperServo.write(static_cast<int>(this->MAX_ANGLE)); 
 }
 
 void Gripper::gripperClose() {
-  this->gripperServo.write(100); 
+  this->gripperServo.write(static_cast<int>(this->MIN_ANGLE)); 
 }
 
 float Gripper::getCurrentAngle() {
