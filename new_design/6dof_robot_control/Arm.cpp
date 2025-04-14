@@ -504,7 +504,7 @@ void Arm::calculateNextPosition_classify(double* model_data){
       this->nextPosition[i] = this->position[i];
   }
   // caculate new position
-  this->nextPosition[0] = this->nextPosition[0] + ( (-0.4651)*(model_data[1]-240.0) + 15 );
+  this->nextPosition[0] = this->nextPosition[0] + ( (-0.4651)*(model_data[1]-240.0) + 5 );
   this->nextPosition[1] = this->nextPosition[1] + ( (-0.9651)*(model_data[0]-320.0) + 8 );
 }
 

@@ -963,7 +963,7 @@ void System::gripper_fsm() {
         {
             this->gripper->setNextAngle(this->gripper->MIN_ANGLE);
             this->gripper->setCurrentState(GRIPPER_MOVING);
-            this->timer_gripper->setLoopAction(this->gripper->MOVING_TIME, micros());
+            this->timer_gripper->setLoopAction(300000, micros());
             #ifdef DEBUG
             this->sender->sendData("!CLOSE GRIPPER");
             #endif

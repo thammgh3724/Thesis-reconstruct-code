@@ -26,9 +26,9 @@ class Arm {
 
         const double home_classify_position[6] = {164.5, 0.0, 241.0, 180.0, 180.0, 180.0};//check later
         const double home_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};
-        const double box1_classify_position[6] = {164.5, 100.0, 50.0, 180.0, 180.0, 180.0};
+        const double box1_classify_position[6] = {80.0, 240.0, 120.0, 180.0, 180.0, 180.0};
         const double box1_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};//check later
-        const double box2_classify_position[6] = {164.5, -100.0, 90.0, 180.0, 180.0, 180.0};
+        const double box2_classify_position[6] = {80.0, -240.0, 120.0, 180.0, 180.0, 180.0};
         const double box2_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};//check later
 
         const int NUMBER_MANUAL_STEP_ACCELERATE[6] = {10, 10, 10, 10, 10, 10};
@@ -101,7 +101,7 @@ class Arm {
     private:
         //robot geometry
         const double MAX_JOINT_ANGLE[6] = {120.0, 120.0, 80.0, 180.0, 160.0, 180.0}; // refind max min joint
-        const double MIN_JOINT_ANGLE[6] = {-120.0, -60.0, -170.0, 170.0, -160.0, -180.0};
+        const double MIN_JOINT_ANGLE[6] = {-120.0, -60.0, -170.0, -180.0, -160.0, -180.0};
 
         const double r1 = 47.0;
         const double r2 = 110.0;
