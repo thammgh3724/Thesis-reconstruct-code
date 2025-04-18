@@ -22,14 +22,14 @@ int Slider::onStart(){
     this->position = this->MIN_POSITION;
     digitalWrite(SLIDER_DIR,HIGH);
     if(inductiveSrDetect() == LOW) return 0;
-    while (inductiveSrDetect() != LOW){
-      digitalWrite(this->PUL_PINS,HIGH);
-      this->PULstat = 1;
-      delayMicroseconds(3000);
-      digitalWrite(this->PUL_PINS,LOW);
-      this->PULstat = 0;
-      delayMicroseconds(3000); 
-    }
+    // while (inductiveSrDetect() != LOW){
+    //   digitalWrite(this->PUL_PINS,HIGH);
+    //   this->PULstat = 1;
+    //   delayMicroseconds(3000);
+    //   digitalWrite(this->PUL_PINS,LOW);
+    //   this->PULstat = 0;
+    //   delayMicroseconds(3000); 
+    // }
     return 1;
     // digitalWrite(SLIDER_DIR,LOW);
     // int count =100;
