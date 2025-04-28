@@ -24,11 +24,11 @@ class Arm {
         const double home_position[6] = {192.5, 0.0, 269.0, 0.0, 90.0, 0.0};
         const double home_joint[6] = {0.0, 0.0, 0.0, 180.0, 0.0, 0.0};
 
-        const double home_classify_position[6] = {164.5, 0.0, 241.0, 180.0, 180.0, 180.0};//check later
-        const double home_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};
-        const double box1_classify_position[6] = {80.0, 240.0, 120.0, 180.0, 180.0, 180.0};
+        const double home_classify_position[6] = {100, 0.0, 269.0, 0.0, 90.0, 0.0};
+        const double home_classify_joint[6] = {0.0, -20.0, -20.0, 180.0, 0.0, 0.0};//check later
+        const double box1_classify_position[6] = {100, 100.0, 269.0, 0.0, 90.0, 0.0};
         const double box1_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};//check later
-        const double box2_classify_position[6] = {80.0, -240.0, 120.0, 180.0, 180.0, 180.0};
+        const double box2_classify_position[6] = {100, -100.0, 269.0, 0.0, 90.0, 0.0};
         const double box2_classify_joint[6] = {0.0, 0.0, 0.0, 180.0, -90.0, 0.0};//check later
 
         const int NUMBER_MANUAL_STEP_ACCELERATE[6] = {10, 10, 10, 10, 10, 10};
@@ -88,6 +88,7 @@ class Arm {
 
         bool isPositionMove_classify = true;
         bool isDeepMove_classify = true;
+        bool isBackMove_classify = true;
 
         bool isHomeMove = true;
         bool isPickingMove = true;

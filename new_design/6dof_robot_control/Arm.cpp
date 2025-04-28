@@ -44,7 +44,7 @@ void Arm::onStart(){
 // // joint #4
   // singleJointMove_onStart(DIR4_PIN, HIGH, PUL4_PIN, (int)((180) / this->dl4));
   // joint #5
-  singleJointMove_onStart(DIR5_PIN, LOW, PUL5_PIN, (int)((40) / this->dl5)); // minus 20 in initial 
+  singleJointMove_onStart(DIR5_PIN, LOW, PUL5_PIN, (int)((50) / this->dl5)); // minus 20 in initial 
   // as by default, the position of pump is tilted by the camera wire
   //Serial.println("Arm go home");
   this->joint[3] = 180;
@@ -503,9 +503,9 @@ void Arm::calculateNextPosition_classify(double* model_data){
   {
       this->nextPosition[i] = this->position[i];
   }
-  // caculate new position
-  this->nextPosition[0] = this->nextPosition[0] + ( (-0.4651)*(model_data[1]-240.0) + 5 );
-  this->nextPosition[1] = this->nextPosition[1] + ( (-0.9651)*(model_data[0]-320.0) + 8 );
+  // caculate new positions
+  this->nextPosition[2] = this->nextPosition[2] + ( (-0.4)*(model_data[1]-240.0) + 10 );
+  this->nextPosition[1] = this->nextPosition[1] + ( (-0.274)*(model_data[0]-320.0) + 10 );
 }
 
 void Arm::calculateNextDeepPosition_classify(double model_data){
@@ -515,27 +515,33 @@ void Arm::calculateNextDeepPosition_classify(double model_data){
   }
   // caculate new position
   if ( ((model_data - 0.0) > -0.1) && ((model_data - 0.0) < 0.1) ) {
-      this->nextPosition[2] = -25;
+      this->nextPosition[0] = 220;
       #ifdef DEBUG
       this->sender->sendData("Pick fruit 0");
       #endif
   }
   else if ( ((model_data - 1.0) > -0.1) && ((model_data - 1.0) < 0.1) ) {
-      this->nextPosition[2] = -50;
+      this->nextPosition[0] = 220;
       #ifdef DEBUG
       this->sender->sendData("Pick fruit 1");
       #endif
   }
   else if ( ((model_data - 2.0) > -0.1) && ((model_data - 2.0) < 0.1) ) {
-      this->nextPosition[2] = -47;
+      this->nextPosition[0] = 220;
       #ifdef DEBUG
       this->sender->sendData("Pick fruit 2");
       #endif
   }
   else if ( ((model_data - 3.0) > -0.1) && ((model_data - 3.0) < 0.1) ) {
-      this->nextPosition[2] = -40;
+      this->nextPosition[0] = 220;
       #ifdef DEBUG
       this->sender->sendData("Pick fruit 3");
+      #endif
+  }
+  else if ( ((model_data - 4.0) > -0.1) && ((model_data - 4.0) < 0.1) ) {
+      this->nextPosition[0] = 220;
+      #ifdef DEBUG
+      this->sender->sendData("Pick fruit 4");
       #endif
   }
 }
@@ -546,8 +552,9 @@ void Arm::calculateNextBoxDeepPosition_classify(){
       this->nextPosition[i] = this->position[i];
   }
   // caculate new position
-  this->nextPosition[0] = 210;
-  this->nextPosition[2] = 200;
+  this->nextPosition[0] = 100;
+  this->nextPosition[1] = 100;
+  this->nextPosition[2] = 269;
 }
 
 void Arm::calculateNextJoint_classify(){

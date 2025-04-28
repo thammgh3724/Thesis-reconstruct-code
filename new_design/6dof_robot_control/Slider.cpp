@@ -21,15 +21,19 @@ int Slider::onStart(){
     // go home here
     this->position = this->MIN_POSITION;
     digitalWrite(SLIDER_DIR,HIGH);
-    if(inductiveSrDetect() == LOW) return 0;
-    // while (inductiveSrDetect() != LOW){
-    //   digitalWrite(this->PUL_PINS,HIGH);
-    //   this->PULstat = 1;
-    //   delayMicroseconds(3000);
-    //   digitalWrite(this->PUL_PINS,LOW);
-    //   this->PULstat = 0;
-    //   delayMicroseconds(3000); 
-    // }
+    if(inductiveSrDetect() == LOW){
+      sensor_state = 1;
+      return 0;
+    }
+    while (inductiveSrDetect() != LOW){
+      digitalWrite(this->PUL_PINS,HIGH);
+      this->PULstat = 1;
+      delayMicroseconds(3000);
+      digitalWrite(this->PUL_PINS,LOW);
+      this->PULstat = 0;
+      delayMicroseconds(3000); 
+    }
+    sensor_state = 1;
     return 1;
     // digitalWrite(SLIDER_DIR,LOW);
     // int count =100;
@@ -71,33 +75,47 @@ int Slider::inductiveSrDetect() {
 }
 
 void Slider::manualMove(double input){
-    if ( (input >= 0.9) && (input <= 1.1) && (this->position + 1 <= (MAX_POSITION + 0.2) )) {
-      //Rotate positive direction
-      digitalWrite(this->DIR_PINS, LOW);
-      if (PULstat == 0) {
-        digitalWrite(this->PUL_PINS, HIGH);
-        PULstat = 1;
-      } else {
-        digitalWrite(this->PUL_PINS, LOW);
-        PULstat = 0;
+    if (sensor_state == 1 && inductiveSrDetect() == HIGH) {
+      sensor_state = 0;
+    }
+    else if (sensor_state == 0 && inductiveSrDetect() == LOW) {
+      if (this->position > (2.0*this->MAX_POSITION/3.0)) {
+        this->position = this->MAX_POSITION;
       }
-      this->position = this->position + 1;
-    } 
-    else if ( (input >= 1.9) && (input <= 2.1) && (this->position - 1 >= (MIN_POSITION - 0.2) )) {
-      //Rotate negative direction
-      digitalWrite(this->DIR_PINS, HIGH);
-      if (PULstat == 0) {
-        digitalWrite(this->PUL_PINS, HIGH);
-        PULstat = 1;
-      } else {
-        digitalWrite(this->PUL_PINS, LOW);
-        PULstat = 0;
+      else if (this->position < (1.0*this->MAX_POSITION/3.0)) {
+        this->position = this->MIN_POSITION;
       }
-      this->position = this->position - 1;
+      sensor_state = 1;
+    }
+    else {
+      if ( (input >= 0.9) && (input <= 1.1) && (this->position + 1 <= (MAX_POSITION + 0.2) )) {
+        //Rotate positive direction
+        digitalWrite(this->DIR_PINS, LOW);
+        if (PULstat == 0) {
+          digitalWrite(this->PUL_PINS, HIGH);
+          PULstat = 1;
+        } else {
+          digitalWrite(this->PUL_PINS, LOW);
+          PULstat = 0;
+        }
+        this->position = this->position + 1;
+      } 
+      else if ( (input >= 1.9) && (input <= 2.1) && (this->position - 1 >= (MIN_POSITION - 0.2) )) {
+        //Rotate negative direction
+        digitalWrite(this->DIR_PINS, HIGH);
+        if (PULstat == 0) {
+          digitalWrite(this->PUL_PINS, HIGH);
+          PULstat = 1;
+        } else {
+          digitalWrite(this->PUL_PINS, LOW);
+          PULstat = 0;
+        }
+        this->position = this->position - 1;
+      }
     }
 }
 int Slider::validatePosition(double input){
-    if(input <0 || input > 28246) return 1;
+    if(input - this->MIN_POSITION < 0.2 || input - this->MAX_POSITION > 0.2) return 1;
     return 0; 
 }
 void Slider::setNextPosition(double newPosition){
@@ -132,57 +150,71 @@ double Slider::getNumberStepDone(){
   return this->numberStepDone;
 }
 void Slider::generalAutoMove(unsigned long &delValue, int incValue = 15, int accRate = 20){
-  if((double_abs(this->numberStepToGo) > 0.2) && (double_abs(this->numberStepToGo) - this->numberStepDone) > 0.2){
-    if (double_abs(this->numberStepToGo) > (2*accRate + 1)){
-      if (this->numberStepDone < accRate){
-        //acceleration
-        if(delValue -incValue > 1.0) delValue = delValue - incValue;
-      } else if (this->numberStepDone > (double_abs(this->numberStepToGo) - accRate)){
-        //decceleration
-        if(delValue + incValue < 4000.0) delValue = delValue + incValue;
-      }
-    } else {
-      //no space for proper acceleration/decceleration
-      if (this->numberStepDone < (double_abs(this->numberStepToGo)/2)){
-        //acceleration
-          if(delValue > 1.0) delValue =  delValue - incValue;
-      } else if (this->numberStepDone > (double_abs(this->numberStepToGo)/2)){
-        //decceleration
-          if(delValue < 4000.0) delValue =  delValue +  incValue;
-      }
+  if (sensor_state == 1 && inductiveSrDetect() == HIGH) {
+    sensor_state = 0;
+  }
+  else if (sensor_state == 0 && inductiveSrDetect() == LOW) {
+    if (this->position > (2.0*this->MAX_POSITION/3.0)) {
+      this->position = this->MAX_POSITION;
     }
-    if ( this->numberStepToGo > 0.2 ) {
-      //Rotate positive direction
-      digitalWrite(this->DIR_PINS, LOW);
-      if (this->PULstat == 0) {
-        digitalWrite(this->PUL_PINS, HIGH);
-        this->PULstat = 1;
-      } else {
-        digitalWrite(this->PUL_PINS, LOW);
-        this->PULstat = 0;
-      }
-      this->position = this->position + 1;
+    else if (this->position < (1.0*this->MAX_POSITION/3.0)) {
+      this->position = this->MIN_POSITION;
     }
-    else if (this->numberStepToGo < -0.2 ) {
-      //Rotate negative direction
-      digitalWrite(this->DIR_PINS, HIGH);
-      if (PULstat == 0) {
-        digitalWrite(this->PUL_PINS, HIGH);
-        PULstat = 1;
-      } else {
-        digitalWrite(this->PUL_PINS, LOW);
-        PULstat = 0;
-      }
-      this->position = this->position - 1;
-    }
-    this->numberStepDone = this->numberStepDone + 1;
-
+    sensor_state = 1;
   }
   else {
-    // #ifdef DEBUG
-    // String data_print = "!SLIDER ";
-    // data_print += " move done";
-    // this->sender->sendData(data_print);
-    // #endif
+    if((double_abs(this->numberStepToGo) > 0.2) && (double_abs(this->numberStepToGo) - this->numberStepDone) > 0.2){
+        if (double_abs(this->numberStepToGo) > (2*accRate + 1)){
+          if (this->numberStepDone < accRate){
+            //acceleration
+            if(delValue -incValue > 1.0) delValue = delValue - incValue;
+          } else if (this->numberStepDone > (double_abs(this->numberStepToGo) - accRate)){
+            //decceleration
+            if(delValue + incValue < 4000.0) delValue = delValue + incValue;
+          }
+        } else {
+          //no space for proper acceleration/decceleration
+          if (this->numberStepDone < (double_abs(this->numberStepToGo)/2)){
+            //acceleration
+              if(delValue > 1.0) delValue =  delValue - incValue;
+          } else if (this->numberStepDone > (double_abs(this->numberStepToGo)/2)){
+            //decceleration
+              if(delValue < 4000.0) delValue =  delValue +  incValue;
+          }
+        }
+        if ( this->numberStepToGo > 0.2 ) {
+          //Rotate positive direction
+          digitalWrite(this->DIR_PINS, LOW);
+          if (this->PULstat == 0) {
+            digitalWrite(this->PUL_PINS, HIGH);
+            this->PULstat = 1;
+          } else {
+            digitalWrite(this->PUL_PINS, LOW);
+            this->PULstat = 0;
+          }
+          this->position = this->position + 1;
+        }
+        else if (this->numberStepToGo < -0.2 ) {
+          //Rotate negative direction
+          digitalWrite(this->DIR_PINS, HIGH);
+          if (PULstat == 0) {
+            digitalWrite(this->PUL_PINS, HIGH);
+            PULstat = 1;
+          } else {
+            digitalWrite(this->PUL_PINS, LOW);
+            PULstat = 0;
+          }
+          this->position = this->position - 1;
+        }
+        this->numberStepDone = this->numberStepDone + 1;
+
+      }
+      else {
+        // #ifdef DEBUG
+        // String data_print = "!SLIDER ";
+        // data_print += " move done";
+        // this->sender->sendData(data_print);
+        // #endif
+      }
   }
 }

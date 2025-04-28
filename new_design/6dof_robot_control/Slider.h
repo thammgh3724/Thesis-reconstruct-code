@@ -22,9 +22,10 @@ class Slider {
 
         public:
         
-        const double MAX_POSITION = 5000.0;
+        const double MAX_POSITION = 7200.0;
         const double MIN_POSITION = 0.0;
         double dl = 1;
+        int sensor_state = 0;
         // variables for specific use case move
 
         // classify auto moving

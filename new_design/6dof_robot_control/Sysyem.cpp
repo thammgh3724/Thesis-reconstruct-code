@@ -239,6 +239,7 @@ void System::arm_fsm(){
                 this->arm->setState(STOP);
                 #ifdef DEBUG
                 this->arm->printCurrentJoint();
+                this->arm->printCurrentPos();
                 this->sender->sendData("!GO STATE STOP");
                 #endif
             }
@@ -364,7 +365,7 @@ void System::arm_fsm(){
         }
         else if (this->nextArmAction == ARM_GOHOME_CLASSIFY_ACTION){
             this->arm->setNextPosition(this->arm->home_classify_position);
-            this->arm->setNextJoint(this->arm->home_classify_joint);
+            this->arm->calculateNextJoint();
             this->arm->calculateTotalSteps();
             double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
             this->arm->setNumberStepDone(initNumberStepsDone);
@@ -471,6 +472,11 @@ void System::arm_fsm(){
                     if (this->arm->isDeepMove_classify) {
                         this->arm->calculateNextBoxDeepPosition_classify();
                         this->arm->calculateNextJoint_classify();
+                        // this->arm->setNextPosition(this->arm->home_classify_position);
+                        // double holdJoint[6];
+                        // this->arm->getCurrentJoint(holdJoint);
+                        // holdJoint[2] = holdJoint[2] + 40;
+                        // this->arm->setNextJoint(holdJoint);
                         if(this->arm->validateNextJoint() == 0){
                             #ifdef DEBUG
                             this->sender->sendData("!GO BOX DEEP CLASSIFY");
@@ -486,6 +492,49 @@ void System::arm_fsm(){
                                 this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
                             }
                             this->arm->isDeepMove_classify = false;
+                    //         this->arm->isBackMove_classify =  true;
+                    //         this->arm->isPositionMove_classify = true;
+                    //     }
+                    //     else {
+                    //         this->arm->isHomeMove = true;
+                    //         this->arm->isPickingMove = true;
+                    //         this->arm->isDroppingMove = true;
+                    //         this->arm->isPositionMove_classify = true;
+                    //         this->arm->isDeepMove_classify = true;
+                    //         this->arm->updateCurrentPosition();
+                    //         this->nextArmAction = ARM_STOP_ACTION;
+                    //         this->arm->setState(STOP);
+                    //         this->sender->sendSystemStatus("$ASTOP#");
+                    //         #ifdef DEBUG
+                    //         this->arm->printCurrentJoint();
+                    //         this->sender->sendData("!GO STATE STOP");
+                    //         #endif
+                    //     }
+                    // }
+                    // else if (this->arm->isBackMove_classify) {
+                    //     // this->arm->calculateNextBoxDeepPosition_classify();
+                    //     // this->arm->calculateNextJoint_classify();
+                    //     this->arm->setNextPosition(this->arm->home_classify_position);
+                    //     double holdJoint[6];
+                    //     this->arm->getCurrentJoint(holdJoint);
+                    //     holdJoint[2] = holdJoint[2] - 40;
+                    //     this->arm->setNextJoint(holdJoint);
+                    //     if(this->arm->validateNextJoint() == 0){
+                    //         #ifdef DEBUG
+                    //         this->sender->sendData("!GO BACK BOX DEEP CLASSIFY");
+                    //         this->arm->printNextJoint();
+                    //         #endif
+                    //         //can move
+                    //         this->arm->calculateTotalSteps();
+                    //         double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+                    //         this->arm->setNumberStepDone(initNumberStepsDone);
+                    //         this->arm->initjointAutoMoveDone();
+                    //         this->arm->setState(CLASSIFY_AUTO_MOVING);
+                    //         for(int i = 0; i < 6; i++){
+                    //             this->timer_arm[i]->setLoopAction(3000, micros()); //int delValue = 3000
+                    //         }
+                    //         this->arm->isDeepMove_classify = false;
+                    //         this->arm->isBackMove_classify = false;
                             this->arm->isPositionMove_classify = true;
                         }
                         else {
@@ -521,6 +570,10 @@ void System::arm_fsm(){
                             this->arm->setNextPosition(this->arm->box2_classify_position);
                             this->nextSliderAction = SLIDER_MOVE_BOX2_CLASSIFY_ACTION;
                         }
+                        else if ( ((this->model_data[2] - 4.0) > -0.1) && ((this->model_data[2] - 4.0) < 0.1) ) {
+                            this->arm->setNextPosition(this->arm->box2_classify_position);
+                            this->nextSliderAction = SLIDER_MOVE_BOX2_CLASSIFY_ACTION;
+                        }
                         if ( ( this->nextSliderAction == SLIDER_MOVE_BOX1_CLASSIFY_ACTION && (this->slider1->getCurrentPosition() > (this->slider1->MIN_POSITION + 0.2)) ) || ( this->nextSliderAction == SLIDER_MOVE_BOX2_CLASSIFY_ACTION && (this->slider1->getCurrentPosition() <= (this->slider1->MAX_POSITION - 0.2))  ) ) {
                             //wait slider go to box
                         }
@@ -537,6 +590,7 @@ void System::arm_fsm(){
                                 }
                                 this->arm->isDroppingMove = false;
                                 this->arm->isDeepMove_classify = true;
+                                this->arm->isBackMove_classify = true;
                                 this->arm->isPositionMove_classify = true;
                                 #ifdef DEBUG
                                 this->sender->sendData("!ARM GO BOX CLASSIFY");
@@ -557,7 +611,7 @@ void System::arm_fsm(){
                 // wait gripper open
                 else {
                     this->arm->setNextPosition(this->arm->home_classify_position);
-                    this->arm->setNextJoint(this->arm->home_classify_joint);
+                    this->arm->calculateNextJoint();
                     if(this->arm->validateNextJoint() == 0){
                         this->arm->calculateTotalSteps();
                         double initNumberStepsDone[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
